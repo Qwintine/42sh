@@ -11,7 +11,8 @@ enum type
 	SEMI_COLON,
 	NEWLINE,
 	QUOTE,
-	WORD
+	WORD,
+	END
 };
 
 struct token
