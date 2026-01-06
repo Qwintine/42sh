@@ -20,11 +20,10 @@ FILE *arg_file(int argc, char** argv)
         {
             i++;
             if (!argv[i])
-	    {
+	        {
                 fprintf(stderr, "42h: IO no argument after -c\n"); // erreur : pas d'argument après -c
-		return NULL;
-	    }
- 	    
+                return NULL;
+            }
             return fmemopen(argv[i], strlen(argv[i]), "r");
         }
         // autre arguments (pour plus tard)
