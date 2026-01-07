@@ -4,18 +4,18 @@
 #include <string.h>
 
 /* Description:
- *  	print size strings sur le terminal
+ *  	insert 2 character
  * Arguments:
- *  	size: le nombre d'elements a print
- *  	strings: les elements a print
+ *  	ind: l'indice du char a changer
+ *  	str: string
  * Retour:
- *  	0 si succes, 1 sinon
+ *  	le string modifier
  * Verbose:
- *  	parse les option -neE si presente  en premiere position
+ *  	".....\n......." => ".....\\n......."
  */
 static char *insert_in(size_t ind, char *str)
 {
-    size_t size = strlen(str) +1;
+    size_t size = strlen(str) + 1;
     char c = str[ind];
     char nc = 0;
     switch (c)
@@ -49,15 +49,25 @@ static char *insert_in(size_t ind, char *str)
     res[ind] = '\\';
     res[ind + 1] = nc;
     ind += 2;
-    while (ind < size+1)
+    while (ind < size + 1)
     {
         res[ind] = str[ind - 1];
-		ind++;
+        ind++;
     }
     free(str);
     return res;
 }
 
+/* Description:
+ *  	print size strings sur le terminal
+ * Arguments:
+ *  	size: le nombre d'elements a print
+ *  	strings: les elements a print
+ * Retour:
+ *  	0 si succes, 1 sinon
+ * Verbose:
+ *  	parse les option -neE si presente  en premiere position
+ */
 int echo_b(size_t size, char **strings)
 {
     int n = 0;
