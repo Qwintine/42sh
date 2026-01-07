@@ -106,9 +106,9 @@ static struct token *end_token(struct token *tok, struct lex *lex)
 /* Description:
  * 	transforme le FILE en token
  * Arguments:
- * 	le FILE à parser
+ * 	le FILE et le contexte à parser
  * Retour:
- * 	struct token * -> token générés
+ * 	int -> code de retour (0 = succès, 1 = erreur)
  * Verbose:
  * 	Suit la SCL pour créer les tokens
  */
