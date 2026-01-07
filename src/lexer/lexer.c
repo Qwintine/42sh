@@ -110,7 +110,7 @@ static struct token *end_token(struct token *tok, FILE *entry)
  * Verbose:
  * 	Suit la SCL pour créer les tokens
  */
-struct token *lexer(FILE *entry)
+int lexer(struct lex *lex)
 {
 	int double_quote = 0;
 	int single_quote = 0;
@@ -118,11 +118,11 @@ struct token *lexer(FILE *entry)
 	struct token *tok = malloc(sizeof(struct token));
 	if(!tok)
 	{
-		return NULL;
+		return 1;
 	}
 	tok->value = calloc(1,1);
-	tok->token_type = WORD;
-	while(fread(buf, 1, 1, entry))
+	tok->token_type = lex->context;
+	while(fread(buf, 1, 1, lex->entry))
 	{
 		switch (buf[0])
 		{
@@ -135,7 +135,7 @@ struct token *lexer(FILE *entry)
 					goto ERROR;
 				break;
 			case '\\': // cas 4
-				if (!handle_backslash(&tok->value, entry, double_quote || single_quote))
+				if (!handle_backslash(&tok->value, lex->entry, double_quote || single_quote))
 					goto ERROR;
 				break;
 			case '\n':	// cas 7
@@ -146,7 +146,10 @@ struct token *lexer(FILE *entry)
 				if (result < 0)
 					goto ERROR;
 				if (result > 0)
-					return tok;
+				{
+					lex->current_token = tok;
+					return 0;
+				}
 				break;
 			}
 			default: 	// cas 9 et 11
@@ -156,29 +159,35 @@ struct token *lexer(FILE *entry)
 		}
 
 	}
-	return end_token(tok, entry); //cas 1
+	lex->current_token = end_token(tok, lex->entry); //cas 1
+	return 0;
 	ERROR:
 			free(tok->value);
 			free(tok);
-			return NULL;
+			return 1;
 }
 
-/* Main de test (temporaire)
+/* Test main
 #include "../io/io.h"
 int main()
 {
 	FILE *f = arg_file(3, (char*[]){"program", "-c", "Hello 'W  o'   \n   \\n 'r   ld'     !"});
-	struct token *t = lexer(f);
-	while (t->token_type != END)
+	struct lex *lex = malloc(sizeof(struct lex));
+	lex->entry = f;
+	lex->context = COMMAND;
+	lex->current_token = NULL;
+	int a = lexer(lex);
+	while (lex->current_token->token_type != END)
 	{
-		printf("Token: %s (type: %d)\n", t->value, t->token_type);
-		free(t->value);
-		free(t);
-		t = lexer(f);
+		printf("Token: %s (type: %d)\n", lex->current_token->value, lex->current_token->token_type);
+		free(lex->current_token->value);
+		free(lex->current_token);
+		lex->context = WORD;
+		int a = lexer(lex);
 	}
-	printf("Token: %s (type: %d)\n", t->value, t->token_type);
-	free(t->value);
-	free(t);
+	printf("Token: %s (type: %d)\n", lex->current_token->value, lex->current_token->token_type);
+	free(lex->current_token->value);
+	free(lex->current_token);
 	fclose(f);
 	return 0;
 }
