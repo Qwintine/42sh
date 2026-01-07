@@ -1,12 +1,13 @@
 #ifndef AST_H
 #define AST_H
 
+#include <stddef.h>
 #include "../utils/token.h"
 
 struct ast
 {
 	struct token *tok;
-	int size;
+	size_t size;
 	struct ast *next;
 };
 
