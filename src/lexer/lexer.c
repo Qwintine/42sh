@@ -23,23 +23,23 @@ static int handle_backslash(char **value, FILE *entry, int in_quotes)
 	{
 		*value = concat(*value, '\\');
 		if (!*value)
-			return 0;
+			return 1;
 	}
 	else
 	{
 		if (!fread(buf, 1, 1, entry))
-			return 0;
+			return 1;
 		if (buf[0] != '\n')
 		{
 			*value = concat(*value, '\\');
 			if (!*value)
-				return 0;
+				return 1;
 			*value = concat(*value, buf[0]);
 			if (!*value)
-				return 0;
+				return 1;
 		}
 	}
-	return 1;
+	return 0;
 }
 
 static int handle_quote(char **value, char c, int *quote, int other_quote)
@@ -48,8 +48,8 @@ static int handle_quote(char **value, char c, int *quote, int other_quote)
 		*quote = !(*quote);
 	*value = concat(*value, c);
 	if (!*value)
-		return 0;
-	return 1;
+		return 1;
+	return 0;
 }
 
 static int handle_newline(struct token *tok, int quote)
@@ -88,16 +88,18 @@ static int handle_delimiter(struct token *tok, char c, int quote)
 	return handle_blank(tok, c, quote);
 }
 
-static struct token *end_token(struct token *tok, FILE *entry)
+static struct token *end_token(struct token *tok, struct lex *lex)
 {
-	if (feof(entry) != 0)
+	if (feof(lex->entry) != 0)
 	{
 		if (strlen(tok->value) == 0)
+		{
 			tok->token_type = END;
+			if (lex->context == COMMAND)
+				return NULL;
+		}
 		return tok;
 	}
-	free(tok->value);
-	free(tok);
 	return NULL;
 }
 
@@ -127,15 +129,15 @@ int lexer(struct lex *lex)
 		switch (buf[0])
 		{
 			case '"':	// cas 4
-				if (!handle_quote(&tok->value, buf[0], &double_quote, single_quote))
+				if (handle_quote(&tok->value, buf[0], &double_quote, single_quote))
 					goto ERROR;
 				break;
 			case '\'':	// cas 4
-				if (!handle_quote(&tok->value, buf[0], &single_quote, double_quote))
+				if (handle_quote(&tok->value, buf[0], &single_quote, double_quote))
 					goto ERROR;
 				break;
 			case '\\': // cas 4
-				if (!handle_backslash(&tok->value, lex->entry, double_quote || single_quote))
+				if (handle_backslash(&tok->value, lex->entry, double_quote || single_quote))
 					goto ERROR;
 				break;
 			case '\n':	// cas 7
@@ -159,7 +161,9 @@ int lexer(struct lex *lex)
 		}
 
 	}
-	lex->current_token = end_token(tok, lex->entry); //cas 1
+	lex->current_token = end_token(tok, lex); //cas 1
+	if (!lex->current_token)
+		goto ERROR;
 	return 0;
 	ERROR:
 			free(tok->value);
@@ -167,7 +171,7 @@ int lexer(struct lex *lex)
 			return 1;
 }
 
-/* Test main
+/* Example main
 #include "../io/io.h"
 int main()
 {
@@ -177,17 +181,25 @@ int main()
 	lex->context = COMMAND;
 	lex->current_token = NULL;
 	int a = lexer(lex);
-	while (lex->current_token->token_type != END)
+	while (lex->current_token && lex->current_token->token_type != END)
 	{
-		printf("Token: %s (type: %d)\n", lex->current_token->value, lex->current_token->token_type);
+		printf("Token: %s (type: %d) exit code: %d\n", lex->current_token->value, lex->current_token->token_type, a);
 		free(lex->current_token->value);
 		free(lex->current_token);
 		lex->context = WORD;
-		int a = lexer(lex);
+		a = lexer(lex);
 	}
-	printf("Token: %s (type: %d)\n", lex->current_token->value, lex->current_token->token_type);
-	free(lex->current_token->value);
-	free(lex->current_token);
+	if (lex->current_token)
+	{
+		printf("Token: %s (type: %d) exit code: %d\n", lex->current_token->value, lex->current_token->token_type, a);
+		free(lex->current_token->value);
+		free(lex->current_token);
+	}
+	else
+	{
+		printf("Lexer error\n");
+	}
+	free(lex);
 	fclose(f);
 	return 0;
 }
