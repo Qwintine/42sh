@@ -15,7 +15,7 @@
  */
 static char *insert_in(size_t ind, char *str)
 {
-    size_t size = strlen(str);
+    size_t size = strlen(str) +1;
     char c = str[ind];
     char nc = 0;
     switch (c)
@@ -49,9 +49,10 @@ static char *insert_in(size_t ind, char *str)
     res[ind] = '\\';
     res[ind + 1] = nc;
     ind += 2;
-    while (ind < size)
+    while (ind < size+1)
     {
         res[ind] = str[ind - 1];
+		ind++;
     }
     free(str);
     return res;
