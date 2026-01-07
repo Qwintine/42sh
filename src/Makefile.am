@@ -1,17 +1,11 @@
-# define the subdirectories
-SUBDIRS = ast \
-      parser \
-      lexer
+SUBDIRS = io lexer
 
 bin_PROGRAMS = 42sh
-
 42sh_SOURCES = 42sh.c
 
-42sh_CPPFLAGS = -I%D%
+AM_CFLAGS = -std=c99 -pedantic -Werror -Wall -Wextra -Wvla
+AM_CPPFLAGS = -I$(top_srcdir)/src
 
-42sh_CFLAGS = -std=c99 -pedantic -Werror -Wall -Wextra -Wvla
-
-42sh_LDADD =  \
-       ast/libast.a \
-       parser/libparser.a \
-       lexer/liblexer.a
+42sh_LDADD = \
+  io/libio.a \
+  lexer/liblexer.a
