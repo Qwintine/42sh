@@ -117,13 +117,9 @@ int lexer(struct lex *lex)
 	int double_quote = 0;
 	int single_quote = 0;
 	char buf[1];
-	struct token *tok = malloc(sizeof(struct token));
+	struct token *tok = init_token(lex->context);
 	if(!tok)
-	{
 		return 1;
-	}
-	tok->value = calloc(1,1);
-	tok->token_type = lex->context;
 	while(fread(buf, 1, 1, lex->entry))
 	{
 		switch (buf[0])
@@ -166,9 +162,8 @@ int lexer(struct lex *lex)
 		goto ERROR;
 	return 0;
 	ERROR:
-			free(tok->value);
-			free(tok);
-			return 1;
+		free_token(tok);
+		return 1;
 }
 
 /* Example main
@@ -176,10 +171,7 @@ int lexer(struct lex *lex)
 int main()
 {
 	FILE *f = arg_file(3, (char*[]){"program", "-c", "Hello 'W  o'   \n   \\n 'r   ld'     !"});
-	struct lex *lex = malloc(sizeof(struct lex));
-	lex->entry = f;
-	lex->context = COMMAND;
-	lex->current_token = NULL;
+	struct lex *lex = init_lex(f);
 	int a = lexer(lex);
 	while (lex->current_token && lex->current_token->token_type != END)
 	{

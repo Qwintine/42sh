@@ -1,6 +1,8 @@
 #ifndef TOKEN_H
 #define TOKEN_H
 
+#include <stdio.h>
+
 enum type
 {
 	IF,
@@ -28,5 +30,10 @@ struct lex
 	struct token *current_token;
 	enum type context;
 };
+
+struct lex *init_lex(FILE *entry);
+struct token *init_token(enum type context);
+void free_lex(struct lex *lex);
+void free_token(struct token *tok);
 
 #endif /* TOKEN_H */
