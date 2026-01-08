@@ -1,72 +1,79 @@
 #include <stdio.h>
 #include "parser.h"
 #include "../lexer/lexer.h"
+#include "../utils/token.h"
 
 /*
  * Descriptif a faire
  */
-struct token *peek(struct lex *lex)
+static struct token *peek(struct lex *lex)
 {
 	if(lex)
 	{
 		if(!lex->current_token)
 		{
-			lexer(lex);
+			int res = lexer(lex);
+			if (res)
+				return NULL;
 		}
 		return lex->current_token;
 	}
 	return NULL;
 }
 
-
 /*
  * Descriptif a faire
  */
-struct token *pop(struct lex *lex)
+static struct token *pop(struct lex *lex)
 {
-	struct token *tok = lex->current_token;
-	lex->current_token = NULL;
-	return tok;
-}
-
-struct ast parser()
-{
-}
-
-/*
- * * Probablement modif plus tard
- */
-int parse_input(struct ast *input_ast)
-{
-	struct lex *lex = malloc(sizeof(struct lex ));
-	lex->entry = calloc(1,sizeof(FILE *));
-	lex->current_token = NULL;
-	lex->context = NULL;
-
-	struct ast *list_ast = malloc(sizeof(struct ast ));
-
-	if(parse_list(ast, &lex))
+	if(lex)
 	{
-		if(peek(&lex) || ((peek(lex)->current_token!= END 
-					&& peek(lex)->current_token != NEWLINE)))
-		{
-			//erreur
-		}
-		input_ast->tok = pop(&lex);
-		input_ast->size = 0;
-		input_ast->next = NULL;
-		free(list_ast);
-		return 0; // penser a gerer lex 
+		struct token *tok = lex->current_token;
+		lex->current_token = NULL;
+		return tok;
+	}
+	return NULL;
+}
+
+// pas sur que soit bien qu'on appelle directement le parser
+static struct ast *parser_list(struct lex *lex)
+{
+	struct ast_list *ast_list = (struct ast_list *)init_ast_list();
+	ast_list->elt = parser_and_or(lex);
+	if (peek(lex) && (peek(lex)->token_type == SEMI_COLON || peek(lex)->token_type == NEWLINE))
+	{
+		free_token(pop(lex));
+		ast_list->next = (struct ast_list *)parser_list(lex);
+	}
+	return (struct ast *)ast_list;
+}
+
+struct ast *parser(FILE *entry)
+{
+	struct lex *lex = init_lex(entry);
+	if (!peek(lex))
+	{
+		free_lex(lex);
+		return NULL;
+	}
+	if (peek(lex) && (peek(lex)->token_type == NEWLINE || peek(lex)->token_type == END))
+	{
+		free_lex(lex);
+		return init_ast_list();
 	}
 
-	struct token *token = malloc(sizeof(struct token ));
-	token->value = NULL;
-	token->token_type = INPUT; // rajouter dans enum
-	input_ast->tok = token;
-	input_ast->next = malloc(sizeof(struct ast));
-	input_ast->next = list_ast;
-	input_ast->size = list_ast->size +1;
-	return 0;
+	struct ast *ast = parser_list(lex);
+	struct token *tok = pop(lex);
+	
+	if (!tok || (tok->token_type != NEWLINE && tok->token_type != END))
+	{
+		if (tok)
+			free_token(tok);
+		free_lex(lex);
+		free_ast(ast);
+		return NULL;
+	}
+	free_token(tok);
+	free_lex(lex);
+	return ast;
 }
-
-
