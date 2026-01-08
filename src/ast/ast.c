@@ -75,22 +75,34 @@ void free_ast(struct ast *ast)
     (*functions[ast->type])(ast);
 }
 
-static void ast_run_cmd(struct ast *ast)
+static int ast_run_cmd(struct ast *ast)
 {
-
+    struct ast_cmd *ast_cmd = (struct ast_cmd *)ast;
+    int res = exec_cmd(ast_cmd->words);
+    return res;
 }
 
-static void ast_run_if(struct ast *ast)
+static int ast_run_if(struct ast *ast)
 {
-    
+    struct ast_if *ast_if = (struct ast_if *)ast;
+    int res = 0;
+    if (!run_ast(ast_if->condition))
+        res = run_ast(ast_if->then_body);
+    else if (ast_if->else_body)
+        res = run_ast(ast_if->else_body);
+    return res;       
 }
 
-static void ast_run_list(struct ast *ast)
+static int ast_run_list(struct ast *ast)
 {
-    
+    struct ast_list *ast_list = (struct ast_list *)ast;
+    int res = run_ast(ast_list->elt);
+    if (ast_list->next)
+        res = ast_run_list(ast_list->next);
+    return res;
 }
 
-void run_ast(struct ast * ast)
+int run_ast(struct ast *ast)
 {
     static const ast_handler functions[] = {
         [AST_CMD] = &ast_run_cmd,
