@@ -15,21 +15,22 @@
  */
 static char *insert_in(size_t ind, char *str)
 {
-    size_t size = strlen(str) + 1;
-    char c = str[ind];
+    size_t size = strlen(str);
+    char c = str[ind + 1];
     char nc = 0;
-    if (c == '\n')
-        nc = 'n';
-    else if (c == '\t')
-        nc = 't';
-    char *res = malloc(size + 1);
+    if (c == 'n')
+        nc = '\n';
+    else if (c == 't')
+        nc = '\t';
+    else if (c == '\\')
+        nc = '\\';
+    char *res = malloc(size);
     res = strncpy(res, str, ind);
-    res[ind] = '\\';
-    res[ind + 1] = nc;
-    ind += 2;
-    while (ind < size + 1)
+    res[ind] = nc;
+    ind++;
+    while (ind < size)
     {
-        res[ind] = str[ind - 1];
+        res[ind] = str[ind + 1];
         ind++;
     }
     free(str);
@@ -74,13 +75,13 @@ int echo_b(char **strings)
     }
     for (; strings[i] != NULL; i++)
     {
-        if (!e)
+        if (e)
         {
             size_t ind = 0;
             while (strings[i][ind] != 0)
             {
                 char c = strings[i][ind];
-                if (c == '\n' || c == '\t')
+                if (c == '\\')
                 {
                     strings[i] = insert_in(ind, strings[i]);
                 }
