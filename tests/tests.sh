@@ -35,10 +35,8 @@ testcase() {
 }
 
 run_criterion() {
-  TOTAL=$((TOTAL + 1))
-
   if ! command -v pkg-config >/dev/null 2>&1 || ! pkg-config --exists criterion >/dev/null 2>&1; then
-    echo "criterion ==> SKIP"
+    echo "criterion ==> SKIP (not installed)"
     return 0
   fi
 
@@ -57,11 +55,31 @@ run_criterion() {
     return 0;
   fi
 
-  if ./tests/crit_tests >/dev/null 2>&1; then
-    echo "criterion ==> OK"
-    PASS=$((PASS + 1))
+  crit_output=$(./tests/crit_tests 2>&1)
+  crit_exit=$?
+  
+  crit_tested=$(echo "$crit_output" | grep -E "Synthesis:" | sed -n 's/.*Tested: \([0-9]*\).*/\1/p')
+  crit_passing=$(echo "$crit_output" | grep -E "Synthesis:" | sed -n 's/.*Passing: \([0-9]*\).*/\1/p')
+  
+  if [ -n "$crit_tested" ] && [ -n "$crit_passing" ]; then
+    TOTAL=$((TOTAL + crit_tested))
+    PASS=$((PASS + crit_passing))
+    
+    echo "criterion ==> Tested: $crit_tested | Passing: $crit_passing"
+    
+    if [ "$crit_exit" -ne 0 ]; then
+      echo "$crit_output"
+    fi
+    
   else
-    echo "criterion ==> FAIL"
+    TOTAL=$((TOTAL + 1))
+    if [ "$crit_exit" -eq 0 ]; then
+      PASS=$((PASS + 1))
+      echo "criterion ==> OK"
+    else
+      echo "criterion ==> FAIL"
+      echo "$crit_output"
+    fi
   fi
 
   rm -f tests/crit_tests
