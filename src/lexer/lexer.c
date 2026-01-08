@@ -5,6 +5,15 @@
 #include "../utils/token.h"
 #include "lexer.h"
 
+/*
+ * Description:
+ *	Helper; Concat char to token value
+ * Arguments:
+ *	char *val -> current token value
+ *	char c -> char to concat
+ * Return:
+ *	New token value
+ */
 static char *concat(char *val, char c)
 {
 	size_t size = strlen(val);
@@ -16,6 +25,16 @@ static char *concat(char *val, char c)
 	return new_val;
 }
 
+/*
+ * Description:
+ *	Helper;  Handle different \ behaviors
+ * Arguments:
+ *	char **value -> value to concat to if needed
+ *	FILE *entry -> Input stream
+ *	int in_quotes -> quote state
+ * Return:
+ *	0 success / 1 failure
+ */
 static int handle_backslash(char **value, FILE *entry, int in_quotes)
 {
 	char buf[1];
@@ -41,6 +60,7 @@ static int handle_backslash(char **value, FILE *entry, int in_quotes)
 	}
 	return 0;
 }
+
 
 static int handle_quote(int *quote, int other_quote)
 {
@@ -129,6 +149,8 @@ static struct token *end_token(struct token *tok, struct lex *lex)
 	return NULL;
 }
 
+//Upgrade/Quality of life: Quote status from enum instead of int
+
 /* Description:
  * 	transforme le FILE en token
  * Arguments:
@@ -182,7 +204,6 @@ int lexer(struct lex *lex)
 				if(!tok->value)
 					goto ERROR;
 		}
-
 	}
 	lex->current_token = end_token(tok, lex); //cas 1
 	if (!lex->current_token)
@@ -193,33 +214,3 @@ int lexer(struct lex *lex)
 		return 1;
 }
 
-/* Example main
-#include "../io/io.h"
-int main()
-{
-	FILE *f = arg_file(3, (char*[]){"program", "-c", "Hello 'W  o'   \n   \\n 'r   ld'     !"});
-	struct lex *lex = init_lex(f);
-	int a = lexer(lex);
-	while (lex->current_token && lex->current_token->token_type != END)
-	{
-		printf("Token: %s (type: %d) exit code: %d\n", lex->current_token->value, lex->current_token->token_type, a);
-		free(lex->current_token->value);
-		free(lex->current_token);
-		lex->context = WORD;
-		a = lexer(lex);
-	}
-	if (lex->current_token)
-	{
-		printf("Token: %s (type: %d) exit code: %d\n", lex->current_token->value, lex->current_token->token_type, a);
-		free(lex->current_token->value);
-		free(lex->current_token);
-	}
-	else
-	{
-		printf("Lexer error\n");
-	}
-	free(lex);
-	fclose(f);
-	return 0;
-}
-*/

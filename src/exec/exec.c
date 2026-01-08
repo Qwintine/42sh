@@ -1,3 +1,7 @@
+#include <string.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include "../built-in/echo.h"
 #include "exec.h"
 
 static int exec_builtin(char **words)

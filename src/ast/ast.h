@@ -1,7 +1,6 @@
 #ifndef AST_H
 #define AST_H
 
-#include <stddef.h>
 #include "../utils/token.h"
 
 enum ast_type

@@ -1,4 +1,9 @@
+#include <stddef.h>
+#include <stdlib.h>
 #include "ast.h"
+
+
+//===================== Init ast from specific type ===========================
 
 struct ast *init_ast_list(void)
 {
@@ -34,6 +39,8 @@ struct ast *init_ast_cmd(void)
     return (struct ast*)node;
 }
 
+//===================== Free ast from specific type ===========================
+
 static void ast_free_cmd(struct ast *ast)
 {
     int i = 0;
@@ -65,15 +72,7 @@ static void ast_free_list(struct ast *ast)
         ast_free_list(ast_list->next);
 }
 
-void free_ast(struct ast *ast)
-{
-    static const ast_handler functions[] = {
-        [AST_CMD] = &ast_free_cmd,
-        [AST_IF] = &ast_free_if,
-        [AST_LIST] = &ast_free_list,
-    };
-    (*functions[ast->type])(ast);
-}
+//===================== Run ast from specific type ============================
 
 static int ast_run_cmd(struct ast *ast)
 {
@@ -90,7 +89,7 @@ static int ast_run_if(struct ast *ast)
         res = run_ast(ast_if->then_body);
     else if (ast_if->else_body)
         res = run_ast(ast_if->else_body);
-    return res;       
+    return res;
 }
 
 static int ast_run_list(struct ast *ast)
@@ -102,12 +101,25 @@ static int ast_run_list(struct ast *ast)
     return res;
 }
 
+
+//=========================== Lookup Tables ===================================
+
 int run_ast(struct ast *ast)
 {
     static const ast_handler functions[] = {
         [AST_CMD] = &ast_run_cmd,
         [AST_IF] = &ast_run_if,
         [AST_LIST] = &ast_run_list,
+    };
+    (*functions[ast->type])(ast);
+}
+
+void free_ast(struct ast *ast)
+{
+    static const ast_handler functions[] = {
+        [AST_CMD] = &ast_free_cmd,
+        [AST_IF] = &ast_free_if,
+        [AST_LIST] = &ast_free_list,
     };
     (*functions[ast->type])(ast);
 }
