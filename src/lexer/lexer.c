@@ -42,13 +42,10 @@ static int handle_backslash(char **value, FILE *entry, int in_quotes)
 	return 0;
 }
 
-static int handle_quote(char **value, char c, int *quote, int other_quote)
+static int handle_quote(int *quote, int other_quote)
 {
 	if (!other_quote)
 		*quote = !(*quote);
-	*value = concat(*value, c);
-	if (!*value)
-		return 1;
 	return 0;
 }
 
@@ -57,8 +54,15 @@ static int handle_newline(struct token *tok, int quote)
 	if (!quote)
 	{
 		if (strlen(tok->value) > 0)
+		{
+			tok->value = concat(tok->value, '\n');
+			if (!tok->value)
+				return -1;
 			return 1;
-		tok->token_type = NEWLINE;
+		}
+		tok->value = concat(tok->value, '\n');
+		if (!tok->value)
+			return -1;
 		return 1;
 	}
 	tok->value = concat(tok->value, '\n');
@@ -125,11 +129,11 @@ int lexer(struct lex *lex)
 		switch (buf[0])
 		{
 			case '"':	// cas 4
-				if (handle_quote(&tok->value, buf[0], &double_quote, single_quote))
+				if (handle_quote(&double_quote, single_quote))
 					goto ERROR;
 				break;
 			case '\'':	// cas 4
-				if (handle_quote(&tok->value, buf[0], &single_quote, double_quote))
+				if (handle_quote(&single_quote, double_quote))
 					goto ERROR;
 				break;
 			case '\\': // cas 4

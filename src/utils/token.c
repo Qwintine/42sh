@@ -1,4 +1,5 @@
 #include "token.h"
+#include <stdlib.h>
 
 struct lex *init_lex(FILE *entry)
 {

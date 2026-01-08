@@ -11,8 +11,6 @@ enum type
 	ELSE,
 	FI,
 	SEMI_COLON,
-	NEWLINE,
-	QUOTE,
 	WORD,
 	COMMAND,
 	END
