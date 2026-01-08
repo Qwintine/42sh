@@ -49,23 +49,43 @@ static int handle_quote(int *quote, int other_quote)
 	return 0;
 }
 
-static int handle_newline(struct token *tok, int quote)
+static int handle_newline(struct token *tok, int quote, FILE *entry)
 {
 	if (!quote)
 	{
 		if (strlen(tok->value) > 0)
 		{
-			tok->value = concat(tok->value, '\n');
-			if (!tok->value)
-				return -1;
+			fseek(entry, -1, SEEK_CUR);
 			return 1;
 		}
 		tok->value = concat(tok->value, '\n');
 		if (!tok->value)
 			return -1;
+		tok->token_type = NEWLINE;
 		return 1;
 	}
 	tok->value = concat(tok->value, '\n');
+	if (!tok->value)
+		return -1;
+	return 0;
+}
+
+static int handle_semicolon(struct token *tok, int quote, FILE *entry)
+{
+	if (!quote)
+	{
+		if (strlen(tok->value) > 0)
+		{
+			fseek(entry, -1, SEEK_CUR);
+			return 1;
+		}
+		tok->value = concat(tok->value, ';');
+		if (!tok->value)
+			return -1;
+		tok->token_type = SEMI_COLON;
+		return 1;
+	}
+	tok->value = concat(tok->value, ';');
 	if (!tok->value)
 		return -1;
 	return 0;
@@ -85,10 +105,12 @@ static int handle_blank(struct token *tok, char c, int quote)
 	return 0;
 }
 
-static int handle_delimiter(struct token *tok, char c, int quote)
+static int handle_delimiter(struct token *tok, char c, int quote, FILE *entry)
 {
 	if (c == '\n')
-		return handle_newline(tok, quote);
+		return handle_newline(tok, quote, entry);
+	if (c == ';')
+		return handle_semicolon(tok, quote, entry);
 	return handle_blank(tok, c, quote);
 }
 
@@ -140,11 +162,12 @@ int lexer(struct lex *lex)
 				if (handle_backslash(&tok->value, lex->entry, double_quote || single_quote))
 					goto ERROR;
 				break;
+			case ';':
 			case '\n':	// cas 7
 			case ' ':	// cas 8
 			case '\t':
 			{
-				int result = handle_delimiter(tok, buf[0], double_quote || single_quote);
+				int result = handle_delimiter(tok, buf[0], double_quote || single_quote, lex->entry);
 				if (result < 0)
 					goto ERROR;
 				if (result > 0)
