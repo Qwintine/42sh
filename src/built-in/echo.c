@@ -18,32 +18,10 @@ static char *insert_in(size_t ind, char *str)
     size_t size = strlen(str) + 1;
     char c = str[ind];
     char nc = 0;
-    switch (c)
-    {
-    case '\a':
-        nc = 'a';
-        break;
-    case '\b':
-        nc = 'b';
-        break;
-    case '\f':
-        nc = 'f';
-        break;
-    case '\n':
+    if (c == '\n')
         nc = 'n';
-        break;
-    case '\r':
-        nc = 'r';
-        break;
-    case '\t':
+    if (c == '\t')
         nc = 't';
-        break;
-    case '\v':
-        nc = 'v';
-        break;
-    default:
-        break;
-    }
     char *res = malloc(size + 1);
     res = strncpy(res, str, ind);
     res[ind] = '\\';
@@ -95,7 +73,6 @@ int echo_b(size_t size, char **strings)
             ind++;
         }
     }
-    // TODO: \c et \e si e (\0 et \x itou?)
     for (; i < size; i++)
     {
         if (!e)
@@ -104,8 +81,7 @@ int echo_b(size_t size, char **strings)
             while (strings[i][ind] != 0)
             {
                 char c = strings[i][ind];
-                if (c == '\a' || c == '\b' || c == '\f' || c == '\n'
-                    || c == '\r' || c == '\t' || c == '\v')
+                if (c == '\n' || c == '\t')
                 {
                     strings[i] = insert_in(ind, strings[i]);
                 }
