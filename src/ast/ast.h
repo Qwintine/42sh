@@ -37,4 +37,12 @@ struct ast_list
 	struct ast_list *next;
 }; 
 
+typedef void (*ast_handler)(struct ast *);
+
+struct ast *init_ast_list(void);
+struct ast *init_ast_cmd(void);
+struct ast *init_ast_if(void);
+void free_ast(struct ast *node);
+void run_ast(struct ast *node);
+
 #endif /* AST_H */
