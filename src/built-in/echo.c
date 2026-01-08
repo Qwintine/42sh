@@ -15,43 +15,22 @@
  */
 static char *insert_in(size_t ind, char *str)
 {
-    size_t size = strlen(str) + 1;
-    char c = str[ind];
+    size_t size = strlen(str);
+    char c = str[ind + 1];
     char nc = 0;
-    switch (c)
-    {
-    case '\a':
-        nc = 'a';
-        break;
-    case '\b':
-        nc = 'b';
-        break;
-    case '\f':
-        nc = 'f';
-        break;
-    case '\n':
-        nc = 'n';
-        break;
-    case '\r':
-        nc = 'r';
-        break;
-    case '\t':
-        nc = 't';
-        break;
-    case '\v':
-        nc = 'v';
-        break;
-    default:
-        break;
-    }
-    char *res = malloc(size + 1);
+    if (c == 'n')
+        nc = '\n';
+    else if (c == 't')
+        nc = '\t';
+    else if (c == '\\')
+        nc = '\\';
+    char *res = malloc(size);
     res = strncpy(res, str, ind);
-    res[ind] = '\\';
-    res[ind + 1] = nc;
-    ind += 2;
-    while (ind < size + 1)
+    res[ind] = nc;
+    ind++;
+    while (ind < size)
     {
-        res[ind] = str[ind - 1];
+        res[ind] = str[ind + 1];
         ind++;
     }
     free(str);
@@ -59,16 +38,15 @@ static char *insert_in(size_t ind, char *str)
 }
 
 /* Description:
- *  	print size strings sur le terminal
+ *  	print les strings sur le terminal
  * Arguments:
- *  	size: le nombre d'elements a print
  *  	strings: les elements a print
  * Retour:
  *  	0 si succes, 1 sinon
  * Verbose:
  *  	parse les option -neE si presente  en premiere position
  */
-int echo_b(size_t size, char **strings)
+int echo_b(char **strings)
 {
     int n = 0;
     int e = 0;
@@ -95,17 +73,15 @@ int echo_b(size_t size, char **strings)
             ind++;
         }
     }
-    // TODO: \c et \e si e (\0 et \x itou?)
-    for (; i < size; i++)
+    for (; strings[i] != NULL; i++)
     {
-        if (!e)
+        if (e)
         {
             size_t ind = 0;
             while (strings[i][ind] != 0)
             {
                 char c = strings[i][ind];
-                if (c == '\a' || c == '\b' || c == '\f' || c == '\n'
-                    || c == '\r' || c == '\t' || c == '\v')
+                if (c == '\\')
                 {
                     strings[i] = insert_in(ind, strings[i]);
                 }
@@ -113,7 +89,7 @@ int echo_b(size_t size, char **strings)
             }
         }
         printf("%s", strings[i]);
-        if (i < size - 1)
+        if (strings[i + 1] != NULL)
             printf(" ");
     }
     if (!n)
