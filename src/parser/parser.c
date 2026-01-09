@@ -5,7 +5,12 @@
 #include "../utils/token.h"
 
 /*
- * Descriptif a faire
+ * Description:
+ * 	Peek on the lexer to see the current token
+ * Arguments:
+ * 	lex -> struct lexer being used
+ * Return:
+ * 	Current_token if success, NULL otherwise
  */
 static struct token *peek(struct lex *lex)
 {
@@ -23,7 +28,12 @@ static struct token *peek(struct lex *lex)
 }
 
 /*
- * Descriptif a faire
+ * Description:
+ * 	Pop the current token from lex
+ * Arguments:
+ * 	lex -> struct lexer being used
+ * Return:
+ * 	Copy of current_token if success, NULL otherwise
  */
 static struct token *pop(struct lex *lex)
 {
@@ -39,6 +49,7 @@ static struct token *pop(struct lex *lex)
 	}
 	return NULL;
 }
+
 /*
  * Description:
  * 		Free a discarded token
@@ -63,7 +74,9 @@ static struct ast *parser_and_or(struct lex *lex);
 static struct ast *parser_else_clause(struct lex *lex);
 static struct ast *parser_list(struct lex *lex);
 
-
+/*
+ * TODO
+ */
 static struct ast *parser_compound_list(struct lex *lex)
 {
 	if(!peek(lex) || peek(lex)->token_type == END)
@@ -104,6 +117,9 @@ static struct ast *parser_compound_list(struct lex *lex)
 	return (struct ast *)ast_list;
 }
 
+/*
+ * TODO
+ */
 static struct ast *parser_elif(struct lex *lex)
 {
 	if(!peek(lex) || peek(lex)->token_type != ELIF)
@@ -131,6 +147,9 @@ static struct ast *parser_elif(struct lex *lex)
 	return (struct ast *) ast_if;
 }
 
+/*
+ * TODO
+ */
 static struct ast *parser_else_clause(struct lex *lex)
 {
 	if(!peek(lex) || peek(lex)->token_type == END)
@@ -150,6 +169,9 @@ static struct ast *parser_else_clause(struct lex *lex)
 	return NULL;
 }
 
+/*
+ * TODO
+ */
 static struct ast *parser_rule_if(struct lex *lex)
 {
 	if(!peek(lex) || peek(lex)->token_type != IF)//si autre keyword (pas con wlh, bien joué Victor1 (désolé bébou Victor2))
@@ -188,6 +210,9 @@ static struct ast *parser_shell_command(struct lex *lex)
 	return parser_rule_if(lex);
 }
 
+/*
+ * TODO
+ */
 //prochaine step -> ajouter gestion des préfixes ( cf. Trove Shell Syntax )
 static struct ast *parser_simple_command(struct lex *lex)
 {
@@ -243,6 +268,9 @@ static struct ast *parser_and_or(struct lex *lex)
 	return parser_pipeline(lex);
 }
 
+/*
+ * TODO
+ */
 static struct ast *parser_list(struct lex *lex)
 {
 	if(!peek(lex) || peek(lex)->token_type == END || peek(lex)->token_type == NEWLINE)
@@ -267,38 +295,49 @@ static struct ast *parser_list(struct lex *lex)
 	return (struct ast *)ast_list;
 }
 
+/*
+ * Description:
+ * 	Parse the input of our shell into list
+ * Arguments:
+ * 	FILE *entry -> used to create struct lexer
+ * Return:
+ * 	struct ast * representing an Abstract Syntax Tree of our input / NULL on Error
+ *
+ * Verbose:
+ * 	TODO
+ */
 struct ast *parser(FILE *entry)
 {
 	struct lex *lex = init_lex(entry);
-	lex->context = KEYWORD;
+	lex->context = KEYWORD; 
 	if (!peek(lex))
 	{
 		free_lex(lex);
 		return NULL;
 	}
 	
-	while(peek(lex) && peek(lex)->token_type == NEWLINE)
+	while(peek(lex) && peek(lex)->token_type == NEWLINE) //consomme newline until début code évaluable
 	{
 		discard_token(pop(lex));
 	}
 	
-	if (!peek(lex) || peek(lex)->token_type == END)
+	if (!peek(lex) || peek(lex)->token_type == END) //fichier sans code évaluable
 	{
 		free_lex(lex);
 		return init_ast_list();
 	}
 
-	struct ast *ast = parser_list(lex);
+	struct ast *ast = parser_list(lex); // récursion sur ast type list ( cf. parser_list )
 	
-	if (!ast)
+	if (!ast) // remontée erreur syntax / grammaire 
 	{
 		free_lex(lex);
 		return NULL;
 	}
 	
-	struct token *tok = pop(lex);
+	struct token *tok = pop(lex); // consomme terminal de grammaire list
 	
-	if (!tok || (tok->token_type != NEWLINE && tok->token_type != END))
+	if (!tok || (tok->token_type != NEWLINE && tok->token_type != END)) // erreur de grammaire 
 	{
 		if (tok)
 			free_token(tok);
