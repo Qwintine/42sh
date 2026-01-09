@@ -76,6 +76,7 @@ static struct ast *parser_compound_list(struct lex *lex)
 		discard_token(lex);
 	}
 	//checker bug ici
+	lex->context = COMMAND;
 	ast_list->next = (struct ast_list *)parser_and_or(lex);
 	return (struct ast *)ast_list;
 }
@@ -149,6 +150,7 @@ static struct ast *parser_simple_command(struct lex *lex)
 {
 	struct ast_cmd *ast_cmd = (struct ast_cmd *)init_ast_cmd();
 	size_t ind = 0;
+	lex->context = WORD;
 	while(peek(lex) && peek(lex)->token_type == WORD)
 	{
 		struct token *tok = pop(lex);
