@@ -79,7 +79,7 @@ static int handle_newline(struct token *tok, int quote, FILE *entry)
 			return 1;
 		}
 		tok->value = concat(tok->value, '\n');
-		if (!tok->value || tok->token_type != WORD)
+		if (!tok->value || (tok->token_type != WORD && tok->token_type != COMMAND))
 			return -1;
 		tok->token_type = NEWLINE;
 		return 1;
@@ -100,7 +100,7 @@ static int handle_semicolon(struct token *tok, int quote, FILE *entry)
 			return 1;
 		}
 		tok->value = concat(tok->value, ';');
-		if (!tok->value || tok->token_type != WORD)
+		if (!tok->value || (tok->token_type != WORD && tok->token_type != COMMAND))
 			return -1;
 		tok->token_type = SEMI_COLON;
 		return 1;
@@ -141,7 +141,7 @@ static struct token *end_token(struct token *tok, struct lex *lex)
 		if (strlen(tok->value) == 0)
 		{
 			tok->token_type = END;
-			if (lex->context != WORD)
+			if (lex->context != WORD && lex->context != COMMAND)
 				return NULL;
 		}
 		return tok;
@@ -179,6 +179,21 @@ static int verif_token(struct token *tok, enum type context)
 	return 0;
 }
 
+enum type check_type(char *value)
+{
+	if (strcmp(value, "if") == 0)
+		return IF;
+	if (strcmp(value, "then") == 0)
+		return THEN;
+	if (strcmp(value, "elif") == 0)
+		return ELIF;
+	if (strcmp(value, "else") == 0)
+		return ELSE;
+	if (strcmp(value, "fi") == 0)
+		return FI;
+	return WORD;
+}
+
 //Upgrade/Quality of life: Quote status from enum instead of int
 
 /* Description:
@@ -194,6 +209,7 @@ int lexer(struct lex *lex)
 {
 	int double_quote = 0;
 	int single_quote = 0;
+	int com = 0;
 	char buf[1];
 	struct token *tok = init_token(lex->context);
 	if(!tok)
@@ -202,6 +218,22 @@ int lexer(struct lex *lex)
 	{
 		switch (buf[0])
 		{
+			case '#':
+				if (!double_quote && !single_quote)
+				{
+					while (fread(buf, 1, 1, lex->entry))
+						if (buf[0] == '\n')
+							break;
+					if (buf[0] == '\n')
+						fseek(lex->entry, -1, SEEK_CUR);
+				}
+				else
+				{
+					tok->value = concat(tok->value, '#');
+					if(!tok->value)
+						goto ERROR;
+				}
+				break;
 			case '"':	// cas 4
 				if (handle_quote(&double_quote, single_quote))
 					goto ERROR;
@@ -240,6 +272,8 @@ int lexer(struct lex *lex)
 		goto ERROR;
 	if (verif_token(lex->current_token, lex->context))
 		goto ERROR;
+	if (lex->current_token->token_type == COMMAND)
+		lex->current_token->token_type = check_type(lex->current_token->value);
 	return 0;
 	ERROR:
 		fseek(lex->entry, -(strlen(tok->value)), SEEK_CUR);
