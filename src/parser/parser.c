@@ -35,8 +35,6 @@ static struct token *pop(struct lex *lex)
 		}
 		struct token *tok = lex->current_token;
 		lex->current_token = NULL;
-		lex->context = WORD;
-		printf("pop token: %s, type: %d\n", tok->value, tok->token_type);
 		return tok;
 	}
 	return NULL;
@@ -76,39 +74,60 @@ static struct ast *parser_compound_list(struct lex *lex)
 	{
 		discard_token(pop(lex));
 	}
+	
 	struct ast_list *ast_list = (struct ast_list *)init_ast_list();
 	ast_list->elt = parser_and_or(lex);
-	if(peek(lex) && peek(lex)->token_type == SEMI_COLON)
+	
+	struct ast_list *current = ast_list;
+	while(peek(lex) && (peek(lex)->token_type == SEMI_COLON || peek(lex)->token_type == NEWLINE))
 	{
 		discard_token(pop(lex));
+		
+		while(peek(lex) && peek(lex)->token_type == NEWLINE)
+		{
+			discard_token(pop(lex));
+		}
+		
+		if(!peek(lex) || peek(lex)->token_type == END || 
+		   peek(lex)->token_type == THEN || peek(lex)->token_type == ELSE || 
+		   peek(lex)->token_type == ELIF || peek(lex)->token_type == FI)
+		{
+			break;
+		}
+		
+		struct ast_list *new_node = (struct ast_list *)init_ast_list();
+		new_node->elt = parser_and_or(lex);
+		current->next = new_node;
+		current = new_node;
 	}
-	while(peek(lex) && peek(lex)->token_type == NEWLINE)
-	{
-		discard_token(pop(lex));
-	}
-	ast_list->next = (struct ast_list *)parser_list(lex);
+	
 	return (struct ast *)ast_list;
 }
 
 static struct ast *parser_elif(struct lex *lex)
 {
-	lex->context = ELIF;
-	if(!discard_token(pop(lex)))
+	if(!peek(lex) || peek(lex)->token_type != ELIF)
 		return NULL;
+	discard_token(pop(lex));
+	
 	struct ast_if *ast_if = (struct ast_if *)init_ast_if();
+	
 	ast_if->condition = parser_compound_list(lex);
-	lex->context = THEN;
-	if(!discard_token(pop(lex)))
+	
+	if(!peek(lex) || peek(lex)->token_type != THEN)
 	{
 		free_ast((struct ast *)ast_if);
 		return NULL;
 	}
+	discard_token(pop(lex));
+	
 	ast_if->then_body = parser_compound_list(lex);
-	lex->context = ELSE;
-	if(discard_token(pop(lex)))
+	
+	if(peek(lex) && (peek(lex)->token_type == ELSE || peek(lex)->token_type == ELIF))
 	{
 		ast_if->else_body = parser_else_clause(lex);
 	}
+	
 	return (struct ast *) ast_if;
 }
 
@@ -116,40 +135,51 @@ static struct ast *parser_else_clause(struct lex *lex)
 {
 	if(!peek(lex) || peek(lex)->token_type == END)
 		return NULL;
-	if(peek(lex) && peek(lex)->token_type == ELSE)
+		
+	if(peek(lex)->token_type == ELIF)
+	{
+		return parser_elif(lex);
+	}
+	
+	if(peek(lex)->token_type == ELSE)
 	{
 		discard_token(pop(lex));
 		return parser_compound_list(lex);
 	}
-	return parser_elif(lex);
+	
+	return NULL;
 }
 
 static struct ast *parser_rule_if(struct lex *lex)
 {
-	lex->context = IF;
-	if(!discard_token(pop(lex)))
+	if(!peek(lex) || peek(lex)->token_type != IF)//si autre keyword (pas con wlh, bien joué Victor1 (désolé bébou Victor2))
 		return NULL;
+	discard_token(pop(lex)); //consomme if
+	
 	struct ast_if *ast_if = (struct ast_if *)init_ast_if();
+	
 	ast_if->condition = parser_compound_list(lex);
-	printf("value token %s, type: %d\n", peek(lex)->value, peek(lex)->token_type); // DEBUG
-	lex->context = THEN;
-	if(!discard_token(pop(lex)))
+	
+	if(!peek(lex) || peek(lex)->token_type != THEN)
 	{
 		free_ast((struct ast *)ast_if);
 		return NULL;
 	}
+	discard_token(pop(lex));
 	ast_if->then_body = parser_compound_list(lex);
-	lex->context = ELSE;
-	if(discard_token(pop(lex)))
+	
+	if(peek(lex) && (peek(lex)->token_type == ELSE || peek(lex)->token_type == ELIF))
 	{
 		ast_if->else_body = parser_else_clause(lex);
 	}
-	lex->context = FI;
-	if(!discard_token(pop(lex)))
+	
+	if(!peek(lex) || peek(lex)->token_type != FI)
 	{
 		free_ast((struct ast *)ast_if);
 		return NULL;
 	}
+	discard_token(pop(lex));
+	
 	return (struct ast *) ast_if;
 }
 
@@ -158,25 +188,42 @@ static struct ast *parser_shell_command(struct lex *lex)
 	return parser_rule_if(lex);
 }
 
+//prochaine step -> ajouter gestion des préfixes ( cf. Trove Shell Syntax )
 static struct ast *parser_simple_command(struct lex *lex)
 {
 	struct ast_cmd *ast_cmd = (struct ast_cmd *)init_ast_cmd();
 	size_t ind = 0;
-	lex->context = WORD;
-	while(peek(lex) && peek(lex)->token_type == WORD)
+
+	if(peek(lex) && peek(lex)->token_type == WORD)
 	{
-		printf("parsing word: %s type: %d\n", peek(lex)->value, peek(lex)->token_type); // DEBUG
 		struct token *tok = pop(lex);
 		ast_cmd->words[ind] = tok->value;
 		free(tok);
 		ind++;
 		ast_cmd->words = realloc(ast_cmd->words, (ind+1) * sizeof(char *));
+		//ajouter test realloc pour sécu -> peu probable mais pas pro
 		ast_cmd->words[ind] = NULL;
+
+		lex->context = WORD;
+		while(peek(lex) && peek(lex)->token_type == WORD)
+		{
+			tok = pop(lex);
+			ast_cmd->words[ind] = tok->value;
+			free(tok);
+			ind++;
+			ast_cmd->words = realloc(ast_cmd->words, (ind+1) * sizeof(char *));
+			ast_cmd->words[ind] = NULL;
+		}
+		lex->context = KEYWORD;
+		return (struct ast *)ast_cmd;
 	}
-	lex->context = COMMAND;
-	return (struct ast *)ast_cmd;
+	lex->context = KEYWORD;
+	free(ast_cmd->words);
+	free(ast_cmd);
+	return NULL;
 }
 
+// prochaine step -> ajouter gestion  { redirections } après shell_command
 static struct ast *parser_command(struct lex *lex)
 {
 	if(peek(lex) && peek(lex)->token_type == IF)
@@ -196,19 +243,26 @@ static struct ast *parser_and_or(struct lex *lex)
 	return parser_pipeline(lex);
 }
 
-// pas sur que soit bien qu'on appelle directement le parser
 static struct ast *parser_list(struct lex *lex)
 {
-	/*
-	if(!peek(lex) || (peek(lex)->token_type != NEWLINE && peek(lex)->token_type != END))
-		return NULL;*/
-	lex->context = COMMAND;
+	if(!peek(lex) || peek(lex)->token_type == END || peek(lex)->token_type == NEWLINE)
+		return NULL;
+	
+	lex->context = KEYWORD;
 	struct ast_list *ast_list = (struct ast_list *)init_ast_list();
 	ast_list->elt = parser_and_or(lex);
+	if(!ast_list->elt)
+	{
+		free(ast_list);
+		return NULL;
+	}
 	if (peek(lex) && (peek(lex)->token_type == SEMI_COLON || peek(lex)->token_type == NEWLINE))
 	{
 		discard_token(pop(lex));
-		ast_list->next = (struct ast_list *)parser_list(lex);
+		if(peek(lex) && peek(lex)->token_type != END && peek(lex)->token_type != NEWLINE)
+		{
+			ast_list->next = (struct ast_list *)parser_list(lex);
+		}
 	}
 	return (struct ast *)ast_list;
 }
@@ -216,19 +270,32 @@ static struct ast *parser_list(struct lex *lex)
 struct ast *parser(FILE *entry)
 {
 	struct lex *lex = init_lex(entry);
-	lex->context = COMMAND;
+	lex->context = KEYWORD;
 	if (!peek(lex))
 	{
 		free_lex(lex);
 		return NULL;
 	}
-	if (peek(lex) && (peek(lex)->token_type == NEWLINE || peek(lex)->token_type == END))
+	
+	while(peek(lex) && peek(lex)->token_type == NEWLINE)
+	{
+		discard_token(pop(lex));
+	}
+	
+	if (!peek(lex) || peek(lex)->token_type == END)
 	{
 		free_lex(lex);
 		return init_ast_list();
 	}
 
 	struct ast *ast = parser_list(lex);
+	
+	if (!ast)
+	{
+		free_lex(lex);
+		return NULL;
+	}
+	
 	struct token *tok = pop(lex);
 	
 	if (!tok || (tok->token_type != NEWLINE && tok->token_type != END))
