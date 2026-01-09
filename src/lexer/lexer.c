@@ -99,7 +99,7 @@ static int handle_newline(struct token *tok, int quote, FILE *entry)
 			return 1;
 		}
 		tok->value = concat(tok->value, '\n');
-		if (!tok->value || (tok->token_type != WORD && tok->token_type != COMMAND))
+		if (!tok->value || (tok->token_type != WORD && tok->token_type != KEYWORD))
 			return -1;
 		tok->token_type = NEWLINE;
 		return 1;
@@ -120,7 +120,7 @@ static int handle_semicolon(struct token *tok, int quote, FILE *entry)
 			return 1;
 		}
 		tok->value = concat(tok->value, ';');
-		if (!tok->value || (tok->token_type != WORD && tok->token_type != COMMAND))
+		if (!tok->value || (tok->token_type != WORD && tok->token_type != KEYWORD))
 			return -1;
 		tok->token_type = SEMI_COLON;
 		return 1;
@@ -161,7 +161,7 @@ static struct token *end_token(struct token *tok, struct lex *lex)
 		if (strlen(tok->value) == 0)
 		{
 			tok->token_type = END;
-			if (lex->context != WORD && lex->context != COMMAND)
+			if (lex->context != WORD && lex->context != KEYWORD)
 				return NULL;
 		}
 		return tok;
@@ -264,7 +264,7 @@ int lexer(struct lex *lex)
 				if (result > 0)
 				{
 					lex->current_token = tok;
-					if (lex->current_token->token_type == COMMAND)
+					if (lex->current_token->token_type == KEYWORD && lex->context == KEYWORD)
 						lex->current_token->token_type = check_type(lex->current_token->value);
 					return 0;
 				}
@@ -281,7 +281,7 @@ int lexer(struct lex *lex)
 		goto ERROR;
 	if (verif_token(lex->current_token, lex->context))
 		goto ERROR;
-	if (lex->current_token->token_type == COMMAND)
+	if (lex->current_token->token_type == KEYWORD && lex->context == KEYWORD)
 		lex->current_token->token_type = check_type(lex->current_token->value);
 	return 0;
 	ERROR:

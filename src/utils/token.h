@@ -13,7 +13,7 @@ enum type
 	SEMI_COLON,
 	NEWLINE,
 	WORD,
-	COMMAND,
+	KEYWORD,
 	END
 };
 
