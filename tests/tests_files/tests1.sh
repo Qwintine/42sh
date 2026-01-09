@@ -1,3 +1,1 @@
-if true; then 
-    echo ok; 
-fi
+if false then echo 1 fi

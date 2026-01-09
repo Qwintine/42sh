@@ -17,15 +17,15 @@ testcase() {
 
   TOTAL=$((TOTAL + 1))
 
-  $REF_SHELL $flag "$cmd" >"$REF_OUT" 2>&1
+  $REF_SHELL $flag "$cmd" >"$REF_OUT" 2>/dev/null
   ref_status=$?
   printf "\n[exit:%d]\n" "$ref_status" >>"$REF_OUT"
 
-  "$BIN" $flag "$cmd" >"$TEST_OUT" 2>&1
+  "$BIN" $flag "$cmd" >"$TEST_OUT" 2>/dev/null
   test_status=$?
   printf "\n[exit:%d]\n" "$test_status" >>"$TEST_OUT"
 
-  if diff -u "$REF_OUT" "$TEST_OUT" >/dev/null; then
+  if diff -u "$REF_OUT" "$TEST_OUT" 2>/dev/null; then
     echo "$name ==> OK"
     PASS=$((PASS + 1))
   else
@@ -91,6 +91,32 @@ testcase "true" "-c" "true"
 testcase "false" "-c" "false"
 testcase "ls" "-c" "ls"
 testcase "one line if err" "" "tests/tests_files/tests1.sh"
+
+testcase "if true then" "-c" "if true; then echo ok; fi"
+testcase "if false else" "-c" "if false; then echo ko; else echo ok; fi"
+testcase "if elif else" "-c" "if false; then echo 1; elif true; then echo 2; else echo 3; fi"
+testcase "if with newlines" "-c" "if true
+then
+echo ok
+fi"
+testcase "nested if" "-c" "if true; then if false; then echo ko; else echo ok; fi; fi"
+
+testcase "two commands" "-c" "echo a; echo b"
+testcase "three commands" "-c" "echo a; echo b; echo c"
+testcase "trailing semicolon" "-c" "echo test;"
+
+testcase "empty command" "-c" ""
+testcase "only semicolon" "-c" ";"
+testcase "only newline" "-c" "
+"
+
+testcase "echo fi" "-c" "echo fi"
+testcase "echo then else" "-c" "echo then else"
+testcase "echo if" "-c" "echo if"
+
+testcase "unclosed if" "-c" "if true; then echo ok"
+testcase "if without then" "-c" "if true echo ok fi"
+testcase "fi without if" "-c" "echo ok; fi"
 
 if [ "${COVERAGE:-no}" = "yes" ]; then
   run_criterion
