@@ -13,20 +13,15 @@ int main(int argc, char **argv)
     struct ast *ast = parser(entry);
 
     if (!ast)
-    {
-        fclose(entry);
         return 2;
-    }
 
     if (prettyprint)
         print_ast(ast);
     else
     {
-        if (run_ast(ast))
-        {
-            free_ast(ast);
-            return 2;
-        }
+        int res = run_ast(ast);
+        free_ast(ast);
+        return res;
     }
 
     free_ast(ast);

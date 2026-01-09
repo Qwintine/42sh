@@ -12,15 +12,16 @@ TOTAL=0
 
 testcase() {
   name="$1"
-  cmd="$2"
+  flag="$2"
+  cmd="$3"
 
   TOTAL=$((TOTAL + 1))
 
-  $REF_SHELL -c "$cmd" >"$REF_OUT" 2>&1
+  $REF_SHELL $flag "$cmd" >"$REF_OUT" 2>&1
   ref_status=$?
   printf "\n[exit:%d]\n" "$ref_status" >>"$REF_OUT"
 
-  "$BIN" -c "$cmd" >"$TEST_OUT" 2>&1
+  "$BIN" $flag "$cmd" >"$TEST_OUT" 2>&1
   test_status=$?
   printf "\n[exit:%d]\n" "$test_status" >>"$TEST_OUT"
 
@@ -85,10 +86,11 @@ run_criterion() {
   rm -f tests/crit_tests
 }
 
-testcase "echo Hello World!" "echo Hello World!"
-testcase "true" "true"
-testcase "false" "false"
-testcase "ls" "ls"
+testcase "echo Hello World!" "-c" "echo Hello World!"
+testcase "true" "-c" "true"
+testcase "false" "-c" "false"
+testcase "ls" "-c" "ls"
+testcase "one line if err" "" "tests/tests_files/tests1.sh"
 
 if [ "${COVERAGE:-no}" = "yes" ]; then
   run_criterion

@@ -27,10 +27,10 @@ FILE *arg_file(int argc, char** argv, int *prettyprint)
             }
             entry = fmemopen(argv[i], strlen(argv[i]), "r");
         }
-	else if(strcmp(argv[i], "--prettyprint") == 0)
-	{
-		*prettyprint = 1;
-	}
+        else if(strcmp(argv[i], "--prettyprint") == 0)
+        {
+            *prettyprint = 1;
+        }
         // autre arguments (pour plus tard)
         else if(!entry)
             entry = fopen(argv[i], "r");

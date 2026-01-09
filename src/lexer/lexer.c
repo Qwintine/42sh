@@ -264,6 +264,8 @@ int lexer(struct lex *lex)
 				if (result > 0)
 				{
 					lex->current_token = tok;
+					if (lex->current_token->token_type == COMMAND)
+						lex->current_token->token_type = check_type(lex->current_token->value);
 					return 0;
 				}
 				break;
