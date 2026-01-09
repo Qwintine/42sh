@@ -1,7 +1,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
-#include "../built-in/echo.h"
+#include <stdio.h>
+#include "../builtin/echo.h"
 #include "exec.h"
 
 static int exec_builtin(char **words)
@@ -12,7 +13,7 @@ static int exec_builtin(char **words)
     else if (!strcmp(cmd, "false"))
         return 1;
     else if (!strcmp(cmd, "echo"))
-        return echo_b(words);
+        return echo_b(words+1);
     return -1;
 }
 
@@ -29,7 +30,7 @@ static int exec_builtin(char **words)
 int exec_cmd(char **words)
 {
     int r = exec_builtin(words);
-    if (r != -1)
+    if (r == -1)
     {
         int child = fork();
         if (!child)

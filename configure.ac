@@ -21,7 +21,12 @@ AX_COMPILER_FLAGS([], [], [], [-std=c99 -pedantic -Werror -Wall -Wextra -Wvla])
 AC_CONFIG_FILES([
                     Makefile
                     src/Makefile
-		            src/lexer/Makefile
+                    src/ast/Makefile
+                    src/builtin/Makefile
+                    src/exec/Makefile
                     src/io/Makefile
+		            src/lexer/Makefile
+                    src/parser/Makefile
+                    src/utils/Makefile
                 ])
 AC_OUTPUT

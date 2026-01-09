@@ -86,7 +86,8 @@ run_criterion() {
 }
 
 testcase "echo Hello World!" "echo Hello World!"
-testcase "exit 42" "exit 42"
+testcase "true" "true"
+testcase "false" "false"
 testcase "ls" "ls"
 
 if [ "${COVERAGE:-no}" = "yes" ]; then

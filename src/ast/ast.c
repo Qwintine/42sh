@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include "ast.h"
+#include "../exec/exec.h"
 
 
 //===================== Init ast from specific type ===========================
@@ -61,6 +62,7 @@ static void ast_free_if(struct ast *ast)
     free_ast(ast_if->then_body);
     if (ast_if->else_body)
         free_ast(ast_if->else_body);
+    free(ast_if);
 }
 
 static void ast_free_list(struct ast *ast)
@@ -69,7 +71,8 @@ static void ast_free_list(struct ast *ast)
     if (ast_list->elt)
         free_ast(ast_list->elt);
     if (ast_list->next)
-        ast_free_list(ast_list->next);
+        ast_free_list((struct ast *)ast_list->next);
+    free(ast_list);
 }
 
 //===================== Run ast from specific type ============================
@@ -97,7 +100,7 @@ static int ast_run_list(struct ast *ast)
     struct ast_list *ast_list = (struct ast_list *)ast;
     int res = run_ast(ast_list->elt);
     if (ast_list->next)
-        res = ast_run_list(ast_list->next);
+        res = ast_run_list((struct ast *)ast_list->next);
     return res;
 }
 
@@ -106,17 +109,17 @@ static int ast_run_list(struct ast *ast)
 
 int run_ast(struct ast *ast)
 {
-    static const ast_handler functions[] = {
+    static const ast_handler_run functions[] = {
         [AST_CMD] = &ast_run_cmd,
         [AST_IF] = &ast_run_if,
         [AST_LIST] = &ast_run_list,
     };
-    (*functions[ast->type])(ast);
+    return ((*functions[ast->type])(ast));
 }
 
 void free_ast(struct ast *ast)
 {
-    static const ast_handler functions[] = {
+    static const ast_handler_free functions[] = {
         [AST_CMD] = &ast_free_cmd,
         [AST_IF] = &ast_free_if,
         [AST_LIST] = &ast_free_list,

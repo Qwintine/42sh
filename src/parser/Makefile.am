@@ -2,7 +2,9 @@ noinst_LIBRARIES = libparser.a
 
 libparser_a_SOURCES =  \
   parser.c \
-  parser.h
+  parser.h \
+  ../lexer/lexer.c \
+  ../ast/ast.c
 
 libparser_a_CPPFLAGS = -I$(top_srcdir)/src
 

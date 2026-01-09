@@ -37,11 +37,12 @@ static void ast_print_list(struct ast *ast)
     print_ast(ast_list->elt);
     if (ast_list->next)
         ast_print_list((struct ast *)ast_list->next);
+    printf("\n");
 }
 
 void print_ast(struct ast *ast)
 {
-    static const ast_handler functions[] = {
+    static const ast_handler_free functions[] = {
         [AST_CMD] = &ast_print_cmd,
         [AST_IF] = &ast_print_if,
         [AST_LIST] = &ast_print_list,

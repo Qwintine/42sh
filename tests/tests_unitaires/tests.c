@@ -14,7 +14,7 @@ TestSuite(Test42sh);
 
 Test(Test42sh, lex_simple, .init = cr_redirect_stdout)
 {
-    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo hello\n"});
+    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo hello\n"}, NULL);
 	cr_assert_not_null(f);
 
     struct lex *lx = init_lex(f);
@@ -40,7 +40,7 @@ Test(Test42sh, lex_simple, .init = cr_redirect_stdout)
 
 Test(Test42sh, lex_medium_1, .init = cr_redirect_stdout)
 {
-    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo 'W  o'   \n   \\n 'r   ld'     !"});
+    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo 'W  o'   \n   \\n 'r   ld'     !"}, NULL);
 	cr_assert_not_null(f);
 
     struct lex *lx = init_lex(f);
@@ -78,7 +78,7 @@ Test(Test42sh, lex_medium_1, .init = cr_redirect_stdout)
 
 Test(Test42sh, lex_medium_2, .init = cr_redirect_stdout)
 {
-    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo hello; cat"});
+    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo hello; cat"}, NULL);
 	cr_assert_not_null(f);
 
     struct lex *lx = init_lex(f);
