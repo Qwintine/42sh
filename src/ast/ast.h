@@ -15,7 +15,7 @@ struct ast
 	enum ast_type type;
 };
 
-struct ast_cmd 
+struct ast_cmd
 {
 	struct ast base;
 	char **words;

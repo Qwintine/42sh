@@ -28,6 +28,10 @@ static struct token *pop(struct lex *lex)
 {
 	if(lex)
 	{
+		if(!lex->current_token)
+		{
+			peek(lex);
+		}
 		struct token *tok = lex->current_token;
 		lex->current_token = NULL;
 		lex->context = NULL;
@@ -35,17 +39,36 @@ static struct token *pop(struct lex *lex)
 	}
 	return NULL;
 }
+/*
+ * Description:
+ * 		Free a discarded token
+ * Arguments:
+ * 		Token to free
+ * Return:
+ * 		1 Succes / 0 Error
+ */
+int discard_token(struct token *tok)
+{
+	if(!tok)
+	{
+		return 0
+	}
+	free_tok(tok);
+	return 1;
+}
+
+//============================ Parser Grammar =================================
 
 static struct ast *parser_compound_list(struct lex *lex)
 {
 	struct ast *ast = parser_and_or(lex);
-	if(peek(lex) && peek(lex)->toke_type == SEMI_COLON)
+	if(peek(lex) && peek(lex)->token_type == SEMI_COLON)
 	{
-		pop(lex);
+		discard_token(lex);
 	}
 	while(peek(lex) && peek(lex)->token_type == NEWLINE)
 	{
-		pop(lex);
+		discard_token(lex);
 	}
 	return ast;
 }
@@ -53,19 +76,19 @@ static struct ast *parser_compound_list(struct lex *lex)
 static struct ast *parser_elif(struct lex *lex)
 {
 	lex->context = ELIF;
-	if(!pop(lex))
+	if(!discard_token(lex))
 		return NULL;
 	struct ast_if *ast_if = (struct ast_if *)init_ast_if();
 	ast_if->condition = parser_compound_list(lex);
 	lex->context = THEN;
-	if(!pop(lex))
+	if(!discard_token(lex))
 	{
 		free_ast_if(ast_if->base);
 		return NULL;
 	}
 	ast_if->then_body = parser_compound_list(lex);
 	lex->context = ELSE;
-	if(pop(lex))
+	if(discard_token(lex))
 	{
 		ast_if->else_body = parser_else_clause(lex);
 	}
@@ -76,7 +99,7 @@ static struct ast *parser_else_clause(struct lex *lex)
 {
 	if(peek(lex) && peek(lex)->token_type == ELSE)
 	{
-		pop(lex);
+		discard_token(lex);
 		return parser_compound_list(lex);
 	}
 	return parser_elif(lex);
@@ -85,24 +108,24 @@ static struct ast *parser_else_clause(struct lex *lex)
 static struct ast *parser_rule_if(struct lex *lex)
 {
 	lex->context = IF;
-	if(!pop(lex))
+	if(!discard_token(lex))
 		return NULL;
 	struct ast_if *ast_if = (struct ast_if *)init_ast_if();
 	ast_if->condition = parser_compound_list(lex);
 	lex->context = THEN;
-	if(!pop(lex))
+	if(!discard_token(lex))
 	{
 		free_ast_if(ast_if->base);
 		return NULL;
 	}
 	ast_if->then_body = parser_compound_list(lex);
 	lex->context = ELSE;
-	if(pop(lex))
+	if(discard_token(lex))
 	{
 		ast_if->else_body = parser_else_clause(lex);
 	}
 	lex->context = FI;
-	if(!pop(lex))
+	if(!discard_token(lex))
 	{
 		free_ast_if(ast_if->base);
 		return NULL;
@@ -121,7 +144,9 @@ static struct ast *parser_simple_command(struct lex *lex)
 	size_t ind = 0;
 	while(peek(lex) && peek(lex)->token_type == WORDS)
 	{
-		ast_cmd->words[ind] = pop(lex)->value;
+		struct token *tok = pop(lex);
+		ast_cmd->words[ind] = tok->value;
+		free_token(tok);
 		ind++;
 		ast_cmd->words = realloc(words,ind+1);
 		ast_cmd->words[ind] = NULL;
@@ -155,7 +180,7 @@ static struct ast *parser_list(struct lex *lex)
 	ast_list->elt = parser_and_or(lex);
 	if (peek(lex) && (peek(lex)->token_type == SEMI_COLON || peek(lex)->token_type == NEWLINE))
 	{
-		free_token(pop(lex));
+		discard_token(lex);
 		ast_list->next = (struct ast_list *)parser_list(lex);
 	}
 	return (struct ast *)ast_list;
