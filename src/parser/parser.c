@@ -61,7 +61,12 @@ int discard_token(struct token *tok)
 
 static struct ast *parser_compound_list(struct lex *lex)
 {
-	struct ast *ast = parser_and_or(lex);
+	while(peek(lex) && peek(lex)->token_type == NEWLINE)
+	{
+		discard_token(lex);
+	}
+	struct ast_list *ast_list = init_ast_list();
+	ast_list->elt = parser_and_or(lex);
 	if(peek(lex) && peek(lex)->token_type == SEMI_COLON)
 	{
 		discard_token(lex);
@@ -70,7 +75,9 @@ static struct ast *parser_compound_list(struct lex *lex)
 	{
 		discard_token(lex);
 	}
-	return ast;
+	//checker bug ici
+	ast_list->next = (struct ast_list *)parser_and_or(lex);
+	return (struct ast *)ast_list;
 }
 
 static struct ast *parser_elif(struct lex *lex)
