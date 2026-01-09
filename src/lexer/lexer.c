@@ -79,7 +79,7 @@ static int handle_newline(struct token *tok, int quote, FILE *entry)
 			return 1;
 		}
 		tok->value = concat(tok->value, '\n');
-		if (!tok->value)
+		if (!tok->value || tok->token_type != WORD)
 			return -1;
 		tok->token_type = NEWLINE;
 		return 1;
@@ -100,7 +100,7 @@ static int handle_semicolon(struct token *tok, int quote, FILE *entry)
 			return 1;
 		}
 		tok->value = concat(tok->value, ';');
-		if (!tok->value)
+		if (!tok->value || tok->token_type != WORD)
 			return -1;
 		tok->token_type = SEMI_COLON;
 		return 1;
@@ -141,12 +141,42 @@ static struct token *end_token(struct token *tok, struct lex *lex)
 		if (strlen(tok->value) == 0)
 		{
 			tok->token_type = END;
-			if (lex->context == COMMAND)
+			if (lex->context != WORD)
 				return NULL;
 		}
 		return tok;
 	}
 	return NULL;
+}
+
+static int verif_token(struct token *tok, enum type context)
+{
+	switch (context)
+	{
+		case IF:
+			if (tok->value == NULL || strcmp(tok->value, "if") != 0)
+				return 1;
+			break;
+		case THEN:
+			if (tok->value == NULL || strcmp(tok->value, "then") !=	 0)
+				return 1;
+			break;
+		case ELIF:
+			if (tok->value == NULL || strcmp(tok->value, "elif") != 0)
+				return 1;
+			break;
+		case ELSE:
+			if (tok->value == NULL || strcmp(tok->value, "else") != 0)
+				return 1;
+			break;
+		case FI:
+			if (tok->value == NULL || strcmp(tok->value, "fi") != 0)
+				return 1;
+			break;
+		default:
+			break;
+	}
+	return 0;
 }
 
 //Upgrade/Quality of life: Quote status from enum instead of int
@@ -208,8 +238,11 @@ int lexer(struct lex *lex)
 	lex->current_token = end_token(tok, lex); //cas 1
 	if (!lex->current_token)
 		goto ERROR;
+	if (verif_token(lex->current_token, lex->context))
+		goto ERROR;
 	return 0;
 	ERROR:
+		fseek(lex->entry, -(strlen(tok->value)), SEEK_CUR);
 		free_token(tok);
 		return 1;
 }

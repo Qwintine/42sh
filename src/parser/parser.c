@@ -51,7 +51,7 @@ int discard_token(struct token *tok)
 {
 	if(!tok)
 	{
-		return 0
+		return 0;
 	}
 	free_tok(tok);
 	return 1;
@@ -142,13 +142,13 @@ static struct ast *parser_simple_command(struct lex *lex)
 {
 	struct ast_cmd *ast_cmd = (struct ast_cmd *)init_ast_cmd();
 	size_t ind = 0;
-	while(peek(lex) && peek(lex)->token_type == WORDS)
+	while(peek(lex) && peek(lex)->token_type == WORD)
 	{
 		struct token *tok = pop(lex);
 		ast_cmd->words[ind] = tok->value;
 		free_token(tok);
 		ind++;
-		ast_cmd->words = realloc(words,ind+1);
+		ast_cmd->words = realloc(ast_cmd->words,ind+1);
 		ast_cmd->words[ind] = NULL;
 	}
 	return (struct ast *)ast_cmd;
