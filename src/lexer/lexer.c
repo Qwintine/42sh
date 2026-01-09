@@ -35,6 +35,26 @@ static char *concat(char *val, char c)
  * Return:
  *	0 success / 1 failure
  */
+
+static int handle_com(int in_quotes, struct lex *lex, struct token *tok, char *buf)
+{
+	if (!in_quotes)
+	{
+		while (fread(buf, 1, 1, lex->entry))
+			if (buf[0] == '\n')
+				break;
+		if (buf[0] == '\n')
+			fseek(lex->entry, -1, SEEK_CUR);
+	}
+	else
+	{
+		tok->value = concat(tok->value, '#');
+		if(!tok->value)
+			return 1;
+	}
+	return 0;
+}
+
 static int handle_backslash(char **value, FILE *entry, int in_quotes)
 {
 	char buf[1];
@@ -209,7 +229,6 @@ int lexer(struct lex *lex)
 {
 	int double_quote = 0;
 	int single_quote = 0;
-	int com = 0;
 	char buf[1];
 	struct token *tok = init_token(lex->context);
 	if(!tok)
@@ -219,20 +238,8 @@ int lexer(struct lex *lex)
 		switch (buf[0])
 		{
 			case '#':
-				if (!double_quote && !single_quote)
-				{
-					while (fread(buf, 1, 1, lex->entry))
-						if (buf[0] == '\n')
-							break;
-					if (buf[0] == '\n')
-						fseek(lex->entry, -1, SEEK_CUR);
-				}
-				else
-				{
-					tok->value = concat(tok->value, '#');
-					if(!tok->value)
-						goto ERROR;
-				}
+				if (handle_com(double_quote || single_quote, lex, tok, buf))
+					goto ERROR;
 				break;
 			case '"':	// cas 4
 				if (handle_quote(&double_quote, single_quote))
