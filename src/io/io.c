@@ -12,8 +12,9 @@
  * 	nom de fichier -> file
  * 	rien -> stdin
  */
-FILE *arg_file(int argc, char** argv)
+FILE *arg_file(int argc, char** argv, int *prettyprint)
 {
+	FILE *entry = NULL;
     for (int i = 1; i < argc; i++)
     {
         if (strcmp(argv[i], "-c") == 0)
@@ -24,11 +25,19 @@ FILE *arg_file(int argc, char** argv)
                 fprintf(stderr, "42h: IO no argument after -c\n"); // erreur : pas d'argument après -c
                 return NULL;
             }
-            return fmemopen(argv[i], strlen(argv[i]), "r");
+            entry = fmemopen(argv[i], strlen(argv[i]), "r");
         }
+	else if(strcmp(argv[i], "--prettyprint") == 0)
+	{
+		*prettyprint = 1;
+	}
         // autre arguments (pour plus tard)
-        else
-            return fopen(argv[i], "r");
+        else if(!entry)
+            entry = fopen(argv[i], "r");
     }
-    return stdin;
+    if(!entry)
+    {
+	    entry = stdin;
+    }
+    return entry;
 }
