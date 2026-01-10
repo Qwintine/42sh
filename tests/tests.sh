@@ -17,11 +17,11 @@ testcase() {
 
   TOTAL=$((TOTAL + 1))
 
-  $REF_SHELL $flag "$cmd" >"$REF_OUT" 2>/dev/null
+  timeout 5 $REF_SHELL $flag "$cmd" >"$REF_OUT" 2>/dev/null
   ref_status=$?
   printf "\n[exit:%d]\n" "$ref_status" >>"$REF_OUT"
 
-  "$BIN" $flag "$cmd" >"$TEST_OUT" 2>/dev/null
+  timeout 5 "$BIN" $flag "$cmd" >"$TEST_OUT" 2>/dev/null
   test_status=$?
   printf "\n[exit:%d]\n" "$test_status" >>"$TEST_OUT"
 
@@ -90,7 +90,6 @@ testcase "echo Hello World!" "-c" "echo Hello World!"
 testcase "true" "-c" "true"
 testcase "false" "-c" "false"
 testcase "ls" "-c" "ls"
-testcase "one line if err" "" "tests/tests_files/tests1.sh"
 
 testcase "if true then" "-c" "if true; then echo ok; fi"
 testcase "if false else" "-c" "if false; then echo ko; else echo ok; fi"
@@ -117,6 +116,19 @@ testcase "echo if" "-c" "echo if"
 testcase "unclosed if" "-c" "if true; then echo ok"
 testcase "if without then" "-c" "if true echo ok fi"
 testcase "fi without if" "-c" "echo ok; fi"
+
+testcase "test_files: test1.sh" "" "tests/test_files/test1.sh"
+testcase "test_files: test2.sh" "" "tests/test_files/test2.sh"
+testcase "test_files: test3.sh" "" "tests/test_files/test3.sh"
+testcase "test_files: test4.sh" "" "tests/test_files/test4.sh"
+testcase "test_files: test5.sh" "" "tests/test_files/test5.sh"
+testcase "test_files: test6.sh" "" "tests/test_files/test6.sh"
+testcase "test_files: test7.sh" "" "tests/test_files/test7.sh"
+testcase "test_files: test8.sh" "" "tests/test_files/test8.sh"
+testcase "test_files: test9.sh" "" "tests/test_files/test9.sh"
+testcase "test_files: test10.sh" "" "tests/test_files/test10.sh"
+testcase "test_files: test11.sh" "" "tests/test_files/test11.sh"
+testcase "test_files: test12.sh" "" "tests/test_files/test12.sh"
 
 if [ "${COVERAGE:-no}" = "yes" ]; then
   run_criterion

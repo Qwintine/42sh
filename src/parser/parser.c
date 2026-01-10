@@ -88,10 +88,11 @@ static struct ast *parser_compound_list(struct lex *lex)
 		discard_token(pop(lex));
 	}
 	
-	struct ast_list *ast_list = (struct ast_list *)init_ast_list();
-	ast_list->elt = parser_and_or(lex);
+	struct ast_list *head = (struct ast_list *)init_ast_list();
+	struct ast_list *current = head;
 	
-	struct ast_list *current = ast_list;
+	current->elt = parser_and_or(lex);
+	
 	while(peek(lex) && (peek(lex)->token_type == SEMI_COLON || peek(lex)->token_type == NEWLINE))
 	{
 		discard_token(pop(lex));
@@ -114,7 +115,7 @@ static struct ast *parser_compound_list(struct lex *lex)
 		current = new_node;
 	}
 	
-	return (struct ast *)ast_list;
+	return (struct ast *)head;
 }
 
 /*
@@ -273,26 +274,44 @@ static struct ast *parser_and_or(struct lex *lex)
  */
 static struct ast *parser_list(struct lex *lex)
 {
-	if(!peek(lex) || peek(lex)->token_type == END || peek(lex)->token_type == NEWLINE)
+	if(!peek(lex) || peek(lex)->token_type == END)
 		return NULL;
 	
 	lex->context = KEYWORD;
-	struct ast_list *ast_list = (struct ast_list *)init_ast_list();
-	ast_list->elt = parser_and_or(lex);
-	if(!ast_list->elt)
+	struct ast_list *head = (struct ast_list *)init_ast_list();
+	struct ast_list *current = head;
+	
+	current->elt = parser_and_or(lex);
+	if(!current->elt)
 	{
-		free(ast_list);
+		free(head);
 		return NULL;
 	}
-	if (peek(lex) && (peek(lex)->token_type == SEMI_COLON || peek(lex)->token_type == NEWLINE))
+	
+	while (peek(lex) && (peek(lex)->token_type == SEMI_COLON || peek(lex)->token_type == NEWLINE))
 	{
 		discard_token(pop(lex));
-		if(peek(lex) && peek(lex)->token_type != END && peek(lex)->token_type != NEWLINE)
+		
+		while(peek(lex) && (peek(lex)->token_type == SEMI_COLON || peek(lex)->token_type == NEWLINE))
 		{
-			ast_list->next = (struct ast_list *)parser_list(lex);
+			discard_token(pop(lex));
 		}
+		
+		if(!peek(lex) || peek(lex)->token_type == END)
+			break;
+		
+		struct ast_list *new_node = (struct ast_list *)init_ast_list();
+		new_node->elt = parser_and_or(lex);
+		if (!new_node->elt)
+		{
+			free(new_node);
+			break;
+		}
+		current->next = new_node;
+		current = new_node;
 	}
-	return (struct ast *)ast_list;
+	
+	return (struct ast *)head;
 }
 
 /*
@@ -335,17 +354,20 @@ struct ast *parser(FILE *entry)
 		return NULL;
 	}
 	
-	struct token *tok = pop(lex); // consomme terminal de grammaire list
-	
-	if (!tok || (tok->token_type != NEWLINE && tok->token_type != END)) // erreur de grammaire 
+	while(peek(lex) && peek(lex)->token_type == NEWLINE)
 	{
-		if (tok)
-			free_token(tok);
+		discard_token(pop(lex));
+	}
+	
+	struct token *tok = peek(lex);
+	
+	if (!tok || tok->token_type != END) // erreur de grammaire 
+	{
 		free_lex(lex);
 		free_ast(ast);
 		return NULL;
 	}
-	free_token(tok);
+	
 	free_lex(lex);
 	return ast;
 }
