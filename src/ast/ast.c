@@ -104,7 +104,7 @@ static int ast_run_list(struct ast *ast)
     int res = 0;
     if (ast_list->elt)
         res = run_ast(ast_list->elt);
-    if (ast_list->next)
+    if (ast_list->next && res != 127)
         res = ast_run_list((struct ast *)ast_list->next);
     return res;
 }

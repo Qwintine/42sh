@@ -37,6 +37,34 @@ static char *insert_in(size_t ind, char *str)
     return res;
 }
 
+static int args_echo(char *string, int *an, int *ae)
+{
+    size_t i = 1;
+    int n = 0;
+    int e = 0;
+    while (string[i] != 0)
+    {
+        switch (string[i])
+        {
+        case 'n':
+            n = 1;
+            break;
+        case 'e':
+            e = 1;
+            break;
+        case 'E':
+            e = 0;
+            break;
+        default:
+            return 1;
+        }
+        i++;
+    }
+    *an = n;
+    *ae = e;
+    return 0;
+}
+
 /* Description:
  *  	print les strings sur le terminal
  * Arguments:
@@ -50,47 +78,39 @@ int echo_b(char **strings)
 {
     int n = 0;
     int e = 0;
+    int a = 1;
     size_t i = 0;
-    if ((*strings)[0] == '-')
-    {
-        i++;
-        size_t ind = 1;
-        while ((*strings)[ind] != 0)
-        {
-            switch ((*strings)[ind])
-            {
-            case 'n':
-                n = 1;
-                break;
-            case 'e':
-                e = 1;
-                break;
-            case 'E':
-                e = 0;
-            default:
-                break;
-            }
-            ind++;
-        }
-    }
     for (; strings[i] != NULL; i++)
     {
-        if (e)
+        if (a)
         {
-            size_t ind = 0;
-            while (strings[i][ind] != 0)
+            if (strings[i][0] == '-')
             {
-                char c = strings[i][ind];
-                if (c == '\\')
-                {
-                    strings[i] = insert_in(ind, strings[i]);
-                }
-                ind++;
+                if (args_echo(strings[i], &n, &e))
+                    a = 0;
             }
+            else
+                a = 0;
         }
-        printf("%s", strings[i]);
-        if (strings[i + 1] != NULL)
-            printf(" ");
+        if (!a)
+        {
+            if (e)
+            {
+                size_t ind = 0;
+                while (strings[i][ind] != 0)
+                {
+                    char c = strings[i][ind];
+                    if (c == '\\')
+                    {
+                        strings[i] = insert_in(ind, strings[i]);
+                    }
+                    ind++;
+                }
+            }
+            printf("%s", strings[i]);
+            if (strings[i + 1] != NULL)
+                printf(" ");
+        }
     }
     if (!n)
     {
