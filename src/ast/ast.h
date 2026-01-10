@@ -5,36 +5,36 @@
 
 enum ast_type
 {
-	AST_CMD,
-	AST_IF,
-	AST_LIST
+    AST_CMD,
+    AST_IF,
+    AST_LIST
 };
 
 struct ast
 {
-	enum ast_type type;
+    enum ast_type type;
 };
 
 struct ast_cmd
 {
-	struct ast base;
-	char **words;
+    struct ast base;
+    char **words;
 };
 
 struct ast_if
 {
-	struct ast base;
-	struct ast *condition;
-	struct ast *then_body;
-	struct ast *else_body; // Nullable
+    struct ast base;
+    struct ast *condition;
+    struct ast *then_body;
+    struct ast *else_body; // Nullable
 };
 
 struct ast_list
 {
-	struct ast base;
-	struct ast *elt;
-	struct ast_list *next;
-}; 
+    struct ast base;
+    struct ast *elt;
+    struct ast_list *next;
+};
 
 typedef void (*ast_handler_free)(struct ast *);
 typedef int (*ast_handler_run)(struct ast *);

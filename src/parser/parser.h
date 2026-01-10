@@ -1,8 +1,9 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-#include "../ast/ast.h"
 #include <stdio.h>
+
+#include "../ast/ast.h"
 
 struct ast *parser(FILE *entry);
 

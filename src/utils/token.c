@@ -1,4 +1,5 @@
 #include "token.h"
+
 #include <stdlib.h>
 
 struct lex *init_lex(FILE *entry)
@@ -15,7 +16,7 @@ struct token *init_token(enum type context)
     struct token *tok = malloc(sizeof(struct token));
     tok->token_type = context;
     tok->value = calloc(1, sizeof(char));
-    return tok;    
+    return tok;
 }
 
 void free_lex(struct lex *lex)

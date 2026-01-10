@@ -1,9 +1,11 @@
-#include <string.h>
-#include <unistd.h>
-#include <sys/wait.h>
-#include <stdio.h>
-#include "../builtin/echo.h"
 #include "exec.h"
+
+#include <stdio.h>
+#include <string.h>
+#include <sys/wait.h>
+#include <unistd.h>
+
+#include "../builtin/echo.h"
 
 static int exec_builtin(char **words)
 {
@@ -13,7 +15,7 @@ static int exec_builtin(char **words)
     else if (!strcmp(cmd, "false"))
         return 1;
     else if (!strcmp(cmd, "echo"))
-        return echo_b(words+1);
+        return echo_b(words + 1);
     return -1;
 }
 

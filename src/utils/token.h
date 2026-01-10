@@ -5,29 +5,29 @@
 
 enum type
 {
-	IF,
-	THEN,
-	ELIF,
-	ELSE,
-	FI,
-	SEMI_COLON,
-	NEWLINE,
-	WORD,
-	KEYWORD,
-	END
+    IF,
+    THEN,
+    ELIF,
+    ELSE,
+    FI,
+    SEMI_COLON,
+    NEWLINE,
+    WORD,
+    KEYWORD,
+    END
 };
 
 struct token
 {
-	char *value;
-	enum type token_type;
+    char *value;
+    enum type token_type;
 };
 
 struct lex
 {
-	FILE *entry;
-	struct token *current_token;
-	enum type context;
+    FILE *entry;
+    struct token *current_token;
+    enum type context;
 };
 
 struct lex *init_lex(FILE *entry);

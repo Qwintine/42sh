@@ -183,7 +183,7 @@ testcase "empty command" "-c" "echo not ok 1; ;echo not ok 2"
 testcase "many trailing ;" "-c" "echo ok;;;"
 testcase "if followed by ;" "-c" "if true;  then echo ok; fi;
 echo after"
-tescase "then as word" "-c" "echo then; echo ok"
+testcase "then as word" "-c" "echo then; echo ok"
 testcase "not kewords" "-c" "echo if; echo then; echo fi"
 
 #========================= NEWLINE + Compound list ============================
