@@ -37,12 +37,14 @@ static char *insert_in(size_t ind, char *str)
     return res;
 }
 
-static int args_echo(int ind, int *an, int *ae)
+static int args_echo(char *string, int *an, int *ae)
 {
     size_t i = 1;
-    while (strings[ind][i] != 0)
+    int n = 0;
+    int e = 0;
+    while (string[i] != 0)
     {
-        switch (strings[ind][i])
+        switch (string[i])
         {
         case 'n':
             n = 1;
@@ -52,14 +54,15 @@ static int args_echo(int ind, int *an, int *ae)
             break;
         case 'E':
             e = 0;
+            break;
         default:
-            return 0;
+            return 1;
         }
         i++;
     }
     *an = n;
     *ae = e;
-    return 1;
+    return 0;
 }
 
 /* Description:
@@ -79,25 +82,35 @@ int echo_b(char **strings)
     size_t i = 0;
     for (; strings[i] != NULL; i++)
     {
-        if (a && strings[i][0] == '-')
-            if (args(ind, &n, &e))
-                a = 0;
-        if (!a && e)
+        if (a)
         {
-            size_t ind = 0;
-            while (strings[i][ind] != 0)
+            if (strings[i][0] == '-')
             {
-                char c = strings[i][ind];
-                if (c == '\\')
-                {
-                    strings[i] = insert_in(ind, strings[i]);
-                }
-                ind++;
+                if (args_echo(strings[i], &n, &e))
+                    a = 0;
             }
+            else
+                a = 0;
         }
-        printf("%s", strings[i]);
-        if (strings[i + 1] != NULL)
-            printf(" ");
+        if (!a)
+        {
+            if (e)
+            {
+                size_t ind = 0;
+                while (strings[i][ind] != 0)
+                {
+                    char c = strings[i][ind];
+                    if (c == '\\')
+                    {
+                        strings[i] = insert_in(ind, strings[i]);
+                    }
+                    ind++;
+                }
+            }
+            printf("%s", strings[i]);
+            if (strings[i + 1] != NULL)
+                printf(" ");
+        }
     }
     if (!n)
     {
