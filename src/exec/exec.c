@@ -40,7 +40,7 @@ int exec_cmd(char **words)
         if (!child)
         {
             execvp(words[0], words);
-            return 1;
+            _exit(127);
         }
         int wstat;
         waitpid(child, &wstat, 0);

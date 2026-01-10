@@ -43,11 +43,18 @@ static int handle_com(int in_quotes, struct lex *lex, struct token *tok,
 {
     if (!in_quotes)
     {
-        while (fread(buf, 1, 1, lex->entry))
+        if (!(strlen(tok->value) > 0))
+        {
+            while (fread(buf, 1, 1, lex->entry))
+                if (buf[0] == '\n')
+                    break;
             if (buf[0] == '\n')
-                break;
-        if (buf[0] == '\n')
-            fseek(lex->entry, -1, SEEK_CUR);
+                fseek(lex->entry, -1, SEEK_CUR);
+        }
+        else
+            tok->value = concat(tok->value, '#');
+        if (!tok->value)
+            return 1;
     }
     else
     {
@@ -73,9 +80,6 @@ static int handle_backslash(char **value, FILE *entry, int in_quotes)
             return 1;
         if (buf[0] != '\n')
         {
-            *value = concat(*value, '\\');
-            if (!*value)
-                return 1;
             *value = concat(*value, buf[0]);
             if (!*value)
                 return 1;
@@ -300,9 +304,7 @@ int lexer(struct lex *lex)
             goto ERROR;
     }
     lex->current_token = end_token(tok, lex); // cas 1
-    if (!lex->current_token)
-        goto ERROR;
-    if (verif_token(lex->current_token, lex->context))
+    if (!lex->current_token || verif_token(lex->current_token, lex->context))
         goto ERROR;
     if (lex->current_token->token_type == KEYWORD && lex->context == KEYWORD)
         lex->current_token->token_type = check_type(lex->current_token->value);
