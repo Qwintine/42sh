@@ -1,8 +1,9 @@
+#include "ast.h"
+
 #include <stddef.h>
 #include <stdlib.h>
-#include "ast.h"
-#include "../exec/exec.h"
 
+#include "../exec/exec.h"
 
 //===================== Init ast from specific type ===========================
 
@@ -26,7 +27,7 @@ struct ast *init_ast_if(void)
     node->condition = NULL;
     node->then_body = NULL;
     node->else_body = NULL;
-    return (struct ast*)node;
+    return (struct ast *)node;
 }
 
 struct ast *init_ast_cmd(void)
@@ -37,7 +38,7 @@ struct ast *init_ast_cmd(void)
     node->base.type = AST_CMD;
     node->words = malloc(sizeof(char *));
     node->words[0] = NULL;
-    return (struct ast*)node;
+    return (struct ast *)node;
 }
 
 //===================== Free ast from specific type ===========================
@@ -103,11 +104,10 @@ static int ast_run_list(struct ast *ast)
     int res = 0;
     if (ast_list->elt)
         res = run_ast(ast_list->elt);
-    if (ast_list->next)
+    if (ast_list->next && res != 127)
         res = ast_run_list((struct ast *)ast_list->next);
     return res;
 }
-
 
 //=========================== Lookup Tables ===================================
 
