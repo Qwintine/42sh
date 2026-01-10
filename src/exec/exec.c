@@ -29,6 +29,8 @@ static int exec_builtin(char **words)
  */
 int exec_cmd(char **words)
 {
+    if (!words || !words[0])
+        return 0;
     int r = exec_builtin(words);
     if (r == -1)
     {

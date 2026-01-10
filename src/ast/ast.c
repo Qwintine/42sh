@@ -58,8 +58,10 @@ static void ast_free_cmd(struct ast *ast)
 static void ast_free_if(struct ast *ast)
 {
     struct ast_if *ast_if = (struct ast_if *)ast;
-    free_ast(ast_if->condition);
-    free_ast(ast_if->then_body);
+    if (ast_if->condition)
+        free_ast(ast_if->condition);
+    if (ast_if->then_body)
+        free_ast(ast_if->then_body);
     if (ast_if->else_body)
         free_ast(ast_if->else_body);
     free(ast_if);
@@ -98,7 +100,9 @@ static int ast_run_if(struct ast *ast)
 static int ast_run_list(struct ast *ast)
 {
     struct ast_list *ast_list = (struct ast_list *)ast;
-    int res = run_ast(ast_list->elt);
+    int res = 0;
+    if (ast_list->elt)
+        res = run_ast(ast_list->elt);
     if (ast_list->next)
         res = ast_run_list((struct ast *)ast_list->next);
     return res;
