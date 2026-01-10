@@ -1,8 +1,9 @@
 #include <stdio.h>
+
+#include "ast/ast.h"
 #include "io/io.h"
 #include "parser/parser.h"
 #include "utils/prettyprint.h"
-#include "ast/ast.h"
 
 /*
 Truc a corriger:
