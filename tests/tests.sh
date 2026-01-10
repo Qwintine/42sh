@@ -375,7 +375,7 @@ echo ok
 testcase "comment after command" "-c" "echo ok # echo should not be printed
 echo after"
 
-testcase "# in word" "-c" "echo no#tcomment"
+testcase "# in word" "-c" "echo no#comment"
 
 testcase "escaped #" "-c" "echo \#escaped"
 testcase "# in quotes" "-c" "
