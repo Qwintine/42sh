@@ -37,11 +37,12 @@ static char *insert_in(size_t ind, char *str)
     return res;
 }
 
-static int args_echo(int *an, int *ae)
+static int args_echo(int ind, int *an, int *ae)
 {
-    while ((*strings)[ind] != 0)
+    size_t i = 1;
+    while (strings[ind][i] != 0)
     {
-        switch ((*strings)[ind])
+        switch (strings[ind][i])
         {
         case 'n':
             n = 1;
@@ -54,6 +55,7 @@ static int args_echo(int *an, int *ae)
         default:
             return 0;
         }
+        i++;
     }
     *an = n;
     *ae = e;
@@ -78,7 +80,7 @@ int echo_b(char **strings)
     for (; strings[i] != NULL; i++)
     {
         if (a && strings[i][0] == '-')
-            if (args(&n, &e))
+            if (args(ind, &n, &e))
                 a = 0;
         if (!a && e)
         {
