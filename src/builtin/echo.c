@@ -96,5 +96,6 @@ int echo_b(char **strings)
     {
         printf("\n");
     }
+    fflush(stdout);
     return 0;
 }
