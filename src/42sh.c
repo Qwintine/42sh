@@ -7,6 +7,7 @@
 
 /*
 Truc a corriger:
+    -> Msg erreur surr stderr dans endroit code adapté ( syntax dans lexer, grammaire dans parser, builtin dans fct builtin, etc...)	
     -> echo (sans argument) plante
     -> execvp ne s'arrete pas si la commande n'existe pas
     -> ;; ne renvoie pas d'erreur
@@ -24,18 +25,18 @@ int main(int argc, char **argv)
 {
     int prettyprint = 0;
     FILE *entry = arg_file(argc, argv, &prettyprint);
-    if (!entry)
+    if (!entry) //msg err
         return 2;
     struct ast *ast = parser(entry);
 
-    if (!ast)
+    if (!ast) //message sur stderr 
         return 2;
 
     if (prettyprint)
         print_ast(ast);
     else
     {
-        int res = run_ast(ast);
+        int res = run_ast(ast); //msg err
         free_ast(ast);
         return res;
     }

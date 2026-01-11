@@ -214,6 +214,7 @@ static struct ast *parser_rule_if(struct lex *lex)
     return (struct ast *)ast_if;
 }
 
+//See parser_rule_if ( for now )
 static struct ast *parser_shell_command(struct lex *lex)
 {
     return parser_rule_if(lex);
@@ -258,6 +259,7 @@ static struct ast *parser_simple_command(struct lex *lex)
     return NULL;
 }
 
+
 // prochaine step -> ajouter gestion  { redirections } après shell_command
 static struct ast *parser_command(struct lex *lex)
 {
@@ -268,29 +270,45 @@ static struct ast *parser_command(struct lex *lex)
     return parser_simple_command(lex);
 }
 
+// See parser_command ( for now )
 static struct ast *parser_pipeline(struct lex *lex)
 {
     return parser_command(lex);
 }
 
+// See parser_command ( for now )
 static struct ast *parser_and_or(struct lex *lex)
 {
     return parser_pipeline(lex);
 }
 
 /*
- * TODO
+ * Description:
+ * 	Parse list block into sub and_or block(s) separated by semi-colons
+ * Arguments:
+ * 	*lex -> struct of the lexer:
+ * 		entry -> input stream
+ * 		current_token -> last token returned by lexer
+ * 		context -> context of the parser when retrieving a token
+ * Return:
+ * 	*ast:
+ * 		NULL: Grammar/Syntax error
+ * 		| *ast: ast of a list ( cf. Verbose )
+ * Verbose:
+ * 	Grammar:
+ *		list = and_or { ';' and_or } [ ';' ]
+ *	TODO
  */
 static struct ast *parser_list(struct lex *lex)
 {
-    if (!peek(lex) || peek(lex)->token_type == END)
+    if (!peek(lex) || peek(lex)->token_type == END)// can't start with EOF -> Error
         return NULL;
 
-    lex->context = KEYWORD;
+    lex->context = KEYWORD; // list starts with keyword (command, operator, if, etc...)
     struct ast_list *head = (struct ast_list *)init_ast_list();
     struct ast_list *current = head;
 
-    current->elt = parser_and_or(lex);
+    current->elt = parser_and_or(lex); // récursion sur ast type and_or ( cf. parser_and_or )
     if (!current->elt)
     {
         free(head);
@@ -299,32 +317,27 @@ static struct ast *parser_list(struct lex *lex)
 
     while (peek(lex)
            && (peek(lex)->token_type == SEMI_COLON
-               || peek(lex)->token_type == NEWLINE))
+               || peek(lex)->token_type == NEWLINE)) // séparateurs
     {
         discard_token(pop(lex));
-
-        while (peek(lex)
-               && (peek(lex)->token_type == SEMI_COLON
-                   || peek(lex)->token_type == NEWLINE))
+        while (peek(lex) && peek(lex)->token_type == NEWLINE) 
         {
             discard_token(pop(lex));
         }
-
         if (!peek(lex) || peek(lex)->token_type == END)
             break;
 
-        struct ast_list *new_node = (struct ast_list *)init_ast_list();
-        new_node->elt = parser_and_or(lex);
+        struct ast_list *new_node = (struct ast_list *)init_ast_list(); // éléments liste de block de and_or 
+        new_node->elt = parser_and_or(lex); // récursion sur ast type and_or
         if (!new_node->elt)
         {
             free(new_node);
             break;
         }
-        current->next = new_node;
+        current->next = new_node; // liste de and_or
         current = new_node;
     }
-
-    return (struct ast *)head;
+    return (struct ast *)head; // 1er elem liste 
 }
 
 /*
@@ -337,6 +350,12 @@ static struct ast *parser_list(struct lex *lex)
  * Error
  *
  * Verbose:
+ * 	Grammar:
+ * 		list '\n'
+ * 	      | list EOF
+ * 	      | '\n'
+ * 	      | EOF
+ * 	      ;
  * 	TODO
  */
 struct ast *parser(FILE *entry)

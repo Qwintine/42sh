@@ -92,7 +92,7 @@ testcase "false" "-c" "false"
 testcase "ls" "-c" "ls"
 testcase "source file" "" "tests/test_files/simple_command.sh"
 testcase "one line if err" "" "tests/test_files/test1.sh"
-#testcase "stdin" "" "< tests/tests_files/test_stdin.sh" #faire .sh
+#testcase "stdin" "" "< tests/tests_files/test_stdin.sh" 
 testcase "unknown option" "--unknown"
 
 testcase "if true then" "-c" "if true; then echo ok; fi"
@@ -402,6 +402,9 @@ testcase "comment with ;" "-c" "#a; b  ;c; echo not ok
 echo ok"
 
 testcase "lastcomment" "-c" "#lastcomment"
+
+#========================== Redirection Corner case ===========================
+#TODO
 
 #================================= Grammar ====================================
 
