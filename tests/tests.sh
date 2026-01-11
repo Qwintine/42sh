@@ -17,13 +17,23 @@ testcase() {
 
   TOTAL=$((TOTAL + 1))
 
-  timeout 5 $REF_SHELL $flag "$cmd" >"$REF_OUT" 2>/dev/null
-  ref_status=$?
-  printf "\n[exit:%d]\n" "$ref_status" >>"$REF_OUT"
+  if [ "$flag" = "<" ]; then
+    timeout 5 $REF_SHELL <"$cmd" >"$REF_OUT" 2>/dev/null
+    ref_status=$?
+    printf "\n[exit:%d]\n" "$ref_status" >>"$REF_OUT"
 
-  timeout 5 "$BIN" $flag "$cmd" >"$TEST_OUT" 2>/dev/null
-  test_status=$?
-  printf "\n[exit:%d]\n" "$test_status" >>"$TEST_OUT"
+    timeout 5 "$BIN" <"$cmd" >"$TEST_OUT" 2>/dev/null
+    test_status=$?
+    printf "\n[exit:%d]\n" "$test_status" >>"$TEST_OUT"
+  else
+    timeout 5 $REF_SHELL $flag "$cmd" >"$REF_OUT" 2>/dev/null
+    ref_status=$?
+    printf "\n[exit:%d]\n" "$ref_status" >>"$REF_OUT"
+
+    timeout 5 "$BIN" $flag "$cmd" >"$TEST_OUT" 2>/dev/null
+    test_status=$?
+    printf "\n[exit:%d]\n" "$test_status" >>"$TEST_OUT"
+  fi
 
   if diff -u "$REF_OUT" "$TEST_OUT" 2>/dev/null; then
     echo "$name ==> OK"
@@ -138,10 +148,22 @@ testcase "test_files: test10.sh" "" "tests/test_files/test10.sh"
 testcase "test_files: test11.sh" "" "tests/test_files/test11.sh"
 testcase "test_files: test12.sh" "" "tests/test_files/test12.sh"
 
+testcase "stdin: test1.sh" "<" "tests/test_files/test1.sh"
+testcase "stdin: test2.sh" "<" "tests/test_files/test2.sh"
+testcase "stdin: test3.sh" "<" "tests/test_files/test3.sh"
+testcase "stdin: test4.sh" "<" "tests/test_files/test4.sh"
+testcase "stdin: test5.sh" "<" "tests/test_files/test5.sh"
+testcase "stdin: test6.sh" "<" "tests/test_files/test6.sh"
+testcase "stdin: test7.sh" "<" "tests/test_files/test7.sh"
+testcase "stdin: test8.sh" "<" "tests/test_files/test8.sh"
+testcase "stdin: test9.sh" "<" "tests/test_files/test9.sh"
+testcase "stdin: test10.sh" "<" "tests/test_files/test10.sh"
+testcase "stdin: test11.sh" "<" "tests/test_files/test11.sh"
+testcase "stdin: test12.sh" "<" "tests/test_files/test12.sh"
 
 #=========================== Simple commands =================================
 
-testcase "true \n echo after" "-c" "true
+testcase "true \\n echo after" "-c" "true
 echo after"
 
 testcase "nonexistent command" "-c" "unknown_command
