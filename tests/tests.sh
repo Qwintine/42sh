@@ -1,6 +1,6 @@
 #!/bin/sh
 
-REF_SHELL=dash
+REF_SHELL="bash --posix"
 BIN="${BIN_PATH:-./src/42sh}"
 OUTFILE="${OUTPUT_FILE:-./out}"
 
