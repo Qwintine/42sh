@@ -1,6 +1,6 @@
 #!/bin/sh
 
-REF_SHELL=/bin/sh
+REF_SHELL=dash
 BIN="${BIN_PATH:-./src/42sh}"
 OUTFILE="${OUTPUT_FILE:-./out}"
 
@@ -442,6 +442,7 @@ if true; then
 #echo not ok
 fi
 "
+testcase "semi colon after newline" "" "tests/test_files/test_semi_colon_alone_after_command_and_newline.sh"
 
 
 if [ "${COVERAGE:-no}" = "yes" ]; then
