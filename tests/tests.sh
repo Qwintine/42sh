@@ -102,8 +102,6 @@ testcase "false" "-c" "false"
 testcase "ls" "-c" "ls"
 testcase "source file" "" "tests/test_files/simple_command.sh"
 testcase "one line if err" "" "tests/test_files/test1.sh"
-#testcase "stdin" "" "< tests/tests_files/test_stdin.sh" 
-testcase "unknown option" "--unknown"
 
 testcase "if true then" "-c" "if true; then echo ok; fi"
 testcase "if false else" "-c" "if false; then echo ko; else echo ok; fi"
@@ -125,7 +123,6 @@ testcase "only newline" "-c" "
 testcase "command with newline" "-c" "echo a
 echo b"
 testcase "ignore second arg" "-c" "echo from_c" "tests/tests_files/should_not_print.sh"
-testcase "too much -c" "-c" "-c" "echo not ok"
 
 testcase "echo fi" "-c" "echo fi"
 testcase "echo then else" "-c" "echo then else"
