@@ -32,7 +32,7 @@ static int exec_builtin(char **words)
 int exec_cmd(char **words)
 {
     if (!words || !words[0])
-        return 0;
+        return 2;
     int r = exec_builtin(words);
     if (r == -1)
     {
@@ -40,6 +40,7 @@ int exec_cmd(char **words)
         if (!child)
         {
             execvp(words[0], words);
+	    fprintf(stderr, "42sh: Error exec\n");
             _exit(127);
         }
         int wstat;

@@ -25,12 +25,19 @@ int main(int argc, char **argv)
 {
     int prettyprint = 0;
     FILE *entry = arg_file(argc, argv, &prettyprint);
-    if (!entry) //msg err
+    if (!entry)
+    {
+	    fprintf(stderr, "42sh: error file entry\n");
         return 2;
+    }
+
     struct ast *ast = parser(entry);
 
-    if (!ast) //message sur stderr 
+    if (!ast)
+    {
+	    fprintf(stderr, "42sh: grammar/syntax error\n");
         return 2;
+    }
 
     if (prettyprint)
         print_ast(ast);
