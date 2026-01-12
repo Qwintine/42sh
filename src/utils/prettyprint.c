@@ -2,6 +2,8 @@
 
 static void ast_print_if(struct ast *ast)
 {
+	if(!ast)
+		return;
     struct ast_if *ast_if = (struct ast_if *)ast;
     printf("if { ");
     print_ast(ast_if->condition);
@@ -18,6 +20,8 @@ static void ast_print_if(struct ast *ast)
 
 static void ast_print_cmd(struct ast *ast)
 {
+	if(!ast)
+		return;
     struct ast_cmd *ast_cmd = (struct ast_cmd *)ast;
     printf("command: ");
     for (int i = 0; ast_cmd->words[i] != NULL; i++)
@@ -33,6 +37,8 @@ static void ast_print_cmd(struct ast *ast)
 
 static void ast_print_list(struct ast *ast)
 {
+	if(!ast)
+		return;
     struct ast_list *ast_list = (struct ast_list *)ast;
     print_ast(ast_list->elt);
     if (ast_list->next)
