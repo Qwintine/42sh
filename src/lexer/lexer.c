@@ -309,7 +309,8 @@ int lexer(struct lex *lex)
             goto ERROR;
     }
     lex->current_token = end_token(tok, lex); // cas 1
-    if (!lex->current_token || verif_token(lex->current_token, lex->context))
+    if (!lex->current_token || verif_token(lex->current_token, lex->context)
+        || quote_status.double_quote || quote_status.single_quote)
         goto ERROR;
     if (lex->current_token->token_type == KEYWORD && lex->context == KEYWORD)
         lex->current_token->token_type = check_type(lex->current_token->value);

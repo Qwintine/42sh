@@ -76,7 +76,7 @@ run_criterion() {
     TOTAL=$((TOTAL + crit_tested))
     PASS=$((PASS + crit_passing))
     
-    echo "criterion ==> Tested: $crit_tested | Passing: $crit_passing"
+    echo "Unitaire ==> Total: $crit_tested | Passed: $crit_passing | Failed: $((crit_tested - crit_passing))\n"
     
     if [ "$crit_exit" -ne 0 ]; then
       echo "$crit_output"
@@ -144,6 +144,7 @@ testcase "test_files: test9.sh" "" "tests/test_files/test9.sh"
 testcase "test_files: test10.sh" "" "tests/test_files/test10.sh"
 testcase "test_files: test11.sh" "" "tests/test_files/test11.sh"
 testcase "test_files: test12.sh" "" "tests/test_files/test12.sh"
+testcase "test_files: test13.sh" "" "tests/test_files/test13.sh"
 
 testcase "stdin: test1.sh" "<" "tests/test_files/test1.sh"
 testcase "stdin: test2.sh" "<" "tests/test_files/test2.sh"
@@ -157,6 +158,7 @@ testcase "stdin: test9.sh" "<" "tests/test_files/test9.sh"
 testcase "stdin: test10.sh" "<" "tests/test_files/test10.sh"
 testcase "stdin: test11.sh" "<" "tests/test_files/test11.sh"
 testcase "stdin: test12.sh" "<" "tests/test_files/test12.sh"
+testcase "stdin: test13.sh" "<" "tests/test_files/test13.sh"
 
 #=========================== Simple commands =================================
 
@@ -441,6 +443,13 @@ fi
 "
 testcase "semi colon after newline" "" "tests/test_files/test_semi_colon_alone_after_command_and_newline.sh"
 
+#=========================== Stress tests ======================================
+
+testcase "test_limite_if.sh" "" "tests/test_files/test_limite_if.sh"
+testcase "test_limite_else.sh" "" "tests/test_files/test_limite_else.sh"
+testcase "many_lines.sh" "" "tests/test_files/many_lines.sh"
+
+printf "Fonctionel => Total: %d | Passed: %d | Failed: %d\n\n" "$TOTAL" "$PASS" "$((TOTAL - PASS))"
 
 if [ "${COVERAGE:-no}" = "yes" ]; then
   run_criterion
