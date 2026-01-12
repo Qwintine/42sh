@@ -40,8 +40,8 @@ static char *insert_in(size_t ind, char *str)
 static int args_echo(char *string, int *an, int *ae)
 {
     size_t i = 1;
-    int n = 0;
-    int e = 0;
+    int n = *an;
+    int e = *ae;
     while (string[i] != 0)
     {
         switch (string[i])
