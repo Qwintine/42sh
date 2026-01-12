@@ -93,10 +93,14 @@ static int handle_backslash(char **value, FILE *entry, int in_quotes)
     return 0;
 }
 
-static int handle_quote(int *quote, int other_quote)
+static int handle_quote(int *quote, int other_quote, struct token *tok)
 {
     if (!other_quote)
+    {
         *quote = !(*quote);
+        if (!(*quote) && strlen(tok->value) == 0)
+            return 1;
+    }
     return 0;
 }
 
@@ -227,26 +231,11 @@ enum type check_type(char *value)
     return WORD;
 }
 
-static int sub_switch(struct lex *lex, struct token *tok, char *buf,
-                      struct quote_status *quote_status)
+static int sub_switch_delim(struct lex *lex, struct token *tok, char *buf,
+                            struct quote_status *quote_status)
 {
     switch (buf[0])
     {
-    case '#':
-        if (handle_com(quote_status->double_quote || quote_status->single_quote,
-                       lex, tok, buf))
-            return 1;
-        break;
-    case '"': // cas 4
-        if (handle_quote(&quote_status->double_quote,
-                         quote_status->single_quote))
-            return 1;
-        break;
-    case '\'': // cas 4
-        if (handle_quote(&quote_status->single_quote,
-                         quote_status->double_quote))
-            return 1;
-        break;
     case '\\': // cas 4
         if (handle_backslash(&tok->value, lex->entry,
                              quote_status->double_quote
@@ -278,6 +267,42 @@ static int sub_switch(struct lex *lex, struct token *tok, char *buf,
         tok->value = concat(tok->value, buf[0]);
         if (!tok->value)
             return 1;
+    }
+    return -1;
+}
+
+static int sub_switch(struct lex *lex, struct token *tok, char *buf,
+                      struct quote_status *quote_status)
+{
+    switch (buf[0])
+    {
+    case '#':
+        if (handle_com(quote_status->double_quote || quote_status->single_quote,
+                       lex, tok, buf))
+            return 1;
+        break;
+    case '"': // cas 4
+        if (handle_quote(&quote_status->double_quote,
+                         quote_status->single_quote, tok))
+        {
+            lex->current_token = tok;
+            if (tok->token_type == KEYWORD && lex->context == KEYWORD)
+                tok->token_type = check_type(tok->value);
+            return 0;
+        }
+        break;
+    case '\'': // cas 4
+        if (handle_quote(&quote_status->single_quote,
+                         quote_status->double_quote, tok))
+        {
+            lex->current_token = tok;
+            if (tok->token_type == KEYWORD && lex->context == KEYWORD)
+                tok->token_type = check_type(tok->value);
+            return 0;
+        }
+        break;
+    default:
+        return sub_switch_delim(lex, tok, buf, quote_status);
     }
     return -1;
 }

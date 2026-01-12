@@ -40,7 +40,7 @@ int exec_cmd(char **words)
         if (!child)
         {
             execvp(words[0], words);
-	        fprintf(stderr, "42sh: Error exec\n");
+            fprintf(stderr, "42sh: Error exec\n");
             _exit(127);
         }
         int wstat;

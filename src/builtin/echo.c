@@ -18,7 +18,7 @@ static char *insert_in(size_t ind, char *str)
     size_t size = strlen(str);
     char c = str[ind + 1];
     char replacement = 0;
-    
+
     if (c == 'n')
         replacement = '\n';
     else if (c == 't')

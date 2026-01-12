@@ -48,9 +48,7 @@ int main(int argc, char **argv)
         if (prettyprint)
             print_ast(ast);
         else
-        {
-            res = run_ast(ast); //derniere valeur de retour
-        }
+            res = run_ast(ast); // derniere valeur de retour
 
         free_ast(ast);
     }
