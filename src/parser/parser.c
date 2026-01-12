@@ -43,7 +43,8 @@ static struct token *pop(struct lex *lex)
     {
         if (!lex->current_token)
         {
-            peek(lex);
+            if (!peek(lex))
+                return NULL;
         }
         struct token *tok = lex->current_token;
         lex->current_token = NULL;
@@ -257,6 +258,7 @@ static struct ast *parser_rule_if(struct lex *lex)
     discard_token(pop(lex));
 
     return (struct ast *)ast_if;
+
 ERROR:
     free_ast((struct ast *)ast_if);
     return NULL;
@@ -285,6 +287,8 @@ static struct ast *parser_simple_command(struct lex *lex)
     if (peek(lex) && peek(lex)->token_type == WORD)
     {
         struct token *tok = pop(lex);
+        if (!tok)
+            goto ERROR;
         ast_cmd->words[ind] = tok->value;
         free(tok);
         ind++;
@@ -301,22 +305,25 @@ static struct ast *parser_simple_command(struct lex *lex)
         while (peek(lex) != NULL && peek(lex)->token_type == WORD)
         {
             tok = pop(lex);
+            if (!tok)
+                goto ERROR;
             ast_cmd->words[ind] = tok->value;
             free(tok);
             ind++;
             ast_cmd->words =
                 realloc(ast_cmd->words, (ind + 1) * sizeof(char *));
+            if (!ast_cmd->words)
+                goto ERROR;
             ast_cmd->words[ind] = NULL;
         }
         lex->context = KEYWORD;
         if (!peek(lex))
-        {
-            free_ast((struct ast *)ast_cmd);
-            return NULL;
-        }
+            goto ERROR;
         return (struct ast *)ast_cmd;
     }
     lex->context = KEYWORD;
+
+ERROR:
     free_ast((struct ast *)ast_cmd);
     return NULL;
 }

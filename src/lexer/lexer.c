@@ -316,6 +316,8 @@ int lexer(struct lex *lex)
         lex->current_token->token_type = check_type(lex->current_token->value);
     return 0;
 ERROR:
+    if (lex->current_token == tok)
+        lex->current_token = NULL;
     fseek(lex->entry, -(strlen(tok->value)), SEEK_CUR);
     free_token(tok);
     return 1;
