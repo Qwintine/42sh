@@ -78,7 +78,7 @@ static struct ast *parser_list(struct lex *lex);
 
 /*
  * Description:
- * 	Absorb a chain of and_or separeted by ';' or '\n' 
+ * 	Absorb a chain of and_or separeted by ';' or '\n'
  * Return:
  * 	*ast -> chained list of  parser_and_or result ast
  * Verbose:
@@ -100,6 +100,11 @@ static struct ast *parser_compound_list(struct lex *lex)
     struct ast_list *current = head;
 
     current->elt = parser_and_or(lex);
+    if(!current->elt)
+    {
+	    free_ast((struct ast*)current);
+	    return NULL;
+    }
 
     while (peek(lex)
            && (peek(lex)->token_type == SEMI_COLON
@@ -121,6 +126,11 @@ static struct ast *parser_compound_list(struct lex *lex)
 
         struct ast_list *new_node = (struct ast_list *)init_ast_list();
         new_node->elt = parser_and_or(lex);
+	if(!new_node->elt)
+	{
+		free_ast((struct ast*)new_node);
+		return NULL;
+	}
         current->next = new_node;
         current = new_node;
     }
@@ -137,22 +147,32 @@ static struct ast *parser_elif(struct lex *lex)
 
     ast_if->condition = parser_compound_list(lex);
 
-    if (!peek(lex) || peek(lex)->token_type != THEN)
+    if (!peek(lex) || peek(lex)->token_type != THEN || !ast_if->condition)
     {
-        free_ast((struct ast *)ast_if);
-        return NULL;
+	    goto ERROR;
     }
     discard_token(pop(lex));
 
     ast_if->then_body = parser_compound_list(lex);
+    if(!ast_if->then_body)
+    {
+	    goto ERROR;
+    }
 
     if (peek(lex)
         && (peek(lex)->token_type == ELSE || peek(lex)->token_type == ELIF))
     {
         ast_if->else_body = parser_else_clause(lex);
+	if(!ast_if->else_body)
+	{
+		goto ERROR;
+	}
     }
 
     return (struct ast *)ast_if;
+ERROR:
+        free_ast((struct ast *)ast_if);
+        return NULL;
 }
 
 /*
@@ -188,7 +208,7 @@ static struct ast *parser_else_clause(struct lex *lex)
  * Description:
  * 	Handle a 'if' block by calling corresponding parser at each step
  * Return:
- * 	
+ *
  * Verbose:
  * 	Grammar:
  * 		'if' compound_list 'then' compound_list [else_clause] 'fi' ;
@@ -204,32 +224,45 @@ static struct ast *parser_rule_if(struct lex *lex)
     struct ast_if *ast_if = (struct ast_if *)init_ast_if();
 
     ast_if->condition = parser_compound_list(lex);
+    if (!ast_if->condition)
+    {
+        goto ERROR;
+    }
 
     if (!peek(lex) || peek(lex)->token_type != THEN)
     {
-        free_ast((struct ast *)ast_if);
-        return NULL;
+        goto ERROR;
     }
     discard_token(pop(lex));
     ast_if->then_body = parser_compound_list(lex);
+    if (!ast_if->then_body)
+    {
+        goto ERROR;
+    }
 
     if (peek(lex)
         && (peek(lex)->token_type == ELSE || peek(lex)->token_type == ELIF))
     {
         ast_if->else_body = parser_else_clause(lex);
+        if (!ast_if->else_body)
+        {
+            goto ERROR;
+        }
     }
 
     if (!peek(lex) || peek(lex)->token_type != FI)
     {
-        free_ast((struct ast *)ast_if);
-        return NULL;
+        goto ERROR;
     }
     discard_token(pop(lex));
 
     return (struct ast *)ast_if;
+ERROR:
+    free_ast((struct ast *)ast_if);
+    return NULL;
 }
 
-//See parser_rule_if ( for now )
+// See parser_rule_if ( for now )
 static struct ast *parser_shell_command(struct lex *lex)
 {
     return parser_rule_if(lex);
@@ -237,11 +270,11 @@ static struct ast *parser_shell_command(struct lex *lex)
 
 /*
  * Description:
- * 	Group words in a command in order to form a list of commands 
+ * 	Group words in a command in order to form a list of commands
  * Return:
  * 	*ast -> ast containing a command to execute
  * Verbose:
- * 	
+ *
  */
 // prochaine step -> ajouter gestion des préfixes ( cf. Trove Shell Syntax )
 static struct ast *parser_simple_command(struct lex *lex)
@@ -256,11 +289,11 @@ static struct ast *parser_simple_command(struct lex *lex)
         free(tok);
         ind++;
         ast_cmd->words = realloc(ast_cmd->words, (ind + 1) * sizeof(char *));
-	if(!ast_cmd->words)
-	{
-		free_ast((struct ast*)ast_cmd);
-		return NULL;
-	}
+        if (!ast_cmd->words)
+        {
+            free_ast((struct ast *)ast_cmd);
+            return NULL;
+        }
         // ajouter test realloc pour sécu -> peu probable mais pas pro
         ast_cmd->words[ind] = NULL;
 
@@ -325,14 +358,17 @@ static struct ast *parser_and_or(struct lex *lex)
  */
 static struct ast *parser_list(struct lex *lex)
 {
-    if (!peek(lex) || peek(lex)->token_type == END)// can't start with EOF -> Error
+    if (!peek(lex)
+        || peek(lex)->token_type == END) // can't start with EOF -> Error
         return NULL;
 
-    lex->context = KEYWORD; // list starts with keyword (command, operator, if, etc...)
+    lex->context =
+        KEYWORD; // list starts with keyword (command, operator, if, etc...)
     struct ast_list *head = (struct ast_list *)init_ast_list();
     struct ast_list *current = head;
 
-    current->elt = parser_and_or(lex); // récursion sur ast type and_or ( cf. parser_and_or )
+    current->elt = parser_and_or(
+        lex); // récursion sur ast type and_or ( cf. parser_and_or )
     if (!current->elt)
     {
         free(head);
@@ -344,14 +380,15 @@ static struct ast *parser_list(struct lex *lex)
                || peek(lex)->token_type == NEWLINE)) // séparateurs
     {
         discard_token(pop(lex));
-        while (peek(lex) && peek(lex)->token_type == NEWLINE) 
+        while (peek(lex) && peek(lex)->token_type == NEWLINE)
         {
             discard_token(pop(lex));
         }
         if (!peek(lex) || peek(lex)->token_type == END)
             break;
 
-        struct ast_list *new_node = (struct ast_list *)init_ast_list(); // éléments liste de block de and_or 
+        struct ast_list *new_node = (struct ast_list *)
+            init_ast_list(); // éléments liste de block de and_or
         new_node->elt = parser_and_or(lex); // récursion sur ast type and_or
         if (!new_node->elt)
         {
@@ -361,7 +398,7 @@ static struct ast *parser_list(struct lex *lex)
         current->next = new_node; // liste de and_or
         current = new_node;
     }
-    return (struct ast *)head; // 1er elem liste 
+    return (struct ast *)head; // 1er elem liste
 }
 
 /*

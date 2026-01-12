@@ -242,7 +242,7 @@ echo a
 echo b; echo c
 fi "
 
-testcase "then onee line after newline" "-c" "if true
+testcase "then one line after newline" "-c" "if true
 then echo ok
 fi"
 
