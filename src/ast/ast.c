@@ -82,6 +82,8 @@ static void ast_free_list(struct ast *ast)
 
 static int ast_run_cmd(struct ast *ast)
 {
+	if(!ast)
+		return 2;
     struct ast_cmd *ast_cmd = (struct ast_cmd *)ast;
     int res = exec_cmd(ast_cmd->words);
     return res;
