@@ -23,7 +23,6 @@ void free_lex(struct lex *lex)
 {
     if (lex->current_token)
         free_token(lex->current_token);
-    fclose(lex->entry);
     free(lex);
 }
 

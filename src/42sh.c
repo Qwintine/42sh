@@ -7,7 +7,8 @@
 
 /*
 Truc a corriger:
-    -> Msg erreur surr stderr dans endroit code adapté ( syntax dans lexer, grammaire dans parser, builtin dans fct builtin, etc...)	
+    -> Msg erreur surr stderr dans endroit code adapté ( syntax dans lexer,
+grammaire dans parser, builtin dans fct builtin, etc...)
     -> echo (sans argument) plante
     -> execvp ne s'arrete pas si la commande n'existe pas
     -> ;; ne renvoie pas d'erreur
@@ -27,27 +28,34 @@ int main(int argc, char **argv)
     FILE *entry = arg_file(argc, argv, &prettyprint);
     if (!entry)
     {
-	    fprintf(stderr, "42sh: error file entry\n");
+        fprintf(stderr, "42sh: error file entry\n");
         return 2;
     }
 
-    struct ast *ast = parser(entry);
-
-    if (!ast)
+    int eof = 0;
+    int res = 0;
+    while (!eof)
     {
-	    fprintf(stderr, "42sh: grammar/syntax error\n");
-        return 2;
-    }
+        struct ast *ast = parser(entry, &eof);
 
-    if (prettyprint)
-        print_ast(ast);
-    else
-    {
-        int res = run_ast(ast); //msg err
+        if (!ast)
+        {
+            fclose(entry);
+            fprintf(stderr, "42sh: grammar/syntax error\n");
+            return 2;
+        }
+
+        if (prettyprint)
+            print_ast(ast);
+        else
+        {
+            res = run_ast(ast); //derniere valeur de retour
+        }
+
         free_ast(ast);
-        return res;
     }
 
-    free_ast(ast);
-    return 0;
+    fclose(entry);
+
+    return res;
 }

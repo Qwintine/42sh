@@ -5,6 +5,6 @@
 
 #include "../ast/ast.h"
 
-struct ast *parser(FILE *entry);
+struct ast *parser(FILE *entry, int *eof);
 
 #endif /* PARSER_H */

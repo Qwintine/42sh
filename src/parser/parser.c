@@ -100,10 +100,10 @@ static struct ast *parser_compound_list(struct lex *lex)
     struct ast_list *current = head;
 
     current->elt = parser_and_or(lex);
-    if(!current->elt)
+    if (!current->elt)
     {
-	    free_ast((struct ast*)current);
-	    return NULL;
+        free_ast((struct ast *)current);
+        return NULL;
     }
 
     while (peek(lex)
@@ -126,11 +126,11 @@ static struct ast *parser_compound_list(struct lex *lex)
 
         struct ast_list *new_node = (struct ast_list *)init_ast_list();
         new_node->elt = parser_and_or(lex);
-	if(!new_node->elt)
-	{
-		free_ast((struct ast*)new_node);
-		return NULL;
-	}
+        if (!new_node->elt)
+        {
+            free_ast((struct ast *)new_node);
+            return NULL;
+        }
         current->next = new_node;
         current = new_node;
     }
@@ -149,30 +149,30 @@ static struct ast *parser_elif(struct lex *lex)
 
     if (!peek(lex) || peek(lex)->token_type != THEN || !ast_if->condition)
     {
-	    goto ERROR;
+        goto ERROR;
     }
     discard_token(pop(lex));
 
     ast_if->then_body = parser_compound_list(lex);
-    if(!ast_if->then_body)
+    if (!ast_if->then_body)
     {
-	    goto ERROR;
+        goto ERROR;
     }
 
     if (peek(lex)
         && (peek(lex)->token_type == ELSE || peek(lex)->token_type == ELIF))
     {
         ast_if->else_body = parser_else_clause(lex);
-	if(!ast_if->else_body)
-	{
-		goto ERROR;
-	}
+        if (!ast_if->else_body)
+        {
+            goto ERROR;
+        }
     }
 
     return (struct ast *)ast_if;
 ERROR:
-        free_ast((struct ast *)ast_if);
-        return NULL;
+    free_ast((struct ast *)ast_if);
+    return NULL;
 }
 
 /*
@@ -375,15 +375,10 @@ static struct ast *parser_list(struct lex *lex)
         return NULL;
     }
 
-    while (peek(lex)
-           && (peek(lex)->token_type == SEMI_COLON
-               || peek(lex)->token_type == NEWLINE)) // séparateurs
+    while (peek(lex) && (peek(lex)->token_type == SEMI_COLON)) // séparateurs
     {
         discard_token(pop(lex));
-        while (peek(lex) && peek(lex)->token_type == NEWLINE)
-        {
-            discard_token(pop(lex));
-        }
+
         if (!peek(lex) || peek(lex)->token_type == END)
             break;
 
@@ -419,7 +414,7 @@ static struct ast *parser_list(struct lex *lex)
  * 	      ;
  * 	TODO
  */
-struct ast *parser(FILE *entry)
+struct ast *parser(FILE *entry, int *eof)
 {
     struct lex *lex = init_lex(entry);
     lex->context = KEYWORD;
@@ -439,6 +434,7 @@ struct ast *parser(FILE *entry)
     if (!peek(lex)
         || peek(lex)->token_type == END) // fichier sans code évaluable
     {
+        *eof = 1;
         free_lex(lex);
         return init_ast_list();
     }
@@ -452,19 +448,15 @@ struct ast *parser(FILE *entry)
         return NULL;
     }
 
-    while (peek(lex) && peek(lex)->token_type == NEWLINE)
-    {
-        discard_token(pop(lex));
-    }
-
-    struct token *tok = peek(lex);
-
-    if (!tok || tok->token_type != END) // erreur de grammaire
+    if (!peek(lex)
+        || (peek(lex)->token_type != NEWLINE && peek(lex)->token_type != END))
     {
         free_lex(lex);
         free_ast(ast);
         return NULL;
     }
+
+    *eof = (pop(lex)->token_type == END);
 
     free_lex(lex);
     return ast;
