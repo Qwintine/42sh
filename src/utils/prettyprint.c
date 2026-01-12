@@ -20,9 +20,9 @@ static void ast_print_if(struct ast *ast)
 
 static void ast_print_cmd(struct ast *ast)
 {
-	if(!ast)
-		return;
     struct ast_cmd *ast_cmd = (struct ast_cmd *)ast;
+	if(!ast_cmd->words)
+		return;
     printf("command: ");
     for (int i = 0; ast_cmd->words[i] != NULL; i++)
     {
