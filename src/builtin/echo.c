@@ -72,7 +72,7 @@ static int args_echo(char *string, int *an, int *ae)
  * Retour:
  *  	0 si succes, 1 sinon
  * Verbose:
- *  	parse les option -neE si presente  en premiere position
+ *  	parse les option -neE si presente en premiere position
  */
 int echo_b(char **strings)
 {

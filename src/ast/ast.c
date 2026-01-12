@@ -78,7 +78,7 @@ static void ast_free_list(struct ast *ast)
     free(ast_list);
 }
 
-//===================== Run ast from specific type ============================
+//===================== Run ast from specific type =============================
 
 static int ast_run_cmd(struct ast *ast)
 {

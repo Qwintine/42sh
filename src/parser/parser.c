@@ -77,7 +77,13 @@ static struct ast *parser_else_clause(struct lex *lex);
 static struct ast *parser_list(struct lex *lex);
 
 /*
- * TODO
+ * Description:
+ * 	Absorb a chain of and_or separeted by ';' or '\n' 
+ * Return:
+ * 	*ast -> chained list of  parser_and_or result ast
+ * Verbose:
+ * 	Grammar:
+ * 		{'\n'} and_or { ( ';' | '\n' ) {'\n'} and_or } [';'] {'\n'} ;
  */
 static struct ast *parser_compound_list(struct lex *lex)
 {
@@ -118,13 +124,9 @@ static struct ast *parser_compound_list(struct lex *lex)
         current->next = new_node;
         current = new_node;
     }
-
     return (struct ast *)head;
 }
 
-/*
- * TODO
- */
 static struct ast *parser_elif(struct lex *lex)
 {
     if (!peek(lex) || peek(lex)->token_type != ELIF)
@@ -154,7 +156,14 @@ static struct ast *parser_elif(struct lex *lex)
 }
 
 /*
- * TODO
+ * Description:
+ * 	Define which parser to use depending on the context
+ * Verbose:
+ * 	Grammar:
+ * 		else_clause =
+ * 			'else' compound_list
+ * 		      | 'elif' compound_list 'then' compound_list [else_clause]
+ * 		      ;
  */
 static struct ast *parser_else_clause(struct lex *lex)
 {
@@ -176,7 +185,13 @@ static struct ast *parser_else_clause(struct lex *lex)
 }
 
 /*
- * TODO
+ * Description:
+ * 	Handle a 'if' block by calling corresponding parser at each step
+ * Return:
+ * 	
+ * Verbose:
+ * 	Grammar:
+ * 		'if' compound_list 'then' compound_list [else_clause] 'fi' ;
  */
 static struct ast *parser_rule_if(struct lex *lex)
 {
@@ -221,7 +236,12 @@ static struct ast *parser_shell_command(struct lex *lex)
 }
 
 /*
- * TODO
+ * Description:
+ * 	Group words in a command in order to form a list of commands 
+ * Return:
+ * 	*ast -> ast containing a command to execute
+ * Verbose:
+ * 	
  */
 // prochaine step -> ajouter gestion des préfixes ( cf. Trove Shell Syntax )
 static struct ast *parser_simple_command(struct lex *lex)
@@ -236,6 +256,11 @@ static struct ast *parser_simple_command(struct lex *lex)
         free(tok);
         ind++;
         ast_cmd->words = realloc(ast_cmd->words, (ind + 1) * sizeof(char *));
+	if(!ast_cmd->words)
+	{
+		free_ast((struct ast*)ast_cmd);
+		return NULL;
+	}
         // ajouter test realloc pour sécu -> peu probable mais pas pro
         ast_cmd->words[ind] = NULL;
 
@@ -258,7 +283,6 @@ static struct ast *parser_simple_command(struct lex *lex)
     free(ast_cmd);
     return NULL;
 }
-
 
 // prochaine step -> ajouter gestion  { redirections } après shell_command
 static struct ast *parser_command(struct lex *lex)
