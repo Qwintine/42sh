@@ -298,7 +298,7 @@ static struct ast *parser_simple_command(struct lex *lex)
         ast_cmd->words[ind] = NULL;
 
         lex->context = WORD;
-        while (peek(lex) && peek(lex)->token_type == WORD)
+        while (peek(lex) != NULL && peek(lex)->token_type == WORD)
         {
             tok = pop(lex);
             ast_cmd->words[ind] = tok->value;
@@ -309,11 +309,15 @@ static struct ast *parser_simple_command(struct lex *lex)
             ast_cmd->words[ind] = NULL;
         }
         lex->context = KEYWORD;
+        if (!peek(lex))
+        {
+            free_ast((struct ast *)ast_cmd);
+            return NULL;
+        }
         return (struct ast *)ast_cmd;
     }
     lex->context = KEYWORD;
-    free(ast_cmd->words);
-    free(ast_cmd);
+    free_ast((struct ast *)ast_cmd);
     return NULL;
 }
 
