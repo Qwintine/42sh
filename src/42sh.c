@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "ast/ast.h"
 #include "io/io.h"
@@ -25,7 +26,8 @@ grammaire dans parser, builtin dans fct builtin, etc...)
 int main(int argc, char **argv)
 {
     int prettyprint = 0;
-    FILE *entry = arg_file(argc, argv, &prettyprint);
+    char *buff = NULL;
+    FILE *entry = arg_file(argc, argv, &prettyprint, &buff);
     if (!entry)
     {
         fprintf(stderr, "42sh: error file entry\n");
@@ -41,6 +43,7 @@ int main(int argc, char **argv)
         if (!ast)
         {
             fclose(entry);
+            free(buff);
             fprintf(stderr, "42sh: grammar/syntax error\n");
             return 2;
         }
@@ -54,6 +57,7 @@ int main(int argc, char **argv)
     }
 
     fclose(entry);
+    free(buff);
 
     return res;
 }
