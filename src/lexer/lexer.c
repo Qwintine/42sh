@@ -77,7 +77,12 @@ static int handle_backslash(char **value, FILE *entry, int in_quotes)
     else
     {
         if (!fread(buf, 1, 1, entry))
-            return 1;
+        {
+            *value = concat(*value, '\\');
+            if (!*value)
+                return 1;
+            return 0;
+        }
         if (buf[0] != '\n')
         {
             *value = concat(*value, buf[0]);

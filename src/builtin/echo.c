@@ -17,16 +17,20 @@ static char *insert_in(size_t ind, char *str)
 {
     size_t size = strlen(str);
     char c = str[ind + 1];
-    char nc = 0;
+    char replacement = 0;
+    
     if (c == 'n')
-        nc = '\n';
+        replacement = '\n';
     else if (c == 't')
-        nc = '\t';
+        replacement = '\t';
     else if (c == '\\')
-        nc = '\\';
+        replacement = '\\';
+    else
+        return str;
+
     char *res = malloc(size);
     res = strncpy(res, str, ind);
-    res[ind] = nc;
+    res[ind] = replacement;
     ind++;
     while (ind < size)
     {

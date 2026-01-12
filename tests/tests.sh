@@ -160,7 +160,7 @@ testcase "stdin: test12.sh" "<" "tests/test_files/test12.sh"
 
 #=========================== Simple commands =================================
 
-testcase "true \\n echo after" "-c" "true
+testcase "true \\\n echo after" "-c" "true
 echo after"
 
 testcase "nonexistent command" "-c" "unknown_command
@@ -316,7 +316,7 @@ testcase "false list for condition" "-c" "if echo first_condition; echo second_c
 testcase "keywords in quotes" "-c" "if true; then echo 'then fi else elif'; fi" #rajouter guillemets
 testcase "else in quotes" "-c" "if false; then echo not ok; else echo 'else'; fi"
 testcase "fi in quotes" "-c" "if true; then echo 'fi'; fi"
-testcase "elif without then" "if false; then echo not ok1; elif true; echo not ok2; fi"
+testcase "elif without then" "-c" "if false; then echo not ok1; elif true; echo not ok2; fi"
 testcase "else before elif" "-c" " if false; then echo not ok1; else echo not ok2; elif true; then echo not ok3; fi"
 testcase "missing then" "-c" "if true; echo not ok; fi"
 testcase "if without condition" "-c" "if then echo not ok; fi"
