@@ -246,7 +246,7 @@ static int new_op(struct token *tok, int quote, FILE *entry, char val)
         if (!tok->value
             || (tok->token_type != WORD && tok->token_type != KEYWORD))
             return -1;
-        return 1;
+        return 0;
     }
     tok->value = concat(tok->value, val);
     if (!tok->value)
@@ -270,12 +270,13 @@ static int sub_switch_delim(struct lex *lex, struct token *tok, char *buf,
 	//int result = handle_expansion(); //TODO
     case '&': // case 6
     case '|':
-	int result = new_op(tok, (quote_status->double_quote
-                                 || quote_status->single_quote), lex->entry,
-				buf[0]);
+    {
+        int result = new_op(tok, (quote_status->double_quote
+                                    || quote_status->single_quote), lex->entry,
+                    buf[0]);
         if (result < 0)
-		return 1;
-	if (result > 0)
+            return 1;
+        if (result > 0)
         {
             lex->current_token = tok;
             if (lex->current_token->token_type == KEYWORD
@@ -284,7 +285,8 @@ static int sub_switch_delim(struct lex *lex, struct token *tok, char *buf,
                     check_type(lex->current_token->value);
             return 0;
         }
-
+        break;
+    }
     case ';':
     case '\n': // cas 7
     case ' ': // cas 8
@@ -362,14 +364,13 @@ static int sub_switch(struct lex *lex, struct token *tok, char *buf,
  * Return:
  * 	0 Token created / 1 Error
  */
-static int manage_op(struct lex *lex, struct token *tok, char buf[], 
-	struct quote_status *quote_status)
+static int manage_op(struct lex *lex, struct token *tok, char buf[])
 {
 	if(tok->value[strlen(tok->value)-1] == '&')
 	{
 		if(buf[0] == '&')
 		{
-			concat(tok->value, buf[0]);
+			concat(tok->value, '&');
 			if(!tok->value)
 			{
 				return 1;
@@ -386,16 +387,16 @@ static int manage_op(struct lex *lex, struct token *tok, char buf[],
 	{
 		if(buf[0] == '|')
 		{
-			concat(tok->value, buf[0]);
+			concat(tok->value, '|');
 			if(!tok->value)
 			{
 				return 1;
 			}
-			tok->token_type = AND;
+			tok->token_type = OR;
 		}
 		else
 		{
-			tok->token-type = PIPE;
+			tok->token_type = PIPE;
 			fseek(lex->entry, -1, SEEK_CUR);
 		}
 	}
@@ -424,10 +425,9 @@ int lexer(struct lex *lex)
     while (fread(buf, 1, 1, lex->entry))
     {
 	    //debut changement -> peut etre implem une size lors creation token 
-	    if(tok->value && tok->value[strlen(tok->value)-1]
+	    if(tok->value && tok->value[0]
 	    && !quote_status.single_quote && !quote_status.double_quote
-	    && (tok->value[strlen(tok->value)-1] == '&'
-	    || tok->value[strlen(tok->value) -1] == '|'))
+	    && (tok->value[0] == '&' || tok->value[0] == '|'))
 	    {
 		    int res = manage_op(lex, tok, buf); // cas 2/3
 		    if(!res)
@@ -436,7 +436,7 @@ int lexer(struct lex *lex)
 	    }
 	    else
 	    {
-		    int res = sub_switch(lex, tok, buf);
+		    int res = sub_switch(lex, tok, buf, &quote_status); // cas 2-11
 		    if (res == 0)
 			    return 0;
 		    if (res == 1)
