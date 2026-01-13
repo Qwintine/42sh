@@ -1,4 +1,4 @@
-lib_LIBRARIES = libio.a
+noinst_LIBRARIES = libio.a
 
 libio_a_SOURCES =  \
   io.c \
@@ -7,5 +7,3 @@ libio_a_SOURCES =  \
 libio_a_CPPFLAGS = -I$(top_srcdir)/src
 
 libio_a_CFLAGS = -std=c99 -pedantic -Werror -Wall -Wextra -Wvla
-
-noinst_LIBRARIES = libio.a

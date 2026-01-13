@@ -5,6 +5,6 @@
 
 #include <stdio.h>
 
-FILE *arg_file(int argc, char** argv);
+FILE *arg_file(int argc, char **argv, int *prettyprint, char **buff);
 
 #endif /* IO_H */
