@@ -228,7 +228,30 @@ enum type check_type(char *value)
         return ELSE;
     if (strcmp(value, "fi") == 0)
         return FI;
+    if(strcmp(value, "!") == 0)
+	    return NEGATION;
     return WORD;
+}
+
+static int new_op(struct token *tok, int quote, FILE *entry, char val)
+{
+    if (!quote)
+    {
+        if (strlen(tok->value) > 0)
+        {
+            fseek(entry, -1, SEEK_CUR);
+            return 1;
+        }
+        tok->value = concat(tok->value, val);
+        if (!tok->value
+            || (tok->token_type != WORD && tok->token_type != KEYWORD))
+            return -1;
+        return 0;
+    }
+    tok->value = concat(tok->value, val);
+    if (!tok->value)
+        return -1;
+    return 0;
 }
 
 static int sub_switch_delim(struct lex *lex, struct token *tok, char *buf,
@@ -242,6 +265,28 @@ static int sub_switch_delim(struct lex *lex, struct token *tok, char *buf,
                                  || quote_status->single_quote))
             return 1;
         break;
+    case '$': // case 5
+    case '`':
+	//int result = handle_expansion(); //TODO
+    case '&': // case 6
+    case '|':
+    {
+        int result = new_op(tok, (quote_status->double_quote
+                                    || quote_status->single_quote), lex->entry,
+                    buf[0]);
+        if (result < 0)
+            return 1;
+        if (result > 0)
+        {
+            lex->current_token = tok;
+            if (lex->current_token->token_type == KEYWORD
+                && lex->context == KEYWORD)
+                lex->current_token->token_type =
+                    check_type(lex->current_token->value);
+            return 0;
+        }
+        break;
+    }
     case ';':
     case '\n': // cas 7
     case ' ': // cas 8
@@ -281,6 +326,7 @@ static int sub_switch(struct lex *lex, struct token *tok, char *buf,
                        lex, tok, buf))
             return 1;
         break;
+
     case '"': // cas 4
         if (handle_quote(&quote_status->double_quote,
                          quote_status->single_quote, tok))
@@ -307,6 +353,57 @@ static int sub_switch(struct lex *lex, struct token *tok, char *buf,
     return -1;
 }
 
+/*
+ * Description:
+ * 	Handle a possible operator
+ * Argument:
+ * 	lex -> struct lexer
+ * 	tok -> token being created
+ * 	buf[] -> current character
+ * 	quote_status -> if in quotes
+ * Return:
+ * 	0 Token created / 1 Error
+ */
+static int manage_op(struct lex *lex, struct token *tok, char buf[])
+{
+	if(tok->value[strlen(tok->value)-1] == '&')
+	{
+		if(buf[0] == '&')
+		{
+			concat(tok->value, '&');
+			if(!tok->value)
+			{
+				return 1;
+			}
+			tok->token_type = AND;
+		}
+		else
+		{
+			tok->token_type = SEMI_COLON;
+			fseek(lex->entry, -1, SEEK_CUR);
+		}
+	}
+	else
+	{
+		if(buf[0] == '|')
+		{
+			concat(tok->value, '|');
+			if(!tok->value)
+			{
+				return 1;
+			}
+			tok->token_type = OR;
+		}
+		else
+		{
+			tok->token_type = PIPE;
+			fseek(lex->entry, -1, SEEK_CUR);
+		}
+	}
+	lex->current_token = tok;
+	return 0;
+}
+
 // Upgrade/Quality of life: Quote status from enum instead of int
 
 /* Description:
@@ -327,11 +424,24 @@ int lexer(struct lex *lex)
         return 1;
     while (fread(buf, 1, 1, lex->entry))
     {
-        int res = sub_switch(lex, tok, buf, &quote_status);
-        if (res == 0)
-            return 0;
-        if (res == 1)
-            goto ERROR;
+	    //debut changement -> peut etre implem une size lors creation token 
+	    if(tok->value && tok->value[0]
+	    && !quote_status.single_quote && !quote_status.double_quote
+	    && (tok->value[0] == '&' || tok->value[0] == '|'))
+	    {
+		    int res = manage_op(lex, tok, buf); // cas 2/3
+		    if(!res)
+			    return 0;
+		    goto ERROR;
+	    }
+	    else
+	    {
+		    int res = sub_switch(lex, tok, buf, &quote_status); // cas 2-11
+		    if (res == 0)
+			    return 0;
+		    if (res == 1)
+			    goto ERROR;
+	    }
     }
     lex->current_token = end_token(tok, lex); // cas 1
     if (!lex->current_token || verif_token(lex->current_token, lex->context)
