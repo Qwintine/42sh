@@ -143,14 +143,14 @@ static int ast_run_pipe(struct ast *ast)
     struct ast_pipe *ast_pipe = (struct ast_pipe *)ast;
     if (!ast_pipe->cmd[0])
         return 2;
-    dup2(STDIN_FILENO, STDOUT_FILENO);
+    // dup2(STDIN_FILENO, STDOUT_FILENO);
     size_t i = 0;
     while (ast_pipe->cmd[i + 1] != NULL)
     {
         run_ast((struct ast *)ast_pipe->cmd[i]);
         i++;
     }
-    dup2(STDOUT_FILENO, STDIN_FILENO);
+    // dup2(STDOUT_FILENO, STDIN_FILENO);
     int res = run_ast((struct ast *)ast_pipe->cmd[i]);
     if (ast_pipe->negation)
     {

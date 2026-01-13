@@ -358,7 +358,7 @@ static struct ast *parser_pipeline(struct lex *lex)
         if (pipe)
             discard_token(pop(lex));
         while (peek(lex) && peek(lex)->token_type == NEWLINE)
-            discard_token(pop(les);
+            discard_token(pop(lex));
         ast_cmd = (struct ast_cmd *)parser_command(lex);
     }
     // There was a pipe but no command after it
