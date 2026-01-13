@@ -77,6 +77,26 @@ static struct ast *parser_and_or(struct lex *lex);
 static struct ast *parser_else_clause(struct lex *lex);
 static struct ast *parser_list(struct lex *lex);
 
+static struct ast *parser_redirection(struct lex *lex)
+{
+	//TODO;
+}
+
+static struct ast *parser_prefix(struct lex *lex)
+{
+	return parser_redirection(lex);
+}
+
+static struct ast *parser_element(struct lex *lex, struct token *tok)
+{
+	if(peek(lex) && peek(lex)->token_type == WORD)
+	{
+		tok = pop(lex);
+		return tok;
+	}
+	//
+}
+
 /*
  * Description:
  * 	Absorb a chain of and_or separeted by ';' or '\n'
@@ -357,6 +377,8 @@ static struct ast *parser_pipeline(struct lex *lex)
         pipe = (peek(lex) && peek(lex)->token_type == PIPE);
         if (pipe)
             discard_token(pop(lex));
+        while (peek(lex) && peek(lex)->token_type == NEWLINE)
+            discard_token(pop(les);
         ast_cmd = (struct ast_cmd *)parser_command(lex);
     }
     // There was a pipe but no command after it
