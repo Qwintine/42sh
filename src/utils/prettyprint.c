@@ -46,9 +46,25 @@ static void ast_print_list(struct ast *ast)
     printf("\n");
 }
 
+static void ast_print_pipe(struct ast *ast)
+{
+    struct ast_pipe *ast_pipe = (struct ast_pipe *)ast;
+    if (!ast_pipe->cmd)
+        return;
+    if (ast_pipe->negation)
+        printf("!");
+    printf("pipeline: ");
+    for (int i = 0; ast_pipe->cmd[i] != NULL; i++)
+    {
+        ast_print_cmd((struct ast *)ast_pipe->cmd[i]);
+    }
+    printf(";");
+}
+
 void print_ast(struct ast *ast)
 {
     static const ast_handler_free functions[] = {
+        [AST_PIPE] = &ast_print_pipe,
         [AST_CMD] = &ast_print_cmd,
         [AST_IF] = &ast_print_if,
         [AST_LIST] = &ast_print_list,

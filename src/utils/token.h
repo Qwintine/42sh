@@ -5,6 +5,8 @@
 
 enum type
 {
+    NEGATION,
+    PIPE,
     IF,
     THEN,
     ELIF,

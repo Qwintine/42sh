@@ -298,7 +298,6 @@ static struct ast *parser_simple_command(struct lex *lex)
             free_ast((struct ast *)ast_cmd);
             return NULL;
         }
-        // ajouter test realloc pour sécu -> peu probable mais pas pro
         ast_cmd->words[ind] = NULL;
 
         lex->context = WORD;
@@ -341,7 +340,32 @@ static struct ast *parser_command(struct lex *lex)
 // See parser_command ( for now )
 static struct ast *parser_pipeline(struct lex *lex)
 {
-    return parser_command(lex);
+    struct ast_pipe *ast_pipe = (struct ast_pipe *)init_ast_pipe();
+    if (peek(lex) && peek(lex)->token_type == NEGATION)
+        ast_pipe->negation = 1;
+    size_t ind = 0;
+    int pipe = 1;
+    struct ast_cmd *ast_cmd = (struct ast_cmd *)parser_command(lex);
+    // while there is a pipe at the end and a command following
+    while (ast_cmd && pipe)
+    {
+        ast_pipe->cmd[ind] = ast_cmd;
+        ind++;
+        ast_pipe->cmd =
+            realloc(ast_pipe->cmd, (ind + 1) * sizeof(struct ast_cmd *));
+        ast_pipe->cmd[ind] = NULL;
+        pipe = (peek(lex) && peek(lex)->token_type == PIPE);
+        if (pipe)
+            discard_token(pop(lex));
+        ast_cmd = (struct ast_cmd *)parser_command(lex);
+    }
+    // There was a pipe but no command after it
+    if (pipe)
+    {
+        free_ast((struct ast *)ast_pipe);
+        return NULL;
+    }
+    return (struct ast *)ast_pipe;
 }
 
 // See parser_command ( for now )
@@ -365,7 +389,6 @@ static struct ast *parser_and_or(struct lex *lex)
  * Verbose:
  * 	Grammar:
  *		list = and_or { ';' and_or } [ ';' ]
- *	TODO
  */
 static struct ast *parser_list(struct lex *lex)
 {
