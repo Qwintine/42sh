@@ -67,6 +67,18 @@ struct ast *init_ast_pipe(void)
     return (struct ast *)node;
 }
 
+struct ast *init_ast_and_or(void)
+{
+    struct ast_and_or *node = malloc(sizeof(struct ast_and_or));
+    if (!node)
+        return NULL;
+    node->base.type = AST_AND_OR;
+    node->left = NULL;
+    node->right = NULL;
+    node->operator = END;
+    return (struct ast *)node;
+}
+
 //===================== Free ast from specific type ===========================
 
 static void ast_free_cmd(struct ast *ast)
@@ -128,6 +140,16 @@ static void ast_free_pipe(struct ast *ast)
     free(ast_pipe);
 }
 
+static void ast_free_and_or(struct ast *ast)
+{
+    struct ast_and_or *ast_and_or = (struct ast_and_or *)ast;
+    if (ast_and_or->left)
+        free_ast(ast_and_or->left);
+    if (ast_and_or->right)
+        free_ast(ast_and_or->right);
+    free(ast_and_or);
+}
+
 //===================== Run ast from specific type =============================
 
 static int ast_run_cmd(struct ast *ast)
@@ -186,6 +208,25 @@ static int ast_run_pipe(struct ast *ast)
     return res;
 }
 
+static int ast_run_and_or(struct ast *ast)
+{
+    struct ast_and_or *ast_and_or = (struct ast_and_or *)ast;
+    int res = run_ast(ast_and_or->left);
+    
+    if (ast_and_or->operator == AND)
+    {
+        if (res == 0)
+            res = run_ast(ast_and_or->right);
+    }
+    else if (ast_and_or->operator == OR)
+    {
+        if (res != 0)
+            res = run_ast(ast_and_or->right);
+    }
+    
+    return res;
+}
+
 //=========================== Lookup Tables ===================================
 
 int run_ast(struct ast *ast)
@@ -196,6 +237,7 @@ int run_ast(struct ast *ast)
         [AST_IF] = &ast_run_if,
         [AST_LIST] = &ast_run_list,
         [AST_PIPE] = &ast_run_pipe,
+        [AST_AND_OR] = &ast_run_and_or,
     };
     return ((*functions[ast->type])(ast));
 }
@@ -208,6 +250,7 @@ void free_ast(struct ast *ast)
         [AST_IF] = &ast_free_if,
         [AST_LIST] = &ast_free_list,
         [AST_PIPE] = &ast_free_pipe,
+        [AST_AND_OR] = &ast_free_and_or,
     };
     (*functions[ast->type])(ast);
 }

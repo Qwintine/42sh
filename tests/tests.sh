@@ -452,30 +452,86 @@ testcase "many_lines.sh" "" "tests/test_files/many_lines.sh"
 
 testcase "test & EOF" "-c" "echo a&"
 
+# ================================ And Or ===================================
+
+testcase "and echo" "-c" "echo a && echo b"
+testcase "and true" "-c" "true && echo ok"
+testcase "and false" "-c" "false && echo should_not_print"
+testcase "and multiple ok" "-c" "echo a && echo b && echo c"
+testcase "and multiple not ok" "-c" "echo a && false && echo should_not_print"
+testcase "and multiple bool echo" "-c" "true && true && echo ok"
+
+testcase "or echo" "-c" "echo a || echo b"
+testcase "or true" "-c" "true || echo should_not_print"
+testcase "or false" "-c" "false || echo ok"
+testcase "or multiple ok" "-c" "echo a || echo should_not_print || echo should_not_print_either"
+testcase "or multiple not ok" "-c" "false || false || echo ok"
+
+testcase "and or 1" "-c" "true && echo ok || echo not_ok"
+testcase "and or 2" "-c" "false && echo not_ok || echo ok"
+testcase "and or 3" "-c" "false || echo ok && echo ok2"
+testcase "and or 4" "-c" "true || echo not_ok && echo ok"
+
+testcase "and semicolon" "-c" "echo a && echo b ; echo c"
+testcase "or semicolon" "-c" "false || echo ok ; echo after"
+testcase "and or multiple" "-c" "echo a && echo b ; false || echo c"
+
+testcase "and with newline" "-c" "echo a &&
+echo b"
+testcase "or with newline" "-c" "false ||
+echo ok"
+
+testcase "and no spaces" "-c" "echo a&&echo b"
+testcase "or no spaces" "-c" "false||echo ok"
+testcase "and with multiple spaces" "-c" "echo a    &&    echo b"
+
+testcase "and if condition" "-c" "if true && true; then echo ok; fi"
+testcase "or if condition" "-c" "if false || true; then echo ok; fi"
+testcase "and or if condition" "-c" "if false || true && true; then echo ok; fi"
+
+testcase "and then" "-c" "if true; then echo a && echo b; fi"
+testcase "or else" "-c" "if false; then echo ko; else false || echo ok; fi"
+
+testcase "and EOF syntax error" "-c" "echo a &&"
+testcase "or EOF syntax error" "-c" "echo a ||"
+testcase "and syntax error" "-c" "echo a && ;"
+testcase "or syntax error" "-c" "echo a || ;"
+
+testcase "and nonexistent command" "-c" "true && nonexistent_cmd_42sh"
+testcase "or nonexistent command" "-c" "false || nonexistent_cmd_42sh"
+
+testcase "and or mix" "-c" "echo 1 && echo 2 || echo 3 && echo 4"
+testcase "and or echo" "-c" "echo start && echo middle || echo end"
+
+testcase "and with comment" "-c" "echo a && # comment
+echo b"
+testcase "or with comment" "-c" "false || # comment  
+echo ok"
+
 # ================================== Pipe ==================================
 
-testcase "test pipe echo" "-c" "echo a | echo b"
-testcase "test pipe EOF" "-c" "echo a |"
-testcase "test pipe syntax error" "-c" "echo a | ;"
-testcase "test pipe lot of pipe" "-c" "echo hello | tr h p | tr e a | tr l m | tr o e"
-testcase "test pipe with if" "-c" "echo a | if true; then echo b; fi"
-testcase "test pipe with false" "-c" "false | echo after_false"
-testcase "test pipe with true" "-c" "true | echo after_true"
-testcase "test pipe multiple commands" "-c" "echo start | echo middle ; echo end"
-testcase "test pipe multiple commands 2" "-c" "echo start ; echo middle | echo end"
-testcase "test pipe syntax error multiple pipes" "-c" "echo a ||| echo b"
-testcase "test pipe syntax error no cmd start" "-c" "| echo a"
-testcase "test pipe syntax error start" "-c" " ;| echo a"
+testcase "pipe echo" "-c" "echo a | echo b"
+testcase "pipe EOF" "-c" "echo a |"
+testcase "pipe syntax error" "-c" "echo a | ;"
+testcase "pipe lot of pipe" "-c" "echo hello | tr h p | tr e a | tr l m | tr o e"
+testcase "pipe with if" "-c" "echo a | if true; then echo b; fi"
+testcase "pipe with false" "-c" "false | echo after_false"
+testcase "pipe with true" "-c" "true | echo after_true"
+testcase "pipe multiple commands" "-c" "echo start | echo middle ; echo end"
+testcase "pipe multiple commands 2" "-c" "echo start ; echo middle | echo end"
+testcase "pipe syntax error multiple pipes" "-c" "echo a ||| echo b"
+testcase "pipe syntax error no cmd start" "-c" "| echo a"
+testcase "pipe syntax error start" "-c" " ;| echo a"
 
-testcase "test pipe no spaces" "-c" "echo a|echo b|echo c"
-testcase "test pipe with newlines" "-c" "echo a |
+testcase "pipe no spaces" "-c" "echo a|echo b|echo c"
+testcase "pipe with newlines" "-c" "echo a |
 echo b"
-testcase "test pipe with comment" "-c" "echo a | # comment
+testcase "pipe with comment" "-c" "echo a | # comment
 echo b"
-testcase "test pipe in else" "-c" "if false; then echo ko; else echo a | echo b; fi"
-testcase "test pipe empty echo" "-c" "echo | echo after_empty"
-testcase "test pipe exit codes" "-c" "false | false | true"
-testcase "test pipe after if" "-c" "if true; then echo a; fi | echo b"
+testcase "pipe in else" "-c" "if false; then echo ko; else echo a | echo b; fi"
+testcase "pipe empty echo" "-c" "echo | echo after_empty"
+testcase "pipe exit codes" "-c" "false | false | true"
+testcase "pipe after if" "-c" "if true; then echo a; fi | echo b"
 
 # ================================ Negation ================================
 

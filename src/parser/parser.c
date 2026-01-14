@@ -510,10 +510,50 @@ static struct ast *parser_pipeline(struct lex *lex)
     return (struct ast *)ast_pipe;
 }
 
-// See parser_command ( for now )
+/*
+ * Description:
+ * 	Parse and_or blocks separated by '&&' or '||'
+ * Return:
+ * 	*ast -> ast containing and_or blocks
+ * Verbose:
+ * 	Grammar:
+ * 		and_or = pipeline { ( '&&' | '||' ) {'\n'} pipeline } ;
+ */
 static struct ast *parser_and_or(struct lex *lex)
 {
-    return parser_pipeline(lex);
+    struct ast *left = parser_pipeline(lex);
+    if (!left)
+        return NULL;
+    // while and_or tokens
+    while (peek(lex) && (peek(lex)->token_type == AND || peek(lex)->token_type == OR))
+    {
+        struct ast_and_or *ast_and_or = (struct ast_and_or *)init_ast_and_or();
+        if (!ast_and_or)
+        {
+            free_ast(left);
+            return NULL;
+        }
+        
+        ast_and_or->left = left;
+        ast_and_or->operator = peek(lex)->token_type;
+        discard_token(pop(lex));
+        
+        while (peek(lex) && peek(lex)->token_type == NEWLINE)
+        {
+            discard_token(pop(lex));
+        }
+        // appel la deuxième partie de l'and_or
+        ast_and_or->right = parser_pipeline(lex);
+        if (!ast_and_or->right)
+        {
+            free_ast((struct ast *)ast_and_or);
+            return NULL;
+        }
+        
+        left = (struct ast *)ast_and_or;
+    }
+    
+    return left;
 }
 
 /*

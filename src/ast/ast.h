@@ -9,7 +9,8 @@ enum ast_type
     AST_PIPE,
     AST_CMD,
     AST_IF,
-    AST_LIST
+    AST_LIST,
+    AST_AND_OR
 };
 
 struct ast
@@ -53,6 +54,14 @@ struct ast_list
     struct ast_list *next;
 };
 
+struct ast_and_or
+{
+    struct ast base;
+    struct ast *left;
+    struct ast *right;
+    enum type operator;
+};
+
 typedef void (*ast_handler_free)(struct ast *);
 typedef int (*ast_handler_run)(struct ast *);
 
@@ -61,6 +70,7 @@ struct ast *init_ast_cmd(void);
 struct ast *init_ast_if(void);
 struct ast *init_ast_pipe(void);
 struct ast *init_ast_loop(void);
+struct ast *init_ast_and_or(void);
 void free_ast(struct ast *node);
 int run_ast(struct ast *node);
 
