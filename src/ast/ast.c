@@ -111,6 +111,22 @@ static int ast_run_list(struct ast *ast)
     return res;
 }
 
+static int ast_run_pipe(struct ast *ast)
+{
+    if (!ast)
+        return 2;
+    struct ast_pipe *ast_pipe = (struct ast_pipe *)ast;
+    if (!ast_pipe->cmd[0])
+        return 2;
+    int fd[2] = { 0, 0 };
+    int res = exec_pipe(ast_pipe->cmd, fd);
+    if (ast_pipe->negation)
+    {
+        res = !res;
+    }
+    return res;
+}
+
 //=========================== Lookup Tables ===================================
 
 int run_ast(struct ast *ast)
