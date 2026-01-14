@@ -54,9 +54,9 @@ static void ast_print_pipe(struct ast *ast)
     if (ast_pipe->negation)
         printf("!");
     printf("pipeline: ");
-    for (int i = 0; ast_pipe->cmd[i] != NULL; i++)
+    for (size_t i = 0; ast_pipe->cmd[i] != NULL; i++)
     {
-        ast_print_cmd((struct ast *)ast_pipe->cmd[i]);
+        print_ast((struct ast *)ast_pipe->cmd[i]);
     }
     printf(";");
 }

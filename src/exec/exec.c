@@ -57,11 +57,11 @@ int exec_pipe(struct ast_cmd **cmd, int fd[2])
     if (cmd[1] == NULL)
     {
         if (fd[0] == 0 && fd[1] == 0)
-            return exec_cmd(cmd[0]->words);
+            return run_ast((struct ast *)cmd[0]);
         dup2(fd[0], STDIN_FILENO);
         close(fd[1]);
         close(fd[0]);
-        int res = exec_cmd(cmd[0]->words);
+        int res = run_ast((struct ast *)cmd[0]);
         close(fd[0]);
         return res;
     }
@@ -74,7 +74,7 @@ int exec_pipe(struct ast_cmd **cmd, int fd[2])
             dup2(fd[1], STDOUT_FILENO);
             close(fd[0]);
             close(fd[1]);
-            return exec_cmd(cmd[0]->words);
+            return run_ast((struct ast *)cmd[0]);
         }
         int w;
         waitpid(child, &w, 0);
@@ -91,7 +91,7 @@ int exec_pipe(struct ast_cmd **cmd, int fd[2])
         dup2(fdbis[1], STDOUT_FILENO);
         close(fdbis[0]);
         close(fdbis[1]);
-        return exec_cmd(cmd[0]->words);
+        return run_ast((struct ast *)cmd[0]);
     }
     int w;
     waitpid(child, &w, 0);
