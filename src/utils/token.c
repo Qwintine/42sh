@@ -8,6 +8,7 @@ struct lex *init_lex(FILE *entry)
     lex->entry = entry;
     lex->current_token = NULL;
     lex->context = WORD;
+    lex->error = 0;
     return lex;
 }
 

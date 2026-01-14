@@ -32,6 +32,7 @@ struct lex
     FILE *entry;
     struct token *current_token;
     enum type context;
+    int error;
 };
 
 struct lex *init_lex(FILE *entry);

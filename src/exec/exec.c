@@ -67,7 +67,8 @@ int exec_pipe(struct ast_cmd **cmd, int fd[2])
     }
     if (fd[0] == 0 && fd[1] == 0)
     {
-        pipe(fd);
+        if (pipe(fd) == -1)
+            return 1;
         int child = fork();
         if (!child)
         {
@@ -84,7 +85,8 @@ int exec_pipe(struct ast_cmd **cmd, int fd[2])
     close(fd[1]);
     close(fd[0]);
     int fdbis[2];
-    pipe(fdbis);
+    if (pipe(fdbis) == -1)
+        return 1;
     int child = fork();
     if (!child)
     {

@@ -18,11 +18,16 @@ static struct token *peek(struct lex *lex)
 {
     if (lex)
     {
+        if (lex->error)
+            return NULL;
         if (!lex->current_token)
         {
             int res = lexer(lex);
             if (res)
+            {
+                lex->error = 1;
                 return NULL;
+            }
         }
         return lex->current_token;
     }
@@ -315,6 +320,8 @@ static struct ast *parser_simple_command(struct lex *lex)
                 goto ERROR;
             ast_cmd->words[ind] = NULL;
         }
+        if (!peek(lex))
+            goto ERROR;
         lex->context = KEYWORD;
         if (!peek(lex))
             goto ERROR;
@@ -337,15 +344,26 @@ static struct ast *parser_command(struct lex *lex)
     return parser_simple_command(lex);
 }
 
-// See parser_command ( for now )
+// Parse a pipeline of commands separated by pipes
+// Return NULL on error
+// Return ast_pipe on success
 static struct ast *parser_pipeline(struct lex *lex)
 {
     struct ast_pipe *ast_pipe = (struct ast_pipe *)init_ast_pipe();
-    if (peek(lex) && peek(lex)->token_type == NEGATION)
-        ast_pipe->negation = 1;
+    // while negation tokens
+    while (peek(lex) && peek(lex)->token_type == NEGATION)
+    {
+        ast_pipe->negation = !ast_pipe->negation;
+        discard_token(pop(lex));
+    }
     size_t ind = 0;
     int pipe = 1;
     struct ast_cmd *ast_cmd = (struct ast_cmd *)parser_command(lex);
+    if (!ast_cmd)
+    {
+        free_ast((struct ast *)ast_pipe);
+        return NULL;
+    }
     // while there is a pipe at the end and a command following
     while (ast_cmd && pipe)
     {
