@@ -489,7 +489,7 @@ int lexer(struct lex *lex)
     {
 	    if(tok->value && tok->value[0]
 	    && !quote_status.single_quote && !quote_status.double_quote
-	    && (tok->value[0] == '&' || tok->value[0] == '|')) // cas 2/3
+	    && (tok->value[0] == '&' || tok->value[0] == '|')) // cas 2/3 !!! verif redir entre dedans
 	    {
 		    int res;
 		    if(tok->value[0] == '&' || tok->value[0] == '|')

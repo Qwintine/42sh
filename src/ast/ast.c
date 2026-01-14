@@ -36,11 +36,19 @@ struct ast *init_ast_cmd(void)
     if (!node)
         return NULL;
     node->base.type = AST_CMD;
-    node->words = malloc(sizeof(char *));
-    node->redirs = malloc(sizeof(struct redir *));
-    node->words[0] = NULL;
-    node->redirs[0] = NULL;
-    node->r_count = 0;
+    node->words = calloc(1, sizeof(char *));
+    if(!node->words)
+    {
+	    free(node);
+	    return NULL;
+    }
+    node->redirs = calloc(1, sizeof(struct redir *));
+    if(!node->redirs)
+    {
+	    free(node->words);
+	    free(node);
+	    return NULL;
+    }
     return (struct ast *)node;
 }
 
@@ -59,7 +67,8 @@ static void ast_free_cmd(struct ast *ast)
     i = 0;
     while(ast_cmd->redirs[i])
     {
-	    free(ast_cmd->redirs[i]->word);
+	    free(ast_cmd->redirs[i]->target);
+	    free(ast_cmd->redirs[i]);
 	    i++;
     }
     free(ast_cmd->redirs);

@@ -21,7 +21,6 @@ struct ast_cmd
     struct ast base;
     char **words; // arguments de la commande
     struct redir **redirs; // redir à appliquer dans l'ordre
-    size_t r_count; 
 };
 
 struct ast_if
