@@ -2,6 +2,8 @@
 
 #include <stddef.h>
 #include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 #include "../exec/exec.h"
 
@@ -41,6 +43,18 @@ struct ast *init_ast_cmd(void)
     return (struct ast *)node;
 }
 
+struct ast *init_ast_pipe(void)
+{
+    struct ast_pipe *node = malloc(sizeof(struct ast_pipe));
+    if (!node)
+        return NULL;
+    node->base.type = AST_PIPE;
+    node->negation = 0;
+    node->cmd = malloc(sizeof(struct ast_cmd *));
+    node->cmd[0] = NULL;
+    return (struct ast *)node;
+}
+
 //===================== Free ast from specific type ===========================
 
 static void ast_free_cmd(struct ast *ast)
@@ -76,6 +90,20 @@ static void ast_free_list(struct ast *ast)
     if (ast_list->next)
         ast_free_list((struct ast *)ast_list->next);
     free(ast_list);
+}
+
+static void ast_free_pipe(struct ast *ast)
+{
+    struct ast_pipe *ast_pipe = (struct ast_pipe *)ast;
+    if (ast_pipe->cmd)
+    {
+        for (size_t i = 0; ast_pipe->cmd[i] != NULL; i++)
+        {
+            free_ast((struct ast *)ast_pipe->cmd[i]);
+        }
+        free(ast_pipe->cmd);
+    }
+    free(ast_pipe);
 }
 
 //===================== Run ast from specific type =============================
@@ -135,6 +163,7 @@ int run_ast(struct ast *ast)
         [AST_CMD] = &ast_run_cmd,
         [AST_IF] = &ast_run_if,
         [AST_LIST] = &ast_run_list,
+        [AST_PIPE] = &ast_run_pipe,
     };
     return ((*functions[ast->type])(ast));
 }
@@ -145,6 +174,7 @@ void free_ast(struct ast *ast)
         [AST_CMD] = &ast_free_cmd,
         [AST_IF] = &ast_free_if,
         [AST_LIST] = &ast_free_list,
+        [AST_PIPE] = &ast_free_pipe,
     };
     (*functions[ast->type])(ast);
 }

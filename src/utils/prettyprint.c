@@ -67,6 +67,7 @@ void print_ast(struct ast *ast)
         [AST_CMD] = &ast_print_cmd,
         [AST_IF] = &ast_print_if,
         [AST_LIST] = &ast_print_list,
+        [AST_PIPE] = &ast_print_pipe,
     };
     (*functions[ast->type])(ast);
 }

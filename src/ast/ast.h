@@ -5,6 +5,7 @@
 
 enum ast_type
 {
+    AST_PIPE,
     AST_CMD,
     AST_IF,
     AST_LIST
@@ -13,6 +14,13 @@ enum ast_type
 struct ast
 {
     enum ast_type type;
+};
+
+struct ast_pipe
+{
+    struct ast base;
+    int negation;
+    struct ast_cmd **cmd;
 };
 
 struct ast_cmd
@@ -42,6 +50,7 @@ typedef int (*ast_handler_run)(struct ast *);
 struct ast *init_ast_list(void);
 struct ast *init_ast_cmd(void);
 struct ast *init_ast_if(void);
+struct ast *init_ast_pipe(void);
 void free_ast(struct ast *node);
 int run_ast(struct ast *node);
 
