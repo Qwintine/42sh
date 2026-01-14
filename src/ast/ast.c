@@ -41,6 +41,18 @@ struct ast *init_ast_cmd(void)
     return (struct ast *)node;
 }
 
+struct ast *init_ast_loop(void)
+{
+    struct ast_loop *node = malloc(sizeof(struct ast_loop));
+    if (!node)
+        return NULL;
+    node->base.type = AST_LOOP;
+    node->truth = 0;
+    node->condition = NULL;
+    node->body = NULL;
+    return (struct ast *)node;
+}
+
 //===================== Free ast from specific type ===========================
 
 static void ast_free_cmd(struct ast *ast)
@@ -78,6 +90,16 @@ static void ast_free_list(struct ast *ast)
     free(ast_list);
 }
 
+static void ast_free_loop(struct ast *ast)
+{
+    struct ast_loop *ast_loop = (struct ast_loop *)ast;
+    if (ast_loop->condition)
+        free_ast(ast_loop->condition);
+    if (ast_loop->body)
+        free_ast(ast_loop->body);
+    free(ast_loop);
+}
+
 //===================== Run ast from specific type =============================
 
 static int ast_run_cmd(struct ast *ast)
@@ -111,11 +133,23 @@ static int ast_run_list(struct ast *ast)
     return res;
 }
 
+static int ast_run_loop(struct ast *ast)
+{
+    struct ast_loop *ast_loop = (struct ast_loop *)ast;
+    int res = 0;
+    if (!run_ast(ast_if->condition))
+        res = run_ast(ast_if->then_body);
+    else if (ast_if->else_body)
+        res = run_ast(ast_if->else_body);
+    return res;
+}
+
 //=========================== Lookup Tables ===================================
 
 int run_ast(struct ast *ast)
 {
     static const ast_handler_run functions[] = {
+        [AST_LOOP] = &ast_run_loop,
         [AST_CMD] = &ast_run_cmd,
         [AST_IF] = &ast_run_if,
         [AST_LIST] = &ast_run_list,
@@ -126,6 +160,7 @@ int run_ast(struct ast *ast)
 void free_ast(struct ast *ast)
 {
     static const ast_handler_free functions[] = {
+        [AST_LOOP] = &ast_free_loop,
         [AST_CMD] = &ast_free_cmd,
         [AST_IF] = &ast_free_if,
         [AST_LIST] = &ast_free_list,

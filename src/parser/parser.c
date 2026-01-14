@@ -267,7 +267,12 @@ ERROR:
 // See parser_rule_if ( for now )
 static struct ast *parser_shell_command(struct lex *lex)
 {
-    return parser_rule_if(lex);
+	if(peek(lex) && peek(lex)->token_type == IF)
+    	return parser_rule_if(lex);
+	else if(peek(lex) && peek(lex)->token_type == WHILE)
+		return parser_rule_while(lex);
+	else
+		return paser_rule_until(lex);
 }
 
 /*

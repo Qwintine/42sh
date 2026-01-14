@@ -5,6 +5,7 @@
 
 enum ast_type
 {
+    AST_LOOP,
     AST_CMD,
     AST_IF,
     AST_LIST
@@ -13,6 +14,14 @@ enum ast_type
 struct ast
 {
     enum ast_type type;
+};
+
+struct ast_loop
+{
+    struct ast base;
+    int truth;
+    struct ast *condition;
+    struct ast *body;
 };
 
 struct ast_cmd
