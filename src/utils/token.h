@@ -5,20 +5,27 @@
 
 enum type
 {
-    IF,
-    THEN,
-    ELIF,
-    ELSE,
-    FI,
-    NEGATION,
-    AND,
-    OR,
-    PIPE,
-    SEMI_COLON,
-    NEWLINE,
-    WORD,
-    KEYWORD,
-    END
+	IF,
+	THEN,
+	ELIF,
+	ELSE,
+	FI,
+	NEGATION,
+	AND,
+	OR,
+	REDIR_OUT, // >
+	REDIR_NO_CLOBB, // >|
+	REDIR_IN, // <
+	REDIR_APPEND, // >>
+	REDIR_DUP_OUT, // >&
+	REDIR_DUP_IN, // <&
+	REDIR_IO, // <>
+	PIPE,
+	SEMI_COLON,
+	NEWLINE,
+	WORD,
+	KEYWORD,
+	END
 };
 
 struct token

@@ -270,6 +270,8 @@ static int sub_switch_delim(struct lex *lex, struct token *tok, char *buf,
 	//int result = handle_expansion(); //TODO
     case '&': // case 6
     case '|':
+    case '>':
+    case '<':
     {
         int result = new_op(tok, (quote_status->double_quote
                                     || quote_status->single_quote), lex->entry,
@@ -360,17 +362,17 @@ static int sub_switch(struct lex *lex, struct token *tok, char *buf,
  * 	lex -> struct lexer
  * 	tok -> token being created
  * 	buf[] -> current character
- * 	quote_status -> if in quotes
  * Return:
  * 	0 Token created / 1 Error
  */
 static int manage_op(struct lex *lex, struct token *tok, char buf[])
 {
-	if(tok->value[strlen(tok->value)-1] == '&')
+	char first = tok->value[0];
+	if(first == '&')
 	{
 		if(buf[0] == '&')
 		{
-			concat(tok->value, '&');
+			tok->value = concat(tok->value, '&');
 			if(!tok->value)
 			{
 				return 1;
@@ -387,7 +389,7 @@ static int manage_op(struct lex *lex, struct token *tok, char buf[])
 	{
 		if(buf[0] == '|')
 		{
-			concat(tok->value, '|');
+			tok->value = concat(tok->value, '|');
 			if(!tok->value)
 			{
 				return 1;
@@ -404,7 +406,68 @@ static int manage_op(struct lex *lex, struct token *tok, char buf[])
 	return 0;
 }
 
-// Upgrade/Quality of life: Quote status from enum instead of int
+/*
+ * Description:
+ * 	Handle different redirections
+ * Arguments:
+ * 	lex-> struct lexer
+ * 	tok -> token being created
+ *      buf[] -> currrent character
+ * Return:
+ * 	0 Redir token created / 1 Error
+ */
+static int manage_redir(struct lex *lex, struct token *tok, char buf[])
+{
+	if(!tok->value || !tok->value[0]) // garde fou ( #crazy )
+		return 1;
+
+	char first = tok->value[0];
+	if(first == '>') // starts with >
+	{
+		if(buf[0] == '>')
+		{
+			tok->value = concat(tok->value, '>');
+			tok->token_type = REDIR_APPEND; // create token >>
+		}
+		else if(buf[0] == '&')
+		{
+			tok->value = concat(tok->value, '&');
+			tok->token_type = REDIR_DUP_OUT; // create token >&
+		}
+		else if(buf[0] == '|')
+		{
+			tok->value = concat(tok->value, '|');
+			tok->token_type = REDIR_NO_CLOBB; // create token >|
+		}
+		else
+		{
+			tok->token_type = REDIR_OUT; // token >
+			fseek(lex->entry, -1, SEEK_CUR);
+		}
+	}
+	else // <
+	{
+		if(buf[0] == '>')
+		{
+			tok->value = concat(tok->value, '>');
+			tok->token_type = REDIR_IO; // create token <>
+		}
+		else if (buf[0] == '&')
+		{
+			tok->value = concat(tok->value, '&');
+			tok->token_type = REDIR_DUP_IN; // create token <&
+		}
+		else
+		{
+			tok->token_type = REDIR_IN;
+			fseek(lex->entry, -1, SEEK_CUR);
+		}
+	}
+	if(!tok->value)
+		return 1;
+	lex->current_token = tok;
+	return 0;
+}
 
 /* Description:
  * 	transforme le FILE en token
@@ -424,12 +487,15 @@ int lexer(struct lex *lex)
         return 1;
     while (fread(buf, 1, 1, lex->entry))
     {
-	    //debut changement -> peut etre implem une size lors creation token 
 	    if(tok->value && tok->value[0]
 	    && !quote_status.single_quote && !quote_status.double_quote
-	    && (tok->value[0] == '&' || tok->value[0] == '|'))
+	    && (tok->value[0] == '&' || tok->value[0] == '|')) // cas 2/3
 	    {
-		    int res = manage_op(lex, tok, buf); // cas 2/3
+		    int res;
+		    if(tok->value[0] == '&' || tok->value[0] == '|')
+			    res = manage_op(lex, tok, buf); 
+		    else
+			    res = manage_redir(lex, tok, buf);
 		    if(!res)
 			    return 0;
 		    goto ERROR;

@@ -37,7 +37,10 @@ struct ast *init_ast_cmd(void)
         return NULL;
     node->base.type = AST_CMD;
     node->words = malloc(sizeof(char *));
+    node->redirs = malloc(sizeof(struct redir *));
     node->words[0] = NULL;
+    node->redirs[0] = NULL;
+    node->r_count = 0;
     return (struct ast *)node;
 }
 
@@ -53,6 +56,13 @@ static void ast_free_cmd(struct ast *ast)
         i++;
     }
     free(ast_cmd->words);
+    i = 0;
+    while(ast_cmd->redirs[i])
+    {
+	    free(ast_cmd->redirs[i]->word);
+	    i++;
+    }
+    free(ast_cmd->redirs);
     free(ast_cmd);
 }
 
@@ -80,6 +90,7 @@ static void ast_free_list(struct ast *ast)
 
 //===================== Run ast from specific type =============================
 
+//TODO adapter à redir
 static int ast_run_cmd(struct ast *ast)
 {
     if (!ast)
