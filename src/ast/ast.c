@@ -53,7 +53,7 @@ struct ast *init_ast_loop(void)
     node->condition = NULL;
     node->body = NULL;
     return (struct ast *)node;
-};
+}
 
 struct ast *init_ast_pipe(void)
 {
@@ -112,7 +112,7 @@ static void ast_free_loop(struct ast *ast)
     if (ast_loop->body)
         free_ast(ast_loop->body);
     free(ast_loop);
-};
+}
 
 static void ast_free_pipe(struct ast *ast)
 {
