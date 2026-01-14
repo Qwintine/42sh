@@ -144,6 +144,13 @@ static struct ast *parser_compound_list(struct lex *lex)
     return (struct ast *)head;
 }
 
+/*
+ * Description:
+ * 	Parse an elif block when called
+ * Verbose:
+ * 	Grammar:
+ * 		elif' compound_list 'then' compound_list [else_clause]
+ */
 static struct ast *parser_elif(struct lex *lex)
 {
     if (!peek(lex) || peek(lex)->token_type != ELIF)
@@ -269,6 +276,15 @@ ERROR:
     return NULL;
 }
 
+/*
+ * Description:
+ * 	Handle a 'while' block by calling corresponding parser at each step
+ * Return:
+ *
+ * Verbose:
+ * 	Grammar:
+ * 		'while' compound_list 'do' compound_list 'done' ;
+ */
 static struct ast *parser_rule_while(struct lex *lex)
 {
 	if(!peek(lex) || peek(lex)->token_type != WHILE)
@@ -308,6 +324,15 @@ ERROR:
     return NULL;
 }
 
+/*
+ * Description:
+ * 	Handle a 'until' block by calling corresponding parser at each step
+ * Return:
+ *
+ * Verbose:
+ * 	Grammar:
+ * 		'until' compound_list 'do' compound_list 'done' ;
+ */
 static struct ast *parser_rule_until(struct lex *lex)
 {
 	if(!peek(lex) || peek(lex)->token_type != UNTIL)
@@ -350,7 +375,15 @@ ERROR:
     return NULL;
 }
 
-// See parser_rule_if ( for now )
+/*
+ * Description:
+ * 	Handle a shell command block by calling corresponding parser at each step
+ * Return:
+ *
+ * Verbose:
+ * 	Grammar:
+ * 		either an if, while or until block
+ */
 static struct ast *parser_shell_command(struct lex *lex)
 {
 	if(peek(lex) && peek(lex)->token_type == IF)
@@ -367,9 +400,10 @@ static struct ast *parser_shell_command(struct lex *lex)
  * Return:
  * 	*ast -> ast containing a command to execute
  * Verbose:
- *
+ * 	Grammar:
+ * 		{prefix} WORD {element}
+ * 		| prefix {prefix}
  */
-// prochaine step -> ajouter gestion des préfixes ( cf. Trove Shell Syntax )
 static struct ast *parser_simple_command(struct lex *lex)
 {
     struct ast_cmd *ast_cmd = (struct ast_cmd *)init_ast_cmd();
@@ -389,7 +423,6 @@ static struct ast *parser_simple_command(struct lex *lex)
             free_ast((struct ast *)ast_cmd);
             return NULL;
         }
-        // ajouter test realloc pour sécu -> peu probable mais pas pro
         ast_cmd->words[ind] = NULL;
 
         lex->context = WORD;
@@ -421,10 +454,10 @@ ERROR:
     return NULL;
 }
 
-// prochaine step -> ajouter gestion  { redirections } après shell_command
+//parse shell and simple commands
 static struct ast *parser_command(struct lex *lex)
 {
-    if (peek(lex) && (peek(lex)->token_type == IF 
+    if (peek(lex) && (peek(lex)->token_type == IF
         || peek(lex)->token_type == WHILE
         || peek(lex)->token_type == UNTIL))
     {
