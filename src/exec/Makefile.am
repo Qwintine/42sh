@@ -3,7 +3,9 @@ noinst_LIBRARIES = libexec.a
 libexec_a_SOURCES =  \
   exec.c \
   exec.h \
-  ../builtin/echo.c
+  redir_exec.c \
+  rredir_exec.h \
+  ../builtin/echo.c 
 
 libexec_a_CPPFLAGS = -I$(top_srcdir)/src
 

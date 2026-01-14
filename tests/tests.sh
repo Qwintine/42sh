@@ -423,8 +423,6 @@ echo ok"
 
 testcase "lastcomment" "-c" "#lastcomment"
 
-#========================== Redirection Corner case ===========================
-#TODO
 
 #================================= Grammar ====================================
 
@@ -451,6 +449,24 @@ testcase "many_lines.sh" "" "tests/test_files/many_lines.sh"
 # ========================== Step 2 ========================================
 
 testcase "test & EOF" "-c" "echo a&"
+
+
+#========================== Redirection Corner case ===========================
+testcase "simple redirection" "-c" "echo hello > out
+cat out"
+testcase "overwrite redirection" "-c" "echo first > out
+echo second > out
+cat out"
+testcase "redirection builtin + restore" "-c" "echo A > out
+echo B
+cat out"
+testcase "redirection read from file" "-c" "echo hello > in
+cat < in"
+testcase "redirection restored stdin" "-c" "echo hi > in
+cat < in
+echo ok"
+
+
 
 # ================================== Pipe ==================================
 

@@ -6,6 +6,16 @@
 #include <unistd.h>
 
 #include "../builtin/echo.h"
+#include "redir_exec.h"
+
+static int is_builtin(char **words)
+{
+	if(!words || !words[0])
+		return 0;
+	return !strcmp(words[0], "true")
+		|| !strcmp(words[0], "false")
+		|| !strcmp(words[0], "echo");
+}
 
 static int exec_builtin(char **words)
 {
@@ -29,9 +39,9 @@ static int exec_builtin(char **words)
  *  	execute la commande en words[0] via un appelle si builtin, via fork->
  *  	execvp sinon.
  */
-int exec_cmd(char **words, struct redir **redirs)
+/*int exec_cmd(char **words, struct redir **redirs)
 {
-    if (!words || (!words[0] && !redirs[0]))
+    if (!words || !redirs || (!words[0] && !redirs[0]))
         return 2;
     int r = exec_builtin(words);
     if (r == -1)
@@ -48,6 +58,37 @@ int exec_cmd(char **words, struct redir **redirs)
         r = WEXITSTATUS(wstat);
     }
     return r;
+}*/
+
+int exec_cmd(char **words, struct redir **redirs)
+{
+    if (!words || !redirs || (!words[0] && !redirs[0]))
+        return 2;
+    if (is_builtin(words))
+    {
+	    struct redir_saved redir_saved;
+	    if(redir_apply(redirs, &redir_saved))
+		    _exit(1);
+	    int r = exec_builtin(words);
+	    restore_redirs(&redir_saved);
+	    return r;
+    }
+    pid_t pid = fork();
+    if(pid ==0)
+    {
+	    struct redir_saved redir_saved;
+	    if(redir_apply(redirs, &redir_saved))
+		    _exit(1);
+	    execvp(words[0], words);
+	    _exit(127);
+    }
+    int status;
+    waitpid(pid, &status, 0);
+    if(WIFEXITED(status))
+    {
+	    return WEXITSTATUS(status); 
+    }
+    return 128;
 }
 
 int exec_pipe(struct ast_cmd **cmd, int fd[2])
