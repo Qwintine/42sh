@@ -221,9 +221,7 @@ static struct ast *parser_else_clause(struct lex *lex)
  */
 static struct ast *parser_rule_if(struct lex *lex)
 {
-    if (!peek(lex)
-        || peek(lex)->token_type != IF) // si autre keyword (pas con wlh, bien
-                                        // joué Victor1 (désolé bébou Victor2))
+    if (!peek(lex) || peek(lex)->token_type != IF) // si autre keyword
         return NULL;
     discard_token(pop(lex)); // consomme if
 
@@ -240,7 +238,8 @@ static struct ast *parser_rule_if(struct lex *lex)
         goto ERROR;
     }
     discard_token(pop(lex));
-    ast_if->then_body = parser_compound_list(lex);
+
+	ast_if->then_body = parser_compound_list(lex);
     if (!ast_if->then_body)
     {
         goto ERROR;
@@ -266,6 +265,83 @@ static struct ast *parser_rule_if(struct lex *lex)
 
 ERROR:
     free_ast((struct ast *)ast_if);
+    return NULL;
+}
+
+static struct ast *parser_rule_while(struct lex *lex)
+{
+	if(!peek(lex) || peek(lex)->token_type != WHILE)
+		return NULL;
+	discard_token(pop(lex));
+
+	struct ast_loop *ast_loop = (struct ast_loop *)init_ast_loop();
+
+	ast_loop->condition = parser_compound_list(lex);
+	if(!ast_loop->condition)
+	{
+		goto ERROR;
+	}
+
+	if(!peek(lex) || peek(lex)->token_type != DO)
+	{
+		goto ERROR;
+	}
+	discard_token(pop(lex));
+
+	ast_loop->body = parser_compound_list(lex);
+	if(!ast_loop->body)
+	{
+		goto ERROR;
+	}
+	
+	if(!peek(lex) || peek(lex)->token_type != DONE)
+	{
+		goto ERROR;
+	}
+	discard_token(pop(lex));
+
+ERROR:
+    free_ast((struct ast *)ast_loop);
+    return NULL;
+}
+
+static struct ast *parser_rule_until(struct lex *lex)
+{
+	if(!peek(lex) || peek(lex)->token_type != UNTIL)
+		return NULL;
+	discard_token(pop(lex));
+
+	struct ast_loop *ast_loop = (struct ast_loop *)init_ast_loop();
+
+	//inverse la condition
+	ast_loop->truth = 1;
+
+	ast_loop->condition = parser_compound_list(lex);
+	if(!ast_loop->condition)
+	{
+		goto ERROR;
+	}
+
+	if(!peek(lex) || peek(lex)->token_type != DO)
+	{
+		goto ERROR;
+	}
+	discard_token(pop(lex));
+
+	ast_loop->body = parser_compound_list(lex);
+	if(!ast_loop->body)
+	{
+		goto ERROR;
+	}
+	
+	if(!peek(lex) || peek(lex)->token_type != DONE)
+	{
+		goto ERROR;
+	}
+	discard_token(pop(lex));
+
+ERROR:
+    free_ast((struct ast *)ast_loop);
     return NULL;
 }
 
