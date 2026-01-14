@@ -357,7 +357,7 @@ static struct ast *parser_pipeline(struct lex *lex)
         pipe = (peek(lex) && peek(lex)->token_type == PIPE);
         if (pipe)
             discard_token(pop(lex));
-        while (peek(lex) && peek(lex)->token_type == NEWLINE)
+        while (pipe && peek(lex) && peek(lex)->token_type == NEWLINE)
             discard_token(pop(lex));
         ast_cmd = (struct ast_cmd *)parser_command(lex);
     }
