@@ -181,6 +181,13 @@ static struct token *end_token(struct token *tok, struct lex *lex)
             if (lex->context != WORD && lex->context != KEYWORD)
                 return NULL;
         }
+        else if (strlen(tok->value) == 1)
+        {
+            if (tok->value[0] == '&')
+                tok->token_type = SEMI_COLON;
+            else if (tok->value[0] == '|')
+                tok->token_type = PIPE;
+        }
         return tok;
     }
     return NULL;
