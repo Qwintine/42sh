@@ -159,6 +159,15 @@ static struct ast *parser_compound_list(struct lex *lex)
         discard_token(pop(lex));
     }
 
+    if (!peek(lex) || peek(lex)->token_type == THEN 
+        || peek(lex)->token_type == ELSE || peek(lex)->token_type == ELIF
+        || peek(lex)->token_type == FI || peek(lex)->token_type == DO
+        || peek(lex)->token_type == DONE || peek(lex)->token_type == END
+        || peek(lex)->token_type == SEMI_COLON)
+    {
+        return NULL;
+    }
+
     struct ast_list *head = (struct ast_list *)init_ast_list();
     struct ast_list *current = head;
 
@@ -186,6 +195,12 @@ static struct ast *parser_compound_list(struct lex *lex)
             || peek(lex)->token_type == DO || peek(lex)->token_type == DONE)
         {
             break;
+        }
+
+        if (peek(lex) && peek(lex)->token_type == SEMI_COLON)
+        {
+            free_ast((struct ast *)head);
+            return NULL;
         }
 
         struct ast_list *new_node = (struct ast_list *)init_ast_list();
@@ -549,6 +564,11 @@ static struct ast *parser_pipeline(struct lex *lex)
         ast_pipe->negation = !ast_pipe->negation;
         discard_token(pop(lex));
     }
+    if (peek(lex) && peek(lex)->token_type == PIPE)
+    {
+        free_ast((struct ast *)ast_pipe);
+        return NULL;
+    }
     size_t ind = 0;
     int pipe = 1;
     struct ast_cmd *ast_cmd = (struct ast_cmd *)parser_command(lex);
@@ -630,6 +650,12 @@ static struct ast *parser_list(struct lex *lex)
         if (!peek(lex) || peek(lex)->token_type == END)
             break;
 
+        if (peek(lex) && peek(lex)->token_type == SEMI_COLON)
+        {
+            free_ast((struct ast *)head);
+            return NULL;
+        }
+
         struct ast_list *new_node = (struct ast_list *)
             init_ast_list(); // éléments liste de block de and_or
         new_node->elt = parser_and_or(lex); // récursion sur ast type and_or
@@ -686,7 +712,11 @@ struct ast *parser(FILE *entry, int *eof)
         free_lex(lex);
         return init_ast_list();
     }
-
+    if (peek(lex) && peek(lex)->token_type == SEMI_COLON)
+    {
+        free_lex(lex);
+        return NULL;
+    }
     struct ast *ast =
         parser_list(lex); // récursion sur ast type list ( cf. parser_list )
 
