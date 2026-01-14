@@ -448,6 +448,19 @@ testcase "test_limite_if.sh" "" "tests/test_files/test_limite_if.sh"
 testcase "test_limite_else.sh" "" "tests/test_files/test_limite_else.sh"
 testcase "many_lines.sh" "" "tests/test_files/many_lines.sh"
 
+# ========================== Step 2 ========================================
+
+# ================================== Pipe ==================================
+
+testcase "test pipe echo" "-c" "echo a | echo b"
+testcase "test pipe EOF" "-c" "echo a |"
+testcase "test pipe syntax error" "-c" "echo a | ;"
+testcase "test pipe lot of pipe" "-c" "echo hello | tr h p | tr e a | tr l m | tr o e"
+
+# ================================ Negation ================================
+
+testcase "not true" "-c" "! true"
+
 printf "Fonctionel => Total: %d | Passed: %d | Failed: %d\n\n" "$TOTAL" "$PASS" "$((TOTAL - PASS))"
 
 if [ "${COVERAGE:-no}" = "yes" ]; then
