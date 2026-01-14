@@ -125,7 +125,8 @@ static struct ast *parser_compound_list(struct lex *lex)
 
         if (!peek(lex) || peek(lex)->token_type == END
             || peek(lex)->token_type == THEN || peek(lex)->token_type == ELSE
-            || peek(lex)->token_type == ELIF || peek(lex)->token_type == FI)
+            || peek(lex)->token_type == ELIF || peek(lex)->token_type == FI
+            || peek(lex)->token_type == DO || peek(lex)->token_type == DONE)
         {
             break;
         }
@@ -300,6 +301,8 @@ static struct ast *parser_rule_while(struct lex *lex)
 	}
 	discard_token(pop(lex));
 
+    return (struct ast *)ast_loop;
+
 ERROR:
     free_ast((struct ast *)ast_loop);
     return NULL;
@@ -340,6 +343,8 @@ static struct ast *parser_rule_until(struct lex *lex)
 	}
 	discard_token(pop(lex));
 
+    return (struct ast *)ast_loop;
+
 ERROR:
     free_ast((struct ast *)ast_loop);
     return NULL;
@@ -353,7 +358,7 @@ static struct ast *parser_shell_command(struct lex *lex)
 	else if(peek(lex) && peek(lex)->token_type == WHILE)
 		return parser_rule_while(lex);
 	else
-		return paser_rule_until(lex);
+		return parser_rule_until(lex);
 }
 
 /*
@@ -419,7 +424,9 @@ ERROR:
 // prochaine step -> ajouter gestion  { redirections } après shell_command
 static struct ast *parser_command(struct lex *lex)
 {
-    if (peek(lex) && peek(lex)->token_type == IF)
+    if (peek(lex) && (peek(lex)->token_type == IF 
+        || peek(lex)->token_type == WHILE
+        || peek(lex)->token_type == UNTIL))
     {
         return parser_shell_command(lex);
     }

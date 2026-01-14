@@ -504,6 +504,18 @@ testcase "negation of if" "-c" "! if true; then true; fi"
 # false"
 testcase "pipe then negation" "-c" "echo test | ! false"
 
+# ================================== LOOP =================================
+
+testcase "while false" "-c" "while false; do echo not ok; done"
+testcase "while syntax error missing do" "-c" "while true; echo not ok; done"
+testcase "while syntax error missing done" "-c" "while true; do echo not ok;"
+testcase "while syntax error no condition" "-c" "while ; do echo not ok; done"
+
+testcase "until true" "-c" "until true; do echo not ok; done"
+testcase "until syntax error missing do" "-c" "until false; echo not ok; done"
+testcase "until syntax error missing done" "-c" "until false; do echo not ok;"
+testcase "until syntax error no condition" "-c" "until ; do echo not ok; done"
+
 printf "Fonctionel => Total: %d | Passed: %d | Failed: %d\n\n" "$TOTAL" "$PASS" "$((TOTAL - PASS))"
 
 if [ "${COVERAGE:-no}" = "yes" ]; then
