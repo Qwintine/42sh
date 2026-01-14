@@ -6,7 +6,7 @@
 struct redir
 {
 	char *io_num; // NULL default
-	enum token_type type;
+	enum type type;
 	char *target; // target file
 };
 

@@ -5,6 +5,7 @@
 #include <ctype.h>
 #include "../lexer/lexer.h"
 #include "../utils/token.h"
+#include "../utils/redir.h"
 
 /*
  * Description:
@@ -84,23 +85,6 @@ static int is_redir(enum type type)
 		|| type == REDIR_NO_CLOBB || type == REDIR_IO;
 }
 
-//a faire dans lexer
-static int all_digits(const char *string) //io number build only with unseparated digits
-{
-	if(!string || !*string)
-	{
-		return 0;
-	}
-	for(size_t i = 0; string[i]; i++)
-	{
-		if(!isdigit(string[i]))
-		{
-			return 0; 
-		}
-	}
-	return 1;
-}
-
 //============================ Parser Grammar =================================
 
 static struct ast *parser_and_or(struct lex *lex);
@@ -108,38 +92,51 @@ static struct ast *parser_else_clause(struct lex *lex);
 static struct ast *parser_list(struct lex *lex);
 
 
-static struct redir *parse_redirection(struct lex *lex)
+static int parser_redir(struct lex *lex, struct ast_cmd *ast_cmd)
 {
+	struct redir *redir = init_redir();
+	if(peek(lex) && peek(lex)->token_type == IO_NUMBER)
+	{
+		redir->io_num = peek(lex)->value;
+		discard_token(pop(lex));
+	}
+
 	if(!peek(lex) || !is_redir(peek(lex)->token_type))
-		return NULL;
-	struct token *op = pop(lex); // <, >, etc... not && or ||
+	{
+		free_redir(redir);
+		return 1;
+	}
+	redir->type = peek(lex)->token_type;
+	discard_token(pop(lex));
+	lex->context = WORD;
+	if(!peek(lex) || peek(lex)->token_type != WORD)
+	{
+		free_redir(redir);
+		return 1;
+	}
+	redir->target = peek(lex)->value;
+	discard_token(pop(lex));
+	size_t ind = 0;
+	while(ast_cmd->redirs[ind])
+	{
+		ind++;
+	}
+	ast_cmd->redirs[ind++] = redir;
+	ast_cmd->redirs = realloc(ast_cmd->redirs,
+			(ind+1) * sizeof(struct ast_cmd *));
+	
+	if(!ast_cmd->redirs)
+	{
+		return 1;
+	}
+	ast_cmd->redirs[ind] = NULL;
+	return 0;
+}
 
-	if(!peek(lex) || peek(lex)->token_type != WORD) // no target for redir
-	{
-		free_token(op);
-		return NULL;
-	}
-
-	struct token *target = pop(lex);
-	struct redir *redir = malloc(sizeof(struct redir )); // créer init redir dans redir.c 
-	if(!redir)
-	{
-		free_token(op);
-		free_token(target);
-		return NULL;
-	}
-	redir->io_num = -1;
-	redir->target = target->value;
-	free(target); // didn't free value because used by redir
-	if(tok_to_redir(op->token_type, &redir->type))
-	{
-		free(redir->target);
-		free(redir); //créer free_redir dans redir.c
-		free_token(op);
-		return NULL;
-	}
-	free_token(op);
-	return redir;
+/* TODO */
+static int parser_prefix(struct lex *lex, struct ast_cmd *ast_cmd)
+{
+	return parser_redir(lex, ast_cmd);
 }
 
 /*
@@ -465,26 +462,33 @@ static struct ast *parser_shell_command(struct lex *lex)
  * 		| prefix {prefix}
  */
 // prochaine step -> ajouter gestion des préfixes ( cf. Trove Shell Syntax )
-/*static struct ast *parser_simple_command(struct lex *lex)
+static struct ast *parser_simple_command(struct lex *lex)
 {
     struct ast_cmd *ast_cmd = (struct ast_cmd *)init_ast_cmd();
-    size_t ind = 0;
+    size_t w = 0;
+    while(peek(lex) && peek(lex)->token_type == IO_NUMBER)
+    {
+	    if(parser_prefix(lex, ast_cmd))
+	    {
+		    goto ERROR;
+	    }
+    }
 
     if (peek(lex) && peek(lex)->token_type == WORD)
     {
         struct token *tok = pop(lex);
         if (!tok)
             goto ERROR;
-        ast_cmd->words[ind] = tok->value;
+        ast_cmd->words[w] = tok->value;
         free(tok);
-        ind++;
-        ast_cmd->words = realloc(ast_cmd->words, (ind + 1) * sizeof(char *));
+        w++;
+        ast_cmd->words = realloc(ast_cmd->words, (w + 1) * sizeof(char *));
         if (!ast_cmd->words)
         {
             free_ast((struct ast *)ast_cmd);
             return NULL;
         }
-        ast_cmd->words[ind] = NULL;
+        ast_cmd->words[w] = NULL;
 
         lex->context = WORD;
         while (peek(lex) != NULL && peek(lex)->token_type == WORD)
@@ -492,14 +496,14 @@ static struct ast *parser_shell_command(struct lex *lex)
             tok = pop(lex);
             if (!tok)
                 goto ERROR;
-            ast_cmd->words[ind] = tok->value;
+            ast_cmd->words[w] = tok->value;
             free(tok);
-            ind++;
+            w++;
             ast_cmd->words =
-                realloc(ast_cmd->words, (ind + 1) * sizeof(char *));
+                realloc(ast_cmd->words, (w + 1) * sizeof(char *));
             if (!ast_cmd->words)
                 goto ERROR;
-            ast_cmd->words[ind] = NULL;
+            ast_cmd->words[w] = NULL;
         }
         if (!peek(lex))
             goto ERROR;
@@ -508,100 +512,14 @@ static struct ast *parser_shell_command(struct lex *lex)
             goto ERROR;
         return (struct ast *)ast_cmd;
     }
+
     lex->context = KEYWORD;
-
-ERROR:
-    free_ast((struct ast *)ast_cmd);
-    return NULL;
-}*/
-
-static struct ast *parser_simple_command(struct lex *lex)
-{
-    struct ast_cmd *ast_cmd = (struct ast_cmd *)init_ast_cmd();
-    size_t w = 0;
-    size_t r = 0;
-
-    //  WORD or redir (prefix-only)
-    if (!peek(lex) || (peek(lex)->token_type != WORD && !is_redir(peek(lex)->token_type)))
-        goto ERROR;
-
-    lex->context = WORD;
-
-    while (peek(lex) && (peek(lex)->token_type == WORD || is_redir(peek(lex)->token_type)))
+    if(ast_cmd->redirs)
     {
-        if (peek(lex)->token_type == WORD) // word
-        {
-		struct token *tok = pop(lex);
-		if(tok && all_digits(tok->value))
-		{
-			if(peek(lex) && is_redir(peek(lex)->token_type)) //  io num 
-			{
-				int io = atoi(tok->value);
-				free_token(tok);
-				struct redir *redir = parse_redirection(lex);
-				if(!redir)
-					goto ERROR;
-				redir->io_num = io;
-				ast_cmd->redirs[r] = redir;
-				r++;
-				ast_cmd->redirs = realloc(ast_cmd->redirs, (r+1) * sizeof(struct redir ));
-				if(!ast_cmd->redirs)
-				{
-					goto ERROR;
-				}
-				ast_cmd->redirs[r] = NULL;
-				continue;
-			}
-			// normal word
-			ast_cmd->words[w] = tok->value;
-			w++;
-			free(tok);
-			ast_cmd->words = realloc(ast_cmd->words, (w+1) * sizeof(char *));
-			if(!ast_cmd->words)
-				goto ERROR;
-			ast_cmd->words[w] = NULL;
-		}
-		else
-		{	
-			if (!tok) 
-				goto ERROR;
-
-			ast_cmd->words[w] = tok->value;
-			free(tok);
-			w++;
-
-			ast_cmd->words = realloc(ast_cmd->words, (w + 1) * sizeof(char *));
-			if (!ast_cmd->words) 
-				goto ERROR;
-			ast_cmd->words[w] = NULL;
-		}
-        }
-        else // redir
-        {
-            struct redir *redir = parse_redirection(lex);
-            if (!redir) 
-		    goto ERROR;
-
-            ast_cmd->redirs[r] = redir;
-            r++;
-
-            ast_cmd->redirs = realloc(ast_cmd->redirs, (r + 1) * sizeof(struct redir *));
-            if (!ast_cmd->redirs) 
-		    goto ERROR;
-            ast_cmd->redirs[r] = NULL;
-        }
+	    return (struct ast *)ast_cmd;
     }
 
-    lex->context = KEYWORD;
-
-    // at least one must exist
-    if (w == 0 && r == 0)
-        goto ERROR;
-
-    return (struct ast *)ast_cmd;
-
 ERROR:
-    lex->context = KEYWORD;
     free_ast((struct ast *)ast_cmd);
     return NULL;
 }
@@ -655,7 +573,7 @@ static struct ast *parser_pipeline(struct lex *lex)
         ast_cmd = (struct ast_cmd *)parser_command(lex);
     }
     // There was a pipe but no command after it
-    if (pipe)
+    if (pipe) // Error parser_command
     {
         free_ast((struct ast *)ast_pipe);
         return NULL;

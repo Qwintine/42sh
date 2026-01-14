@@ -29,9 +29,9 @@ static int exec_builtin(char **words)
  *  	execute la commande en words[0] via un appelle si builtin, via fork->
  *  	execvp sinon.
  */
-int exec_cmd(char **words)
+int exec_cmd(char **words, struct redir **redirs)
 {
-    if (!words || !words[0])
+    if (!words || (!words[0] && !redirs[0]))
         return 2;
     int r = exec_builtin(words);
     if (r == -1)

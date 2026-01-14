@@ -1,7 +1,7 @@
-
+#include <stdlib.h>
 #include "redir.h"
 
-struct redir *init_redir(enum redir_type)
+struct redir *init_redir(void)
 {
 	struct redir *redir = malloc(sizeof(struct redir));
 	if(!redir)
@@ -10,9 +10,18 @@ struct redir *init_redir(enum redir_type)
 	}
 	redir->io_num = NULL;
 	redir->target = NULL;
+	return redir;
 }
 
 void free_redir(struct redir *redir)
 {
-
+	if(redir->io_num)
+	{
+		free(redir->io_num);
+	}
+	if(redir->target)
+	{
+		free(redir->target);
+	}
+	free(redir);
 }
