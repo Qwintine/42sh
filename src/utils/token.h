@@ -17,12 +17,13 @@ enum type
     DONE,
     IN,
     REDIR_OUT, // >
-	REDIR_NO_CLOBB, // >|
-	REDIR_IN, // <
+    REDIR_IN, // <
 	REDIR_APPEND, // >>
 	REDIR_DUP_OUT, // >&
 	REDIR_DUP_IN, // <&
+    REDIR_NO_CLOBB, // >|
 	REDIR_IO, // <>
+    IO_NUMBER,
     NEGATION,
     AND,
     OR,

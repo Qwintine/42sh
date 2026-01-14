@@ -301,6 +301,16 @@ enum type check_type(char *value)
     return WORD;
 }
 
+static int all_digit(char *str)
+{
+    for (size_t i = 0; i < strlen(str); i++)
+    {
+        if (str[i] < '0' || str[i] > '9')
+            return 0;
+    }
+    return 1;
+}
+
 static int new_op(struct token *tok, int quote, FILE *entry, char val)
 {
     if (!quote)
@@ -308,6 +318,9 @@ static int new_op(struct token *tok, int quote, FILE *entry, char val)
         if (strlen(tok->value) > 0)
         {
             fseek(entry, -1, SEEK_CUR);
+            if (val == '>' || val == '<')
+                if(all_digit(tok->value))
+                    tok->token_type = IO_NUMBER;
             return 1;
         }
         tok->value = concat(tok->value, val);
@@ -486,7 +499,7 @@ static int manage_op(struct lex *lex, struct token *tok, char buf[])
  */
 static int manage_redir(struct lex *lex, struct token *tok, char buf[])
 {
-	if(!tok->value || !tok->value[0]) // garde fou ( #crazy )
+	if(!tok->value || !tok->value[0]) // garde fou ( #wankilcrazy )
 		return 1;
 
 	char first = tok->value[0];
@@ -557,7 +570,8 @@ int lexer(struct lex *lex)
     {
 	    if(tok->value && tok->value[0]
 	    && !quote_status.single_quote && !quote_status.double_quote
-	    && (tok->value[0] == '&' || tok->value[0] == '|')) // cas 2/3 !!! verif redir entre dedans
+	    && (tok->value[0] == '&' || tok->value[0] == '|' ||
+            tok->value[0] == '>' || tok->value[0] == '<')) // cas 2/3 !!! verif redir entre dedans nuh uh ?
 	    {
 		    int res;
 		    if(tok->value[0] == '&' || tok->value[0] == '|')
