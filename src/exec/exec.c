@@ -49,3 +49,53 @@ int exec_cmd(char **words)
     }
     return r;
 }
+
+int exec_pipe(struct ast_cmd **cmd, int fd[2])
+{
+    if (cmd[0] == NULL)
+        return 2;
+    if (cmd[1] == NULL)
+    {
+        if (fd[0] == 0 && fd[1] == 0)
+            return run_ast((struct ast *)cmd[0]);
+        dup2(fd[0], STDIN_FILENO);
+        close(fd[1]);
+        close(fd[0]);
+        int res = run_ast((struct ast *)cmd[0]);
+        close(fd[0]);
+        return res;
+    }
+    if (fd[0] == 0 && fd[1] == 0)
+    {
+        if (pipe(fd) == -1)
+            return 1;
+        int child = fork();
+        if (!child)
+        {
+            dup2(fd[1], STDOUT_FILENO);
+            close(fd[0]);
+            close(fd[1]);
+            return run_ast((struct ast *)cmd[0]);
+        }
+        int w;
+        waitpid(child, &w, 0);
+        return exec_pipe(cmd + 1, fd);
+    }
+    dup2(fd[0], STDIN_FILENO);
+    close(fd[1]);
+    close(fd[0]);
+    int fdbis[2];
+    if (pipe(fdbis) == -1)
+        return 1;
+    int child = fork();
+    if (!child)
+    {
+        dup2(fdbis[1], STDOUT_FILENO);
+        close(fdbis[0]);
+        close(fdbis[1]);
+        return run_ast((struct ast *)cmd[0]);
+    }
+    int w;
+    waitpid(child, &w, 0);
+    return exec_pipe(cmd + 1, fdbis);
+}

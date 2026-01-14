@@ -18,11 +18,16 @@ static struct token *peek(struct lex *lex)
 {
     if (lex)
     {
+        if (lex->error)
+            return NULL;
         if (!lex->current_token)
         {
             int res = lexer(lex);
             if (res)
+            {
+                lex->error = 1;
                 return NULL;
+            }
         }
         return lex->current_token;
     }
@@ -77,42 +82,6 @@ static int is_redir(enum type type)
 	return type == REDIR_OUT || type == REDIR_IN || type == REDIR_APPEND 
 		||  type == REDIR_DUP_OUT || type == REDIR_DUP_IN 
 		|| type == REDIR_NO_CLOBB || type == REDIR_IO;
-}
-
-//possible de supprimer si on merge les type de tok et de redir
-static int tok_to_redir(enum type token_type, enum redir_type *out)
-{
-	if(out)
-	{
-		switch(token_type)
-		{
-			case REDIR_OUT:
-				*out = R_OUT;
-				break;
-			case REDIR_IN:
-				*out = R_IN;
-				break;
-			case REDIR_APPEND:
-				*out = R_APPEND;
-				break;
-			case REDIR_DUP_OUT:
-				*out = R_DUP_OUT;
-				break;
-			case REDIR_DUP_IN:
-				*out = R_DUP_IN;
-				break;
-			case REDIR_NO_CLOBB:
-				*out = R_NO_CLOBB;
-				break;
-			case REDIR_IO:
-				*out = R_IO;
-				break;
-			default:
-				return 1;
-		}
-		return 0;
-	}
-	return 1; 
 }
 
 //a faire dans lexer
@@ -216,7 +185,8 @@ static struct ast *parser_compound_list(struct lex *lex)
 
         if (!peek(lex) || peek(lex)->token_type == END
             || peek(lex)->token_type == THEN || peek(lex)->token_type == ELSE
-            || peek(lex)->token_type == ELIF || peek(lex)->token_type == FI)
+            || peek(lex)->token_type == ELIF || peek(lex)->token_type == FI
+            || peek(lex)->token_type == DO || peek(lex)->token_type == DONE)
         {
             break;
         }
@@ -234,6 +204,13 @@ static struct ast *parser_compound_list(struct lex *lex)
     return (struct ast *)head;
 }
 
+/*
+ * Description:
+ * 	Parse an elif block when called
+ * Verbose:
+ * 	Grammar:
+ * 		elif' compound_list 'then' compound_list [else_clause]
+ */
 static struct ast *parser_elif(struct lex *lex)
 {
     if (!peek(lex) || peek(lex)->token_type != ELIF)
@@ -312,9 +289,7 @@ static struct ast *parser_else_clause(struct lex *lex)
  */
 static struct ast *parser_rule_if(struct lex *lex)
 {
-    if (!peek(lex)
-        || peek(lex)->token_type != IF) // si autre keyword (pas con wlh, bien
-                                        // joué Victor1 (désolé bébou Victor2))
+    if (!peek(lex) || peek(lex)->token_type != IF) // si autre keyword
         return NULL;
     discard_token(pop(lex)); // consomme if
 
@@ -331,7 +306,8 @@ static struct ast *parser_rule_if(struct lex *lex)
         goto ERROR;
     }
     discard_token(pop(lex));
-    ast_if->then_body = parser_compound_list(lex);
+
+	ast_if->then_body = parser_compound_list(lex);
     if (!ast_if->then_body)
     {
         goto ERROR;
@@ -360,10 +336,122 @@ ERROR:
     return NULL;
 }
 
-// See parser_rule_if ( for now )
+/*
+ * Description:
+ * 	Handle a 'while' block by calling corresponding parser at each step
+ * Return:
+ *
+ * Verbose:
+ * 	Grammar:
+ * 		'while' compound_list 'do' compound_list 'done' ;
+ */
+static struct ast *parser_rule_while(struct lex *lex)
+{
+	if(!peek(lex) || peek(lex)->token_type != WHILE)
+		return NULL;
+	discard_token(pop(lex));
+
+	struct ast_loop *ast_loop = (struct ast_loop *)init_ast_loop();
+
+	ast_loop->condition = parser_compound_list(lex);
+	if(!ast_loop->condition)
+	{
+		goto ERROR;
+	}
+
+	if(!peek(lex) || peek(lex)->token_type != DO)
+	{
+		goto ERROR;
+	}
+	discard_token(pop(lex));
+
+	ast_loop->body = parser_compound_list(lex);
+	if(!ast_loop->body)
+	{
+		goto ERROR;
+	}
+	
+	if(!peek(lex) || peek(lex)->token_type != DONE)
+	{
+		goto ERROR;
+	}
+	discard_token(pop(lex));
+
+    return (struct ast *)ast_loop;
+
+ERROR:
+    free_ast((struct ast *)ast_loop);
+    return NULL;
+}
+
+/*
+ * Description:
+ * 	Handle a 'until' block by calling corresponding parser at each step
+ * Return:
+ *
+ * Verbose:
+ * 	Grammar:
+ * 		'until' compound_list 'do' compound_list 'done' ;
+ */
+static struct ast *parser_rule_until(struct lex *lex)
+{
+	if(!peek(lex) || peek(lex)->token_type != UNTIL)
+		return NULL;
+	discard_token(pop(lex));
+
+	struct ast_loop *ast_loop = (struct ast_loop *)init_ast_loop();
+
+	//inverse la condition
+	ast_loop->truth = 1;
+
+	ast_loop->condition = parser_compound_list(lex);
+	if(!ast_loop->condition)
+	{
+		goto ERROR;
+	}
+
+	if(!peek(lex) || peek(lex)->token_type != DO)
+	{
+		goto ERROR;
+	}
+	discard_token(pop(lex));
+
+	ast_loop->body = parser_compound_list(lex);
+	if(!ast_loop->body)
+	{
+		goto ERROR;
+	}
+	
+	if(!peek(lex) || peek(lex)->token_type != DONE)
+	{
+		goto ERROR;
+	}
+	discard_token(pop(lex));
+
+    return (struct ast *)ast_loop;
+
+ERROR:
+    free_ast((struct ast *)ast_loop);
+    return NULL;
+}
+
+/*
+ * Description:
+ * 	Handle a shell command block by calling corresponding parser at each step
+ * Return:
+ *
+ * Verbose:
+ * 	Grammar:
+ * 		either an if, while or until block
+ */
 static struct ast *parser_shell_command(struct lex *lex)
 {
-    return parser_rule_if(lex);
+	if(peek(lex) && peek(lex)->token_type == IF)
+    	return parser_rule_if(lex);
+	else if(peek(lex) && peek(lex)->token_type == WHILE)
+		return parser_rule_while(lex);
+	else
+		return parser_rule_until(lex);
 }
 
 /*
@@ -372,7 +460,9 @@ static struct ast *parser_shell_command(struct lex *lex)
  * Return:
  * 	*ast -> ast containing a command to execute
  * Verbose:
- *
+ * 	Grammar:
+ * 		{prefix} WORD {element}
+ * 		| prefix {prefix}
  */
 // prochaine step -> ajouter gestion des préfixes ( cf. Trove Shell Syntax )
 /*static struct ast *parser_simple_command(struct lex *lex)
@@ -394,7 +484,6 @@ static struct ast *parser_shell_command(struct lex *lex)
             free_ast((struct ast *)ast_cmd);
             return NULL;
         }
-        // ajouter test realloc pour sécu -> peu probable mais pas pro
         ast_cmd->words[ind] = NULL;
 
         lex->context = WORD;
@@ -412,6 +501,8 @@ static struct ast *parser_shell_command(struct lex *lex)
                 goto ERROR;
             ast_cmd->words[ind] = NULL;
         }
+        if (!peek(lex))
+            goto ERROR;
         lex->context = KEYWORD;
         if (!peek(lex))
             goto ERROR;
@@ -519,17 +610,57 @@ ERROR:
 // prochaine step -> ajouter gestion  { redirections } après shell_command
 static struct ast *parser_command(struct lex *lex)
 {
-    if (peek(lex) && peek(lex)->token_type == IF)
+    if (peek(lex) && (peek(lex)->token_type == IF
+        || peek(lex)->token_type == WHILE
+        || peek(lex)->token_type == UNTIL))
     {
         return parser_shell_command(lex);
     }
     return parser_simple_command(lex);
 }
 
-// See parser_command ( for now )
+// Parse a pipeline of commands separated by pipes
+// Return NULL on error
+// Return ast_pipe on success
 static struct ast *parser_pipeline(struct lex *lex)
 {
-    return parser_command(lex);
+    struct ast_pipe *ast_pipe = (struct ast_pipe *)init_ast_pipe();
+    // while negation tokens
+    while (peek(lex) && peek(lex)->token_type == NEGATION)
+    {
+        ast_pipe->negation = !ast_pipe->negation;
+        discard_token(pop(lex));
+    }
+    size_t ind = 0;
+    int pipe = 1;
+    struct ast_cmd *ast_cmd = (struct ast_cmd *)parser_command(lex);
+    if (!ast_cmd)
+    {
+        free_ast((struct ast *)ast_pipe);
+        return NULL;
+    }
+    // while there is a pipe at the end and a command following
+    while (ast_cmd && pipe)
+    {
+        ast_pipe->cmd[ind] = ast_cmd;
+        ind++;
+        ast_pipe->cmd =
+            realloc(ast_pipe->cmd, (ind + 1) * sizeof(struct ast_cmd *));
+        ast_pipe->cmd[ind] = NULL;
+        pipe = (peek(lex) && peek(lex)->token_type == PIPE);
+        if (pipe)
+            discard_token(pop(lex));
+        while (pipe && peek(lex) && peek(lex)->token_type == NEWLINE)
+            discard_token(pop(lex));
+        ast_cmd = (struct ast_cmd *)parser_command(lex);
+    }
+    // There was a pipe but no command after it
+    if (pipe)
+    {
+        free_ast((struct ast *)ast_pipe);
+        return NULL;
+    }
+    return (struct ast *)ast_pipe;
 }
 
 // See parser_command ( for now )

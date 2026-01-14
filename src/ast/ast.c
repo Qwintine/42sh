@@ -2,6 +2,8 @@
 
 #include <stddef.h>
 #include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 #include "../exec/exec.h"
 
@@ -52,6 +54,30 @@ struct ast *init_ast_cmd(void)
     return (struct ast *)node;
 }
 
+struct ast *init_ast_loop(void)
+{
+    struct ast_loop *node = malloc(sizeof(struct ast_loop));
+    if (!node)
+        return NULL;
+    node->base.type = AST_LOOP;
+    node->truth = 0;
+    node->condition = NULL;
+    node->body = NULL;
+    return (struct ast *)node;
+}
+
+struct ast *init_ast_pipe(void)
+{
+    struct ast_pipe *node = malloc(sizeof(struct ast_pipe));
+    if (!node)
+        return NULL;
+    node->base.type = AST_PIPE;
+    node->negation = 0;
+    node->cmd = malloc(sizeof(struct ast_cmd *));
+    node->cmd[0] = NULL;
+    return (struct ast *)node;
+}
+
 //===================== Free ast from specific type ===========================
 
 static void ast_free_cmd(struct ast *ast)
@@ -97,6 +123,30 @@ static void ast_free_list(struct ast *ast)
     free(ast_list);
 }
 
+static void ast_free_loop(struct ast *ast)
+{
+    struct ast_loop *ast_loop = (struct ast_loop *)ast;
+    if (ast_loop->condition)
+        free_ast(ast_loop->condition);
+    if (ast_loop->body)
+        free_ast(ast_loop->body);
+    free(ast_loop);
+}
+
+static void ast_free_pipe(struct ast *ast)
+{
+    struct ast_pipe *ast_pipe = (struct ast_pipe *)ast;
+    if (ast_pipe->cmd)
+    {
+        for (size_t i = 0; ast_pipe->cmd[i] != NULL; i++)
+        {
+            free_ast((struct ast *)ast_pipe->cmd[i]);
+        }
+        free(ast_pipe->cmd);
+    }
+    free(ast_pipe);
+}
+
 //===================== Run ast from specific type =============================
 
 //TODO adapter à redir
@@ -131,14 +181,41 @@ static int ast_run_list(struct ast *ast)
     return res;
 }
 
+static int ast_run_loop(struct ast *ast)
+{
+    struct ast_loop *ast_loop = (struct ast_loop *)ast;
+    int res = 0;
+    if (run_ast(ast_loop->condition) == ast_loop->truth)
+        res = run_ast(ast_loop->body);
+    return res;
+}
+
+static int ast_run_pipe(struct ast *ast)
+{
+    if (!ast)
+        return 2;
+    struct ast_pipe *ast_pipe = (struct ast_pipe *)ast;
+    if (!ast_pipe->cmd[0])
+        return 2;
+    int fd[2] = { 0, 0 };
+    int res = exec_pipe(ast_pipe->cmd, fd);
+    if (ast_pipe->negation)
+    {
+        res = !res;
+    }
+    return res;
+}
+
 //=========================== Lookup Tables ===================================
 
 int run_ast(struct ast *ast)
 {
     static const ast_handler_run functions[] = {
+        [AST_LOOP] = &ast_run_loop,
         [AST_CMD] = &ast_run_cmd,
         [AST_IF] = &ast_run_if,
         [AST_LIST] = &ast_run_list,
+        [AST_PIPE] = &ast_run_pipe,
     };
     return ((*functions[ast->type])(ast));
 }
@@ -146,9 +223,11 @@ int run_ast(struct ast *ast)
 void free_ast(struct ast *ast)
 {
     static const ast_handler_free functions[] = {
+        [AST_LOOP] = &ast_free_loop,
         [AST_CMD] = &ast_free_cmd,
         [AST_IF] = &ast_free_if,
         [AST_LIST] = &ast_free_list,
+        [AST_PIPE] = &ast_free_pipe,
     };
     (*functions[ast->type])(ast);
 }

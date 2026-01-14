@@ -448,6 +448,74 @@ testcase "test_limite_if.sh" "" "tests/test_files/test_limite_if.sh"
 testcase "test_limite_else.sh" "" "tests/test_files/test_limite_else.sh"
 testcase "many_lines.sh" "" "tests/test_files/many_lines.sh"
 
+# ========================== Step 2 ========================================
+
+testcase "test & EOF" "-c" "echo a&"
+
+# ================================== Pipe ==================================
+
+testcase "test pipe echo" "-c" "echo a | echo b"
+testcase "test pipe EOF" "-c" "echo a |"
+testcase "test pipe syntax error" "-c" "echo a | ;"
+testcase "test pipe lot of pipe" "-c" "echo hello | tr h p | tr e a | tr l m | tr o e"
+testcase "test pipe with if" "-c" "echo a | if true; then echo b; fi"
+testcase "test pipe with false" "-c" "false | echo after_false"
+testcase "test pipe with true" "-c" "true | echo after_true"
+testcase "test pipe multiple commands" "-c" "echo start | echo middle ; echo end"
+testcase "test pipe multiple commands 2" "-c" "echo start ; echo middle | echo end"
+testcase "test pipe syntax error multiple pipes" "-c" "echo a ||| echo b"
+testcase "test pipe syntax error no cmd start" "-c" "| echo a"
+testcase "test pipe syntax error start" "-c" " ;| echo a"
+
+testcase "test pipe no spaces" "-c" "echo a|echo b|echo c"
+testcase "test pipe with newlines" "-c" "echo a |
+echo b"
+testcase "test pipe with comment" "-c" "echo a | # comment
+echo b"
+testcase "test pipe in else" "-c" "if false; then echo ko; else echo a | echo b; fi"
+testcase "test pipe empty echo" "-c" "echo | echo after_empty"
+testcase "test pipe exit codes" "-c" "false | false | true"
+testcase "test pipe after if" "-c" "if true; then echo a; fi | echo b"
+
+# ================================ Negation ================================
+
+testcase "not true" "-c" "! true"
+testcase "not false" "-c" "! false"
+testcase "double negation" "-c" "! ! true"
+testcase "negation with output" "-c" "! echo test"
+testcase "negation in if true" "-c" "if ! true; then echo ok; fi"
+testcase "negation in if false" "-c" "if ! false; then echo ok; fi"
+testcase "negation then command" "-c" "! true; echo after"
+testcase "negation with pipe" "-c" "! true | echo test"
+testcase "negation failing command" "-c" "! ls /nonexistent_dir_42sh"
+testcase "triple negation" "-c" "! ! ! false"
+testcase "negation with multiple spaces" "-c" "!    false"
+
+testcase "negation of pipeline" "-c" "! echo a | echo b"
+testcase "negation in elif" "-c" "if false; then echo ko; elif ! false; then echo ok; fi"
+testcase "negation in else" "-c" "if false; then echo ko; else ! true; echo after; fi"
+# testcase "negation with newline" "-c" "!
+# true"
+testcase "negation with semicolon" "-c" "! true ; ! false"
+testcase "multiple negations separate" "-c" "! false; ! true; ! false"
+testcase "negation nonexistent command" "-c" "! nonexistent_cmd_42sh"
+testcase "negation of if" "-c" "! if true; then true; fi"
+# testcase "negation with comment" "-c" "! # comment
+# false"
+testcase "pipe then negation" "-c" "echo test | ! false"
+
+# ================================== LOOP =================================
+
+testcase "while false" "-c" "while false; do echo not ok; done"
+testcase "while syntax error missing do" "-c" "while true; echo not ok; done"
+testcase "while syntax error missing done" "-c" "while true; do echo not ok;"
+testcase "while syntax error no condition" "-c" "while ; do echo not ok; done"
+
+testcase "until true" "-c" "until true; do echo not ok; done"
+testcase "until syntax error missing do" "-c" "until false; echo not ok; done"
+testcase "until syntax error missing done" "-c" "until false; do echo not ok;"
+testcase "until syntax error no condition" "-c" "until ; do echo not ok; done"
+
 printf "Fonctionel => Total: %d | Passed: %d | Failed: %d\n\n" "$TOTAL" "$PASS" "$((TOTAL - PASS))"
 
 if [ "${COVERAGE:-no}" = "yes" ]; then

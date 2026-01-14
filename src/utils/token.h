@@ -5,27 +5,33 @@
 
 enum type
 {
-	IF,
-	THEN,
-	ELIF,
-	ELSE,
-	FI,
-	NEGATION,
-	AND,
-	OR,
-	REDIR_OUT, // >
+    IF,
+    THEN,
+    ELIF,
+    ELSE,
+    FI,
+    WHILE,
+    UNTIL,
+    FOR,
+    DO,
+    DONE,
+    IN,
+    REDIR_OUT, // >
 	REDIR_NO_CLOBB, // >|
 	REDIR_IN, // <
 	REDIR_APPEND, // >>
 	REDIR_DUP_OUT, // >&
 	REDIR_DUP_IN, // <&
 	REDIR_IO, // <>
-	PIPE,
-	SEMI_COLON,
-	NEWLINE,
-	WORD,
-	KEYWORD,
-	END
+    NEGATION,
+    AND,
+    OR,
+    PIPE,
+    SEMI_COLON,
+    NEWLINE,
+    WORD,
+    KEYWORD,
+    END
 };
 
 struct token
@@ -39,6 +45,7 @@ struct lex
     FILE *entry;
     struct token *current_token;
     enum type context;
+    int error;
 };
 
 struct lex *init_lex(FILE *entry);
