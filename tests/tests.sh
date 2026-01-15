@@ -440,13 +440,13 @@ fi
 "
 testcase "semi colon after newline" "" "tests/test_files/test_semi_colon_alone_after_command_and_newline.sh"
 
-#=========================== Stress tests ======================================
+#================================ Stress tests ================================
 
 testcase "test_limite_if.sh" "" "tests/test_files/test_limite_if.sh"
 testcase "test_limite_else.sh" "" "tests/test_files/test_limite_else.sh"
 testcase "many_lines.sh" "" "tests/test_files/many_lines.sh"
 
-# ========================== Step 2 ========================================
+#================================== Step 2 ====================================
 
 testcase "test & EOF" "-c" "echo a&"
 
@@ -465,7 +465,7 @@ cat < in"
 testcase "redirection restored stdin" "-c" "echo hi > in
 cat < in
 echo ok"
-
+testcase "redirection basic io number" "-c" "echo ok in file, not ok on stdout 1> test.txt"
 
 
 # ================================== Pipe ==================================

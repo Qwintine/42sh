@@ -91,7 +91,6 @@ static struct ast *parser_and_or(struct lex *lex);
 static struct ast *parser_else_clause(struct lex *lex);
 static struct ast *parser_list(struct lex *lex);
 
-
 static int parser_redir(struct lex *lex, struct ast_cmd *ast_cmd)
 {
 	struct redir *redir = init_redir();
@@ -136,6 +135,35 @@ static int parser_redir(struct lex *lex, struct ast_cmd *ast_cmd)
 	}
 	return 1;
 }
+
+static int parser_element(struct lex *lex, struct ast_cmd *ast_cmd, size_t *w)
+{
+	if(peek(lex)) 
+	{
+		if(peek(lex)->token_type == WORD)
+		{
+			struct token *tok = pop(lex);
+			if (!tok)
+				return 1;
+			ast_cmd->words[*w] = tok->value;
+			free(tok);
+			(*w)++;
+			ast_cmd->words =
+				realloc(ast_cmd->words, (*w + 1) * sizeof(char *));
+			if (!ast_cmd->words)
+				return 1;
+			ast_cmd->words[*w] = NULL;
+		}
+		else if(peek(lex)->token_type == IO_NUMBER 
+				|| is_redir(peek(lex)->token_type))
+		{
+			return parser_redir(lex, ast_cmd);
+		}
+		return 0;
+	}
+	return 1;
+}
+
 
 /* TODO */
 static int parser_prefix(struct lex *lex, struct ast_cmd *ast_cmd)
@@ -462,12 +490,24 @@ ERROR:
  */
 static struct ast *parser_shell_command(struct lex *lex)
 {
+	struct ast *ast = NULL;
 	if(peek(lex) && peek(lex)->token_type == IF)
-    	return parser_rule_if(lex);
+    	ast = parser_rule_if(lex);
 	else if(peek(lex) && peek(lex)->token_type == WHILE)
-		return parser_rule_while(lex);
+		ast = parser_rule_while(lex);
 	else
-		return parser_rule_until(lex);
+		ast = parser_rule_until(lex);
+	if(peek(lex) && (peek(lex)->token_type == IO_NUMBER 
+				|| is_redir(peek(lex)->token_type)))
+	{
+		int error = parser_redir(lex, (struct ast_cmd*)ast);
+		if(!error)
+		{
+			free_ast(ast);
+			return NULL;
+		}
+	}
+	return ast;
 }
 
 /*
@@ -485,14 +525,15 @@ static struct ast *parser_simple_command(struct lex *lex)
 {
     struct ast_cmd *ast_cmd = (struct ast_cmd *)init_ast_cmd();
     size_t w = 0;
-    while(peek(lex) && peek(lex)->token_type == IO_NUMBER)
+    while(peek(lex) && (peek(lex)->token_type == IO_NUMBER 
+			    || is_redir(peek(lex)->token_type)))
     {
 	    if(parser_prefix(lex, ast_cmd))
 	    {
 		    goto ERROR;
 	    }
     }
-
+        lex->context = WORD;
     if (peek(lex) && peek(lex)->token_type == WORD)
     {
         struct token *tok = pop(lex);
@@ -509,20 +550,14 @@ static struct ast *parser_simple_command(struct lex *lex)
         }
         ast_cmd->words[w] = NULL;
 
-        lex->context = WORD;
-        while (peek(lex) != NULL && peek(lex)->token_type == WORD)
+        while (peek(lex) != NULL && (peek(lex)->token_type == IO_NUMBER 
+				|| peek(lex)->token_type == WORD 
+				|| is_redir(peek(lex)->token_type)))
         {
-            tok = pop(lex);
-            if (!tok)
-                goto ERROR;
-            ast_cmd->words[w] = tok->value;
-            free(tok);
-            w++;
-            ast_cmd->words =
-                realloc(ast_cmd->words, (w + 1) * sizeof(char *));
-            if (!ast_cmd->words)
-                goto ERROR;
-            ast_cmd->words[w] = NULL;
+		if(parser_element(lex, ast_cmd, &w))
+		{
+			goto ERROR;
+		}
         }
         if (!peek(lex))
             goto ERROR;
