@@ -18,6 +18,7 @@ static int read_io(char *string, int defaul)
 			return defaul;
 		}
 		res = res *10 + (string[ind] - '0');
+		ind++;
 	}
 	return res;
 } 
