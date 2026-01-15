@@ -454,19 +454,32 @@ testcase "test & EOF" "-c" "echo a&"
 #========================== Redirection Corner case ===========================
 testcase "simple redirection" "-c" "echo hello > out
 cat out"
+rm -f out
 testcase "overwrite redirection" "-c" "echo first > out
 echo second > out
 cat out"
+rm -f out
 testcase "redirection builtin + restore" "-c" "echo A > out
 echo B
 cat out"
+rm -f out
 testcase "redirection read from file" "-c" "echo hello > in
 cat < in"
+rm -f in
 testcase "redirection restored stdin" "-c" "echo hi > in
 cat < in
 echo ok"
-testcase "redirection basic io number" "-c" "echo ok in file, not ok on stdout 1> test.txt"
+rm -f in
+testcase "redirection basic io number" "-c" "echo ok in file, not ok on stdout 1> test.txt
+cat test.txt"
+rm -f test.txt
 
+testcase "redirection not an io number" "-c" "echo big number 654654654654> test.txt
+cat test.txt"
+rm -f test.txt
+testcase "non existent fd" "-c" "echo on stdout 1023> nothing.txt
+cat nothing.txt"
+rm -f nothing.txt
 
 # ================================== Pipe ==================================
 
