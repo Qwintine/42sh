@@ -1,9 +1,11 @@
 #define _POSIX_C_SOURCE 200809L
 #include "lexer.h"
 
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "../utils/token.h"
 
@@ -301,6 +303,47 @@ enum type check_type(char *value)
     return WORD;
 }
 
+static int all_digit(char *str)
+{
+    for (size_t i = 0; i < strlen(str); i++)
+    {
+        if (str[i] < '0' || str[i] > '9')
+            return 0;
+    }
+    return 1;
+}
+
+static int valid_io(char *str)
+{
+    if (!all_digit(str))
+        return 0;
+    
+    size_t len = strlen(str);
+    if (len > 10)
+        return 0;
+    
+    char *endptr;
+    long num = strtol(str, &endptr, 10);
+    
+    if (*endptr != '\0' || num < 0) // Check for errors
+        return 0;
+    
+    // Get max nb fd 
+    long max_fd = sysconf(_SC_OPEN_MAX);
+    if (max_fd == -1)
+    {
+        max_fd = 1024;
+    }
+
+    if (max_fd > INT_MAX)
+        max_fd = INT_MAX;
+    
+    if (num > max_fd)
+        return 0;
+    
+    return 1;
+}
+
 static int new_op(struct token *tok, int quote, FILE *entry, char val)
 {
     if (!quote)
@@ -308,6 +351,9 @@ static int new_op(struct token *tok, int quote, FILE *entry, char val)
         if (strlen(tok->value) > 0)
         {
             fseek(entry, -1, SEEK_CUR);
+            if (val == '>' || val == '<')
+                if(valid_io(tok->value))
+                    tok->token_type = IO_NUMBER;
             return 1;
         }
         tok->value = concat(tok->value, val);
@@ -338,6 +384,8 @@ static int sub_switch_delim(struct lex *lex, struct token *tok, char *buf,
 	//int result = handle_expansion(); //TODO
     case '&': // case 6
     case '|':
+    case '>':
+    case '<':
     {
         int result = new_op(tok, (quote_status->double_quote
                                     || quote_status->single_quote), lex->entry,
@@ -428,17 +476,17 @@ static int sub_switch(struct lex *lex, struct token *tok, char *buf,
  * 	lex -> struct lexer
  * 	tok -> token being created
  * 	buf[] -> current character
- * 	quote_status -> if in quotes
  * Return:
  * 	0 Token created / 1 Error
  */
 static int manage_op(struct lex *lex, struct token *tok, char buf[])
 {
-	if(tok->value[strlen(tok->value)-1] == '&')
+	char first = tok->value[0];
+	if(first == '&')
 	{
 		if(buf[0] == '&')
 		{
-			concat(tok->value, '&');
+			tok->value = concat(tok->value, '&');
 			if(!tok->value)
 			{
 				return 1;
@@ -455,7 +503,7 @@ static int manage_op(struct lex *lex, struct token *tok, char buf[])
 	{
 		if(buf[0] == '|')
 		{
-			concat(tok->value, '|');
+			tok->value = concat(tok->value, '|');
 			if(!tok->value)
 			{
 				return 1;
@@ -472,7 +520,68 @@ static int manage_op(struct lex *lex, struct token *tok, char buf[])
 	return 0;
 }
 
-// Upgrade/Quality of life: Quote status from enum instead of int
+/*
+ * Description:
+ * 	Handle different redirections
+ * Arguments:
+ * 	lex-> struct lexer
+ * 	tok -> token being created
+ *      buf[] -> currrent character
+ * Return:
+ * 	0 Redir token created / 1 Error
+ */
+static int manage_redir(struct lex *lex, struct token *tok, char buf[])
+{
+	if(!tok->value || !tok->value[0]) // garde fou ( #wankilcrazy )
+		return 1;
+
+	char first = tok->value[0];
+	if(first == '>') // starts with >
+	{
+		if(buf[0] == '>')
+		{
+			tok->value = concat(tok->value, '>');
+			tok->token_type = REDIR_APPEND; // create token >>
+		}
+		else if(buf[0] == '&')
+		{
+			tok->value = concat(tok->value, '&');
+			tok->token_type = REDIR_DUP_OUT; // create token >&
+		}
+		else if(buf[0] == '|')
+		{
+			tok->value = concat(tok->value, '|');
+			tok->token_type = REDIR_NO_CLOBB; // create token >|
+		}
+		else
+		{
+			tok->token_type = REDIR_OUT; // token >
+			fseek(lex->entry, -1, SEEK_CUR);
+		}
+	}
+	else // <
+	{
+		if(buf[0] == '>')
+		{
+			tok->value = concat(tok->value, '>');
+			tok->token_type = REDIR_IO; // create token <>
+		}
+		else if (buf[0] == '&')
+		{
+			tok->value = concat(tok->value, '&');
+			tok->token_type = REDIR_DUP_IN; // create token <&
+		}
+		else
+		{
+			tok->token_type = REDIR_IN;
+			fseek(lex->entry, -1, SEEK_CUR);
+		}
+	}
+	if(!tok->value)
+		return 1;
+	lex->current_token = tok;
+	return 0;
+}
 
 /* Description:
  * 	transforme le FILE en token
@@ -492,12 +601,16 @@ int lexer(struct lex *lex)
         return 1;
     while (fread(buf, 1, 1, lex->entry))
     {
-	    //debut changement -> peut etre implem une size lors creation token 
 	    if(tok->value && tok->value[0]
 	    && !quote_status.single_quote && !quote_status.double_quote
-	    && (tok->value[0] == '&' || tok->value[0] == '|'))
+	    && (tok->value[0] == '&' || tok->value[0] == '|' ||
+            tok->value[0] == '>' || tok->value[0] == '<')) // cas 2/3 !!! verif redir entre dedans nuh uh ?
 	    {
-		    int res = manage_op(lex, tok, buf); // cas 2/3
+		    int res;
+		    if(tok->value[0] == '&' || tok->value[0] == '|')
+			    res = manage_op(lex, tok, buf); 
+		    else
+			    res = manage_redir(lex, tok, buf);
 		    if(!res)
 			    return 0;
 		    goto ERROR;

@@ -2,6 +2,7 @@
 #define AST_H
 
 #include "../utils/token.h"
+#include "../utils/redir.h"
 
 enum ast_type
 {
@@ -36,7 +37,8 @@ struct ast_pipe
 struct ast_cmd
 {
     struct ast base;
-    char **words;
+    char **words; // arguments de la commande
+    struct redir **redirs; // redir à appliquer dans l'ordre
 };
 
 struct ast_if

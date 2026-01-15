@@ -2,9 +2,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <ctype.h>
 #include "../lexer/lexer.h"
 #include "../utils/token.h"
+#include "../utils/redir.h"
 
 /*
  * Description:
@@ -76,11 +77,99 @@ int discard_token(struct token *tok)
     return 1;
 }
 
+/* Helper pour savoir si token de type Redir */
+static int is_redir(enum type type)
+{
+	return type == REDIR_OUT || type == REDIR_IN || type == REDIR_APPEND 
+		||  type == REDIR_DUP_OUT || type == REDIR_DUP_IN 
+		|| type == REDIR_NO_CLOBB || type == REDIR_IO;
+}
+
 //============================ Parser Grammar =================================
 
 static struct ast *parser_and_or(struct lex *lex);
 static struct ast *parser_else_clause(struct lex *lex);
 static struct ast *parser_list(struct lex *lex);
+
+static int parser_redir(struct lex *lex, struct ast_cmd *ast_cmd)
+{
+	struct redir *redir = init_redir();
+	if(redir)
+	{
+		if(peek(lex) && peek(lex)->token_type == IO_NUMBER)
+		{
+			redir->io_num = peek(lex)->value;
+			free(pop(lex));
+		}
+
+		if(!peek(lex) || !is_redir(peek(lex)->token_type))
+		{
+			free_redir(redir);
+			return 1;
+		}
+		redir->type = peek(lex)->token_type;
+		discard_token(pop(lex));
+		lex->context = WORD;
+		if(!peek(lex) || peek(lex)->token_type != WORD)
+		{
+			free_redir(redir);
+			return 1;
+		}
+		redir->target = peek(lex)->value;
+		free(pop(lex));
+		size_t ind = 0;
+		while(ast_cmd->redirs[ind])
+		{
+			ind++;
+		}
+		ast_cmd->redirs[ind++] = redir;
+		ast_cmd->redirs = realloc(ast_cmd->redirs,
+				(ind+1) * sizeof(struct redir *));
+
+		if(!ast_cmd->redirs)
+		{
+			return 1;
+		}
+		ast_cmd->redirs[ind] = NULL;
+		return 0;
+	}
+	return 1;
+}
+
+static int parser_element(struct lex *lex, struct ast_cmd *ast_cmd, size_t *w)
+{
+	if(peek(lex)) 
+	{
+		if(peek(lex)->token_type == WORD)
+		{
+			struct token *tok = pop(lex);
+			if (!tok)
+				return 1;
+			ast_cmd->words[*w] = tok->value;
+			free(tok);
+			(*w)++;
+			ast_cmd->words =
+				realloc(ast_cmd->words, (*w + 1) * sizeof(char *));
+			if (!ast_cmd->words)
+				return 1;
+			ast_cmd->words[*w] = NULL;
+		}
+		else if(peek(lex)->token_type == IO_NUMBER 
+				|| is_redir(peek(lex)->token_type))
+		{
+			return parser_redir(lex, ast_cmd);
+		}
+		return 0;
+	}
+	return 1;
+}
+
+
+/* TODO */
+static int parser_prefix(struct lex *lex, struct ast_cmd *ast_cmd)
+{
+	return parser_redir(lex, ast_cmd);
+}
 
 /*
  * Description:
@@ -100,6 +189,15 @@ static struct ast *parser_compound_list(struct lex *lex)
     while (peek(lex) && peek(lex)->token_type == NEWLINE)
     {
         discard_token(pop(lex));
+    }
+
+    if (!peek(lex) || peek(lex)->token_type == THEN 
+        || peek(lex)->token_type == ELSE || peek(lex)->token_type == ELIF
+        || peek(lex)->token_type == FI || peek(lex)->token_type == DO
+        || peek(lex)->token_type == DONE || peek(lex)->token_type == END
+        || peek(lex)->token_type == SEMI_COLON)
+    {
+        return NULL;
     }
 
     struct ast_list *head = (struct ast_list *)init_ast_list();
@@ -129,6 +227,12 @@ static struct ast *parser_compound_list(struct lex *lex)
             || peek(lex)->token_type == DO || peek(lex)->token_type == DONE)
         {
             break;
+        }
+
+        if (peek(lex) && peek(lex)->token_type == SEMI_COLON)
+        {
+            free_ast((struct ast *)head);
+            return NULL;
         }
 
         struct ast_list *new_node = (struct ast_list *)init_ast_list();
@@ -386,12 +490,24 @@ ERROR:
  */
 static struct ast *parser_shell_command(struct lex *lex)
 {
+	struct ast *ast = NULL;
 	if(peek(lex) && peek(lex)->token_type == IF)
-    	return parser_rule_if(lex);
+    	ast = parser_rule_if(lex);
 	else if(peek(lex) && peek(lex)->token_type == WHILE)
-		return parser_rule_while(lex);
+		ast = parser_rule_while(lex);
 	else
-		return parser_rule_until(lex);
+		ast = parser_rule_until(lex);
+	if(peek(lex) && (peek(lex)->token_type == IO_NUMBER 
+				|| is_redir(peek(lex)->token_type)))
+	{
+		int error = parser_redir(lex, (struct ast_cmd*)ast);
+		if(!error)
+		{
+			free_ast(ast);
+			return NULL;
+		}
+	}
+	return ast;
 }
 
 /*
@@ -404,41 +520,44 @@ static struct ast *parser_shell_command(struct lex *lex)
  * 		{prefix} WORD {element}
  * 		| prefix {prefix}
  */
+// prochaine step -> ajouter gestion des préfixes ( cf. Trove Shell Syntax )
 static struct ast *parser_simple_command(struct lex *lex)
 {
     struct ast_cmd *ast_cmd = (struct ast_cmd *)init_ast_cmd();
-    size_t ind = 0;
-
+    size_t w = 0;
+    while(peek(lex) && (peek(lex)->token_type == IO_NUMBER 
+			    || is_redir(peek(lex)->token_type)))
+    {
+	    if(parser_prefix(lex, ast_cmd))
+	    {
+		    goto ERROR;
+	    }
+    }
+        lex->context = WORD;
     if (peek(lex) && peek(lex)->token_type == WORD)
     {
         struct token *tok = pop(lex);
         if (!tok)
             goto ERROR;
-        ast_cmd->words[ind] = tok->value;
+        ast_cmd->words[w] = tok->value;
         free(tok);
-        ind++;
-        ast_cmd->words = realloc(ast_cmd->words, (ind + 1) * sizeof(char *));
+        w++;
+        ast_cmd->words = realloc(ast_cmd->words, (w + 1) * sizeof(char *));
         if (!ast_cmd->words)
         {
             free_ast((struct ast *)ast_cmd);
             return NULL;
         }
-        ast_cmd->words[ind] = NULL;
+        ast_cmd->words[w] = NULL;
 
-        lex->context = WORD;
-        while (peek(lex) != NULL && peek(lex)->token_type == WORD)
+        while (peek(lex) != NULL && (peek(lex)->token_type == IO_NUMBER 
+				|| peek(lex)->token_type == WORD 
+				|| is_redir(peek(lex)->token_type)))
         {
-            tok = pop(lex);
-            if (!tok)
-                goto ERROR;
-            ast_cmd->words[ind] = tok->value;
-            free(tok);
-            ind++;
-            ast_cmd->words =
-                realloc(ast_cmd->words, (ind + 1) * sizeof(char *));
-            if (!ast_cmd->words)
-                goto ERROR;
-            ast_cmd->words[ind] = NULL;
+		if(parser_element(lex, ast_cmd, &w))
+		{
+			goto ERROR;
+		}
         }
         if (!peek(lex))
             goto ERROR;
@@ -447,14 +566,20 @@ static struct ast *parser_simple_command(struct lex *lex)
             goto ERROR;
         return (struct ast *)ast_cmd;
     }
+
     lex->context = KEYWORD;
+    if(ast_cmd->redirs && ast_cmd->redirs[0])
+    {
+	    return (struct ast *)ast_cmd;
+    }
 
 ERROR:
     free_ast((struct ast *)ast_cmd);
     return NULL;
 }
 
-//parse shell and simple commands
+
+// prochaine step -> ajouter gestion  { redirections } après shell_command
 static struct ast *parser_command(struct lex *lex)
 {
     if (peek(lex) && (peek(lex)->token_type == IF
@@ -477,6 +602,11 @@ static struct ast *parser_pipeline(struct lex *lex)
     {
         ast_pipe->negation = !ast_pipe->negation;
         discard_token(pop(lex));
+    }
+    if (peek(lex) && peek(lex)->token_type == PIPE)
+    {
+        free_ast((struct ast *)ast_pipe);
+        return NULL;
     }
     size_t ind = 0;
     int pipe = 1;
@@ -502,7 +632,7 @@ static struct ast *parser_pipeline(struct lex *lex)
         ast_cmd = (struct ast_cmd *)parser_command(lex);
     }
     // There was a pipe but no command after it
-    if (pipe)
+    if (pipe) // Error parser_command
     {
         free_ast((struct ast *)ast_pipe);
         return NULL;
@@ -599,6 +729,12 @@ static struct ast *parser_list(struct lex *lex)
         if (!peek(lex) || peek(lex)->token_type == END)
             break;
 
+        if (peek(lex) && peek(lex)->token_type == SEMI_COLON)
+        {
+            free_ast((struct ast *)head);
+            return NULL;
+        }
+
         struct ast_list *new_node = (struct ast_list *)
             init_ast_list(); // éléments liste de block de and_or
         new_node->elt = parser_and_or(lex); // récursion sur ast type and_or
@@ -655,7 +791,11 @@ struct ast *parser(FILE *entry, int *eof)
         free_lex(lex);
         return init_ast_list();
     }
-
+    if (peek(lex) && peek(lex)->token_type == SEMI_COLON)
+    {
+        free_lex(lex);
+        return NULL;
+    }
     struct ast *ast =
         parser_list(lex); // récursion sur ast type list ( cf. parser_list )
 

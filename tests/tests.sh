@@ -423,8 +423,6 @@ echo ok"
 
 testcase "lastcomment" "-c" "#lastcomment"
 
-#========================== Redirection Corner case ===========================
-#TODO
 
 #================================= Grammar ====================================
 
@@ -442,15 +440,34 @@ fi
 "
 testcase "semi colon after newline" "" "tests/test_files/test_semi_colon_alone_after_command_and_newline.sh"
 
-#=========================== Stress tests ======================================
+#================================ Stress tests ================================
 
 testcase "test_limite_if.sh" "" "tests/test_files/test_limite_if.sh"
 testcase "test_limite_else.sh" "" "tests/test_files/test_limite_else.sh"
 testcase "many_lines.sh" "" "tests/test_files/many_lines.sh"
 
-# ========================== Step 2 ========================================
+#================================== Step 2 ====================================
 
 testcase "test & EOF" "-c" "echo a&"
+
+#========================== Redirection Corner case ===========================
+testcase "simple redirection" "-c" "echo hello > out; cat out"
+rm -f out
+testcase "overwrite redirection" "-c" "echo first > out; echo second > out; cat out"
+rm -f out
+testcase "redirection builtin + restore" "-c" "echo A > out; echo B; cat out"
+rm -f out
+testcase "redirection read from file" "-c" "echo hello > in; cat < in"
+rm -f in
+testcase "redirection restored stdin" "-c" "echo hi > in; cat < in; echo ok"
+rm -f in
+testcase "redirection basic io number" "-c" "echo ok in file, not ok on stdout 1> test.txt; cat test.txt"
+rm -f test.txt
+
+testcase "redirection not an io number" "-c" "echo big number 654654654654> test.txt; cat test.txt"
+rm -f test.txt
+testcase "non existent fd" "-c" "echo on stdout 3> nothing.txt;"
+rm -f nothing.txt
 
 # ================================ And Or ===================================
 
@@ -507,6 +524,8 @@ testcase "and with comment" "-c" "echo a && # comment
 echo b"
 testcase "or with comment" "-c" "false || # comment  
 echo ok"
+
+
 
 # ================================== Pipe ==================================
 
