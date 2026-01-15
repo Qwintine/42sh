@@ -1,8 +1,8 @@
 #ifndef AST_H
 #define AST_H
 
-#include "../utils/token.h"
 #include "../utils/redir.h"
+#include "../utils/token.h"
 
 enum ast_type
 {

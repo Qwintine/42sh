@@ -18,11 +18,11 @@ enum type
     IN,
     REDIR_OUT, // >
     REDIR_IN, // <
-	REDIR_APPEND, // >>
-	REDIR_DUP_OUT, // >&
-	REDIR_DUP_IN, // <&
+    REDIR_APPEND, // >>
+    REDIR_DUP_OUT, // >&
+    REDIR_DUP_IN, // <&
     REDIR_NO_CLOBB, // >|
-	REDIR_IO, // <>
+    REDIR_IO, // <>
     IO_NUMBER,
     NEGATION,
     AND,

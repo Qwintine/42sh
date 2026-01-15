@@ -5,9 +5,9 @@
 
 struct redir
 {
-	char *io_num; // NULL default
-	enum type type;
-	char *target; // target file
+    char *io_num; // NULL default
+    enum type type;
+    char *target; // target file
 };
 
 struct redir *init_redir();

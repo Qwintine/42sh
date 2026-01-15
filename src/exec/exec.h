@@ -1,7 +1,7 @@
 #ifndef EXEC_H
 #define EXEC_H
-#include "../utils/redir.h"
 #include "../ast/ast.h"
+#include "../utils/redir.h"
 
 int exec_cmd(char **words, struct redir **redirs);
 

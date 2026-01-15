@@ -1,8 +1,8 @@
 #include "ast.h"
 
+#include <fcntl.h>
 #include <stddef.h>
 #include <stdlib.h>
-#include <fcntl.h>
 #include <unistd.h>
 
 #include "../exec/exec.h"
@@ -39,17 +39,17 @@ struct ast *init_ast_cmd(void)
         return NULL;
     node->base.type = AST_CMD;
     node->words = calloc(1, sizeof(char *));
-    if(!node->words)
+    if (!node->words)
     {
-	    free(node);
-	    return NULL;
+        free(node);
+        return NULL;
     }
     node->redirs = calloc(1, sizeof(struct redir *));
-    if(!node->redirs)
+    if (!node->redirs)
     {
-	    free(node->words);
-	    free(node);
-	    return NULL;
+        free(node->words);
+        free(node);
+        return NULL;
     }
     return (struct ast *)node;
 }
@@ -86,7 +86,7 @@ struct ast *init_ast_and_or(void)
     node->base.type = AST_AND_OR;
     node->left = NULL;
     node->right = NULL;
-    node->operator = END;
+    node->operator= END;
     return (struct ast *)node;
 }
 
@@ -103,11 +103,11 @@ static void ast_free_cmd(struct ast *ast)
     }
     free(ast_cmd->words);
     i = 0;
-    while(ast_cmd->redirs[i])
+    while (ast_cmd->redirs[i])
     {
-	    free(ast_cmd->redirs[i]->target);
-	    free(ast_cmd->redirs[i]);
-	    i++;
+        free(ast_cmd->redirs[i]->target);
+        free(ast_cmd->redirs[i]);
+        i++;
     }
     free(ast_cmd->redirs);
     free(ast_cmd);
@@ -171,7 +171,7 @@ static void ast_free_and_or(struct ast *ast)
 
 //===================== Run ast from specific type =============================
 
-//TODO adapter à redir
+// TODO adapter à redir
 static int ast_run_cmd(struct ast *ast)
 {
     if (!ast)
@@ -232,18 +232,18 @@ static int ast_run_and_or(struct ast *ast)
 {
     struct ast_and_or *ast_and_or = (struct ast_and_or *)ast;
     int res = run_ast(ast_and_or->left);
-    
-    if (ast_and_or->operator == AND)
+
+    if (ast_and_or->operator== AND)
     {
         if (res == 0)
             res = run_ast(ast_and_or->right);
     }
-    else if (ast_and_or->operator == OR)
+    else if (ast_and_or->operator== OR)
     {
         if (res != 0)
             res = run_ast(ast_and_or->right);
     }
-    
+
     return res;
 }
 
@@ -252,12 +252,9 @@ static int ast_run_and_or(struct ast *ast)
 int run_ast(struct ast *ast)
 {
     static const ast_handler_run functions[] = {
-        [AST_LOOP] = &ast_run_loop,
-        [AST_CMD] = &ast_run_cmd,
-        [AST_IF] = &ast_run_if,
-        [AST_LIST] = &ast_run_list,
-        [AST_PIPE] = &ast_run_pipe,
-        [AST_AND_OR] = &ast_run_and_or,
+        [AST_LOOP] = &ast_run_loop, [AST_CMD] = &ast_run_cmd,
+        [AST_IF] = &ast_run_if,     [AST_LIST] = &ast_run_list,
+        [AST_PIPE] = &ast_run_pipe, [AST_AND_OR] = &ast_run_and_or,
     };
     return ((*functions[ast->type])(ast));
 }
@@ -265,12 +262,9 @@ int run_ast(struct ast *ast)
 void free_ast(struct ast *ast)
 {
     static const ast_handler_free functions[] = {
-        [AST_LOOP] = &ast_free_loop,
-        [AST_CMD] = &ast_free_cmd,
-        [AST_IF] = &ast_free_if,
-        [AST_LIST] = &ast_free_list,
-        [AST_PIPE] = &ast_free_pipe,
-        [AST_AND_OR] = &ast_free_and_or,
+        [AST_LOOP] = &ast_free_loop, [AST_CMD] = &ast_free_cmd,
+        [AST_IF] = &ast_free_if,     [AST_LIST] = &ast_free_list,
+        [AST_PIPE] = &ast_free_pipe, [AST_AND_OR] = &ast_free_and_or,
     };
     (*functions[ast->type])(ast);
 }
