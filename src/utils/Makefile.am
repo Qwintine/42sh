@@ -4,7 +4,9 @@ libutils_a_SOURCES =  \
   prettyprint.c \
   prettyprint.h \
   token.c \
-  token.h
+  token.h \
+  redir.c \
+  redir.h
 
 libutils_a_CPPFLAGS = -I$(top_srcdir)/src
 

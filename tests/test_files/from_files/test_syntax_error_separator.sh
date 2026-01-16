@@ -5,4 +5,4 @@
 echo test
 ;
 ;;
-; echo apres pointvirgules
+; echo test

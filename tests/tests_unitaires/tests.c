@@ -234,3 +234,79 @@ Test(Test42sh, lex_loop, .init = cr_redirect_stdout)
 
     free_lex(lx);
 }
+
+Test(Test42sh, lex_redir, .init = cr_redirect_stdout)
+{
+    char *buff;
+    FILE *f = arg_file(3, (char*[]){"program", "-c", "test > 2 < 4>> ok42>& 1234<&    ok >|  1<>2"}, NULL, &buff);
+    cr_assert_not_null(f);
+
+    struct lex *lx = init_lex(f);
+    cr_assert_not_null(lx);
+    lx->context = KEYWORD;
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, WORD));
+    cr_expect(eq(str, lx->current_token->value, "test"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, REDIR_OUT));
+    cr_expect(eq(str, lx->current_token->value, ">"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, WORD));
+    cr_expect(eq(str, lx->current_token->value, "2"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, REDIR_IN));
+    cr_expect(eq(str, lx->current_token->value, "<"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, IO_NUMBER));
+    cr_expect(eq(str, lx->current_token->value, "4"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, REDIR_APPEND));
+    cr_expect(eq(str, lx->current_token->value, ">>"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, WORD));
+    cr_expect(eq(str, lx->current_token->value, "ok42"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, REDIR_DUP_OUT));
+    cr_expect(eq(str, lx->current_token->value, ">&"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, IO_NUMBER));
+    cr_expect(eq(str, lx->current_token->value, "1234"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, REDIR_DUP_IN));
+    cr_expect(eq(str, lx->current_token->value, "<&"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, WORD));
+    cr_expect(eq(str, lx->current_token->value, "ok"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, REDIR_NO_CLOBB));
+    cr_expect(eq(str, lx->current_token->value, ">|"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, IO_NUMBER));
+    cr_expect(eq(str, lx->current_token->value, "1"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, REDIR_IO));
+    cr_expect(eq(str, lx->current_token->value, "<>"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, WORD));
+    cr_expect(eq(str, lx->current_token->value, "2"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, END));
+
+    free_lex(lx);
+}

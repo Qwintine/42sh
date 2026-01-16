@@ -1,11 +1,12 @@
 #include "ast.h"
 
+#include <fcntl.h>
 #include <stddef.h>
 #include <stdlib.h>
-#include <fcntl.h>
 #include <unistd.h>
 
 #include "../exec/exec.h"
+#include "../exec/redir_exec.h"
 
 //===================== Init ast from specific type ===========================
 
@@ -38,8 +39,19 @@ struct ast *init_ast_cmd(void)
     if (!node)
         return NULL;
     node->base.type = AST_CMD;
-    node->words = malloc(sizeof(char *));
-    node->words[0] = NULL;
+    node->words = calloc(1, sizeof(char *));
+    if (!node->words)
+    {
+        free(node);
+        return NULL;
+    }
+    node->redirs = calloc(1, sizeof(struct redir *));
+    if (!node->redirs)
+    {
+        free(node->words);
+        free(node);
+        return NULL;
+    }
     return (struct ast *)node;
 }
 
@@ -67,6 +79,35 @@ struct ast *init_ast_pipe(void)
     return (struct ast *)node;
 }
 
+struct ast *init_ast_and_or(void)
+{
+    struct ast_and_or *node = malloc(sizeof(struct ast_and_or));
+    if (!node)
+        return NULL;
+    node->base.type = AST_AND_OR;
+    node->left = NULL;
+    node->right = NULL;
+    node->operator= END;
+    return (struct ast *)node;
+}
+
+struct ast *init_ast_shell_redir(void)
+{
+    struct ast_shell_redir *node = malloc(sizeof(struct ast_shell_redir));
+    if (!node)
+        return NULL;
+    node->base.type = AST_SHELL_REDIR;
+    node->words = NULL;
+    node->child = NULL;
+    node->redirs = calloc(1, sizeof(struct redir *));
+    if (!node->redirs)
+    {
+        free(node);
+        return NULL;
+    }
+    return (struct ast *)node;
+}
+
 //===================== Free ast from specific type ===========================
 
 static void ast_free_cmd(struct ast *ast)
@@ -79,6 +120,14 @@ static void ast_free_cmd(struct ast *ast)
         i++;
     }
     free(ast_cmd->words);
+    i = 0;
+    while (ast_cmd->redirs[i])
+    {
+        free(ast_cmd->redirs[i]->target);
+        free(ast_cmd->redirs[i]);
+        i++;
+    }
+    free(ast_cmd->redirs);
     free(ast_cmd);
 }
 
@@ -128,14 +177,41 @@ static void ast_free_pipe(struct ast *ast)
     free(ast_pipe);
 }
 
+static void ast_free_and_or(struct ast *ast)
+{
+    struct ast_and_or *ast_and_or = (struct ast_and_or *)ast;
+    if (ast_and_or->left)
+        free_ast(ast_and_or->left);
+    if (ast_and_or->right)
+        free_ast(ast_and_or->right);
+    free(ast_and_or);
+}
+
+static void ast_free_shell_redir(struct ast *ast)
+{
+    struct ast_shell_redir *ast_shell = (struct ast_shell_redir *)ast;
+    if (ast_shell->child)
+        free_ast(ast_shell->child);
+    int i = 0;
+    while (ast_shell->redirs[i])
+    {
+        free(ast_shell->redirs[i]->target);
+        free(ast_shell->redirs[i]);
+        i++;
+    }
+    free(ast_shell->redirs);
+    free(ast_shell);
+}
+
 //===================== Run ast from specific type =============================
 
+// TODO adapter à redir
 static int ast_run_cmd(struct ast *ast)
 {
     if (!ast)
         return 2;
     struct ast_cmd *ast_cmd = (struct ast_cmd *)ast;
-    int res = exec_cmd(ast_cmd->words);
+    int res = exec_cmd(ast_cmd->words, ast_cmd->redirs);
     return res;
 }
 
@@ -186,6 +262,36 @@ static int ast_run_pipe(struct ast *ast)
     return res;
 }
 
+static int ast_run_and_or(struct ast *ast)
+{
+    struct ast_and_or *ast_and_or = (struct ast_and_or *)ast;
+    int res = run_ast(ast_and_or->left);
+
+    if (ast_and_or->operator== AND)
+    {
+        if (res == 0)
+            res = run_ast(ast_and_or->right);
+    }
+    else if (ast_and_or->operator== OR)
+    {
+        if (res != 0)
+            res = run_ast(ast_and_or->right);
+    }
+
+    return res;
+}
+
+static int ast_run_shell_redir(struct ast *ast)
+{
+    struct ast_shell_redir *ast_shell = (struct ast_shell_redir *)ast;
+    struct redir_saved redir_saved;
+    if (redir_apply(ast_shell->redirs, &redir_saved))
+        return 1;
+    int res = run_ast(ast_shell->child);
+    restore_redirs(&redir_saved);
+    return res;
+}
+
 //=========================== Lookup Tables ===================================
 
 int run_ast(struct ast *ast)
@@ -196,6 +302,8 @@ int run_ast(struct ast *ast)
         [AST_IF] = &ast_run_if,
         [AST_LIST] = &ast_run_list,
         [AST_PIPE] = &ast_run_pipe,
+        [AST_AND_OR] = &ast_run_and_or,
+        [AST_SHELL_REDIR] = &ast_run_shell_redir,
     };
     return ((*functions[ast->type])(ast));
 }
@@ -208,6 +316,8 @@ void free_ast(struct ast *ast)
         [AST_IF] = &ast_free_if,
         [AST_LIST] = &ast_free_list,
         [AST_PIPE] = &ast_free_pipe,
+        [AST_AND_OR] = &ast_free_and_or,
+        [AST_SHELL_REDIR] = &ast_free_shell_redir,
     };
     (*functions[ast->type])(ast);
 }

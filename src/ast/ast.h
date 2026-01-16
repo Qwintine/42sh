@@ -1,6 +1,7 @@
 #ifndef AST_H
 #define AST_H
 
+#include "../utils/redir.h"
 #include "../utils/token.h"
 
 enum ast_type
@@ -9,7 +10,9 @@ enum ast_type
     AST_PIPE,
     AST_CMD,
     AST_IF,
-    AST_LIST
+    AST_LIST,
+    AST_AND_OR,
+    AST_SHELL_REDIR
 };
 
 struct ast
@@ -35,7 +38,8 @@ struct ast_pipe
 struct ast_cmd
 {
     struct ast base;
-    char **words;
+    char **words; // arguments de la commande
+    struct redir **redirs; // redir à appliquer dans l'ordre
 };
 
 struct ast_if
@@ -53,6 +57,22 @@ struct ast_list
     struct ast_list *next;
 };
 
+struct ast_and_or
+{
+    struct ast base;
+    struct ast *left;
+    struct ast *right;
+    enum type operator;
+};
+
+struct ast_shell_redir
+{
+    struct ast base;
+    char **words; // NULL pour shell_command (compatibilité offset)
+    struct redir **redirs; // redirections à appliquer
+    struct ast *child; // shell_command (if/while/until)
+};
+
 typedef void (*ast_handler_free)(struct ast *);
 typedef int (*ast_handler_run)(struct ast *);
 
@@ -61,6 +81,8 @@ struct ast *init_ast_cmd(void);
 struct ast *init_ast_if(void);
 struct ast *init_ast_pipe(void);
 struct ast *init_ast_loop(void);
+struct ast *init_ast_and_or(void);
+struct ast *init_ast_shell_redir(void);
 void free_ast(struct ast *node);
 int run_ast(struct ast *node);
 

@@ -58,7 +58,6 @@ static void ast_print_pipe(struct ast *ast)
     {
         print_ast((struct ast *)ast_pipe->cmd[i]);
     }
-    printf(";");
 }
 
 void print_ast(struct ast *ast)
