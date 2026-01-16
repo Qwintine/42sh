@@ -2,6 +2,8 @@
 
 static void ast_print_if(struct ast *ast)
 {
+    if (!ast)
+        return;
     struct ast_if *ast_if = (struct ast_if *)ast;
     printf("if { ");
     print_ast(ast_if->condition);
@@ -19,6 +21,8 @@ static void ast_print_if(struct ast *ast)
 static void ast_print_cmd(struct ast *ast)
 {
     struct ast_cmd *ast_cmd = (struct ast_cmd *)ast;
+    if (!ast_cmd->words)
+        return;
     printf("command: ");
     for (int i = 0; ast_cmd->words[i] != NULL; i++)
     {
@@ -33,11 +37,27 @@ static void ast_print_cmd(struct ast *ast)
 
 static void ast_print_list(struct ast *ast)
 {
+    if (!ast)
+        return;
     struct ast_list *ast_list = (struct ast_list *)ast;
     print_ast(ast_list->elt);
     if (ast_list->next)
         ast_print_list((struct ast *)ast_list->next);
     printf("\n");
+}
+
+static void ast_print_pipe(struct ast *ast)
+{
+    struct ast_pipe *ast_pipe = (struct ast_pipe *)ast;
+    if (!ast_pipe->cmd)
+        return;
+    if (ast_pipe->negation)
+        printf("!");
+    printf("pipeline: ");
+    for (size_t i = 0; ast_pipe->cmd[i] != NULL; i++)
+    {
+        print_ast((struct ast *)ast_pipe->cmd[i]);
+    }
 }
 
 void print_ast(struct ast *ast)
@@ -46,6 +66,7 @@ void print_ast(struct ast *ast)
         [AST_CMD] = &ast_print_cmd,
         [AST_IF] = &ast_print_if,
         [AST_LIST] = &ast_print_list,
+        [AST_PIPE] = &ast_print_pipe,
     };
     (*functions[ast->type])(ast);
 }

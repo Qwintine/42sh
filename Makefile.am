@@ -23,3 +23,7 @@ clean-all:
 	-rm -f Makefile.in
 	-rm -f test-driver
 	-rm -f out
+
+debug:
+	$(MAKE) clean
+	CFLAGS="-g -O0" $(MAKE)

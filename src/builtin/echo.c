@@ -17,16 +17,20 @@ static char *insert_in(size_t ind, char *str)
 {
     size_t size = strlen(str);
     char c = str[ind + 1];
-    char nc = 0;
+    char replacement = 0;
+
     if (c == 'n')
-        nc = '\n';
+        replacement = '\n';
     else if (c == 't')
-        nc = '\t';
+        replacement = '\t';
     else if (c == '\\')
-        nc = '\\';
+        replacement = '\\';
+    else
+        return str;
+
     char *res = malloc(size);
     res = strncpy(res, str, ind);
-    res[ind] = nc;
+    res[ind] = replacement;
     ind++;
     while (ind < size)
     {
@@ -40,8 +44,8 @@ static char *insert_in(size_t ind, char *str)
 static int args_echo(char *string, int *an, int *ae)
 {
     size_t i = 1;
-    int n = 0;
-    int e = 0;
+    int n = *an;
+    int e = *ae;
     while (string[i] != 0)
     {
         switch (string[i])
@@ -72,7 +76,7 @@ static int args_echo(char *string, int *an, int *ae)
  * Retour:
  *  	0 si succes, 1 sinon
  * Verbose:
- *  	parse les option -neE si presente  en premiere position
+ *  	parse les option -neE si presente en premiere position
  */
 int echo_b(char **strings)
 {

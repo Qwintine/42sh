@@ -8,6 +8,7 @@ struct lex *init_lex(FILE *entry)
     lex->entry = entry;
     lex->current_token = NULL;
     lex->context = WORD;
+    lex->error = 0;
     return lex;
 }
 
@@ -23,7 +24,6 @@ void free_lex(struct lex *lex)
 {
     if (lex->current_token)
         free_token(lex->current_token);
-    fclose(lex->entry);
     free(lex);
 }
 

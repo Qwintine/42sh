@@ -1,6 +1,44 @@
 #include "io.h"
 
+#include <stdlib.h>
 #include <string.h>
+
+// Solution de contournement pour lire stdin avec fmemopen
+// (pas sur que ça tienne dans le temps)
+static FILE *stdin_to_mem(char **buff)
+{
+    size_t capacity = 4096;
+    size_t size = 0;
+    char *buffer = malloc(capacity);
+    if (!buffer)
+        return NULL;
+
+    size_t n = 0;
+    while ((n = fread(buffer + size, 1, capacity - size, stdin)) > 0)
+    {
+        size += n;
+        if (size == capacity)
+        {
+            capacity *= 2;
+            char *new_buffer = realloc(buffer, capacity);
+            if (!new_buffer)
+            {
+                free(buffer);
+                return NULL;
+            }
+            buffer = new_buffer;
+        }
+    }
+
+    FILE *mem = fmemopen(buffer, size, "r");
+    if (!mem)
+    {
+        free(buffer);
+        return NULL;
+    }
+    *buff = buffer;
+    return mem;
+}
 
 /* Description:
  * 	Gère options scripts et arguments
@@ -13,9 +51,10 @@
  * 	nom de fichier -> file
  * 	rien -> stdin
  */
-FILE *arg_file(int argc, char **argv, int *prettyprint)
+FILE *arg_file(int argc, char **argv, int *prettyprint, char **buff)
 {
     FILE *entry = NULL;
+    *buff = NULL;
     for (int i = 1; i < argc; i++)
     {
         if (strcmp(argv[i], "-c") == 0)
@@ -41,7 +80,7 @@ FILE *arg_file(int argc, char **argv, int *prettyprint)
     }
     if (!entry)
     {
-        entry = stdin;
+        entry = stdin_to_mem(buff);
     }
     return entry;
 }

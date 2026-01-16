@@ -1,12 +1,16 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "ast/ast.h"
+#include "expand/expand.h"
 #include "io/io.h"
 #include "parser/parser.h"
 #include "utils/prettyprint.h"
 
 /*
 Truc a corriger:
+    -> Msg erreur surr stderr dans endroit code adapté ( syntax dans lexer,
+grammaire dans parser, builtin dans fct builtin, etc...)
     -> echo (sans argument) plante
     -> execvp ne s'arrete pas si la commande n'existe pas
     -> ;; ne renvoie pas d'erreur
@@ -22,24 +26,43 @@ Truc a corriger:
 
 int main(int argc, char **argv)
 {
+    struct dictionnary *vars = init_dict();
     int prettyprint = 0;
-    FILE *entry = arg_file(argc, argv, &prettyprint);
+    char *buff = NULL;
+    FILE *entry = arg_file(argc, argv, &prettyprint, &buff);
     if (!entry)
-        return 2;
-    struct ast *ast = parser(entry);
-
-    if (!ast)
-        return 2;
-
-    if (prettyprint)
-        print_ast(ast);
-    else
     {
-        int res = run_ast(ast);
-        free_ast(ast);
-        return res;
+        fprintf(stderr, "42sh: error file entry\n");
+        free_dict(vars);
+        return 2;
     }
 
-    free_ast(ast);
-    return 0;
+    int eof = 0;
+    int res = 0;
+    while (!eof)
+    {
+        struct ast *ast = parser(entry, &eof);
+
+        if (!ast)
+        {
+            fclose(entry);
+            free(buff);
+            free_dict(vars);
+            fprintf(stderr, "42sh: grammar/syntax error\n");
+            return 2;
+        }
+
+        if (prettyprint)
+            print_ast(ast);
+        else
+            res = run_ast(ast, vars); // derniere valeur de retour
+
+        free_ast(ast);
+    }
+
+    fclose(entry);
+    free(buff);
+    free_dict(vars);
+
+    return res;
 }

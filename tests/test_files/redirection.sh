@@ -1,0 +1,37 @@
+#!/bin/sh
+
+testcase "simple redirection" "-c" "echo hello > tmp.txt; cat tmp.txt"
+testcase "overwrite redirection" "-c" "echo first > tmp.txt; echo second > tmp.txt; cat tmp.txt"
+testcase "redirection builtin + restore" "-c" "echo A > tmp.txt; echo B; cat tmp.txt"
+testcase "redirection read from file" "-c" "echo hello > tmp.txt; cat < tmp.txt"
+testcase "redirection restored stdin" "-c" "echo hi > tmp.txt; cat < tmp.txt; echo ok"
+testcase "redirection basic io number" "-c" "echo ok tmp.txt file, not ok on stdout 1> tmp.txt; cat tmp.txt"
+
+testcase "redirection not an io number" "-c" "echo big number 654654654654> tmp.txt; cat tmp.txt"
+testcase "non existent fd" "-c" "echo on stdout 3> tmp.txt;"
+
+testcase "redirection append" "-c" "echo first > tmp.txt; echo second >> tmp.txt; cat tmp.txt"
+testcase "redirection append multiple times" "-c" "echo A >> tmp.txt; echo B >> tmp.txt; echo C >> tmp.txt; cat tmp.txt"
+testcase "redirection stderr" "-c" "echo error message 2> tmp.txt; cat tmp.txt"
+testcase "redirection multiple on same command" "-c" "echo hello > tmp.txt > tmp.txt; cat tmp.txt"
+testcase "redirection before command" "-c" "> tmp.txt echo test; cat tmp.txt"
+testcase "redirection in the middle" "-c" "echo > tmp.txt hello world; cat tmp.txt"
+testcase "redirection with pipe" "-c" "echo hello | cat > tmp.txt; cat tmp.txt"
+testcase "redirection input and output" "-c" "echo data > tmp.txt; cat < tmp.txt > tmp.txt; cat tmp.txt"
+testcase "redirection no clobber" "-c" "echo first > tmp.txt; echo second >| tmp.txt; cat tmp.txt"
+testcase "redirection duplicate output" "-c" "echo test >& 1"
+testcase "redirection duplicate input" "-c" "echo hi > tmp.txt; cat <& 0 < tmp.txt"
+testcase "redirection io" "-c" "echo output to fd 3 3> tmp.txt; cat tmp.txt"
+testcase "redirection with io number append" "-c" "echo stdout 1>> tmp.txt; echo more 1>> tmp.txt; cat tmp.txt"
+testcase "redirection empty file" "-c" "> tmp.txt; cat tmp.txt"
+testcase "redirection overwrite same file twice" "-c" "echo A > tmp.txt; echo B > tmp.txt > tmp.txt; cat tmp.txt"
+
+# Corner cases 
+testcase "redirection input output operator" "-c" "echo test > tmp.txt; cat <> tmp.txt"
+testcase "redirection ionumber zero" "-c" "echo test 0> tmp.txt; cat tmp.txt"
+testcase "redirection no space before operator" "-c" "echo test>tmp.txt; cat tmp.txt"
+testcase "redirection negative ionumber" "-c" "echo test -1> tmp.txt; cat tmp.txt"
+testcase "redirection before pipe" "-c" "echo data > tmp.txt | cat; cat tmp.txt"
+testcase "redirection only operators" "-c" "> >> < >| <> >&"
+testcase "redirection empty command with redirect" "-c" "> tmp.txt < tmp.txt"
+testcase "redirection fd to itself" "-c" "echo test 1>& 1"
