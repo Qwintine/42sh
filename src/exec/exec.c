@@ -6,8 +6,8 @@
 #include <unistd.h>
 
 #include "../builtin/echo.h"
-#include "redir_exec.h"
 #include "expand/expand.h"
+#include "redir_exec.h"
 
 static int is_builtin(char **words)
 {
@@ -40,6 +40,7 @@ static void expand(struct dictionnary *vars, enum type *types, char **words)
             free(words[i]);
             words[i] = val;
         }
+        i++;
     }
 }
 
@@ -65,6 +66,7 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars)
         {
             return 1;
         }
+        i++;
     }
 
     expand(vars, ast_cmd->types, ast_cmd->words);
