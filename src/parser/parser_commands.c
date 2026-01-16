@@ -20,12 +20,12 @@ struct ast *parser_shell_command(struct lex *lex)
         ast = parser_rule_while(lex);
     else
         ast = parser_rule_until(lex);
-    
+
     if (peek(lex)
         && (peek(lex)->token_type == IO_NUMBER
             || is_redir(peek(lex)->token_type)))
     {
-        struct ast_shell_redir *wrapper = 
+        struct ast_shell_redir *wrapper =
             (struct ast_shell_redir *)init_ast_shell_redir();
         if (!wrapper)
         {
@@ -66,7 +66,8 @@ struct ast *parser_simple_command(struct lex *lex)
     size_t w = 0;
     while (peek(lex)
            && (peek(lex)->token_type == IO_NUMBER
-               || is_redir(peek(lex)->token_type)))
+               || is_redir(peek(lex)->token_type)
+               || peek(lex)->token_type == ASSIGNMENT))
     {
         if (parser_prefix(lex, ast_cmd))
         {
@@ -74,38 +75,45 @@ struct ast *parser_simple_command(struct lex *lex)
         }
     }
     lex->context = WORD;
-    if (peek(lex) && peek(lex)->token_type == WORD)
+    if (peek(lex)
+        && (peek(lex)->token_type == WORD
+            || peek(lex)->token_type == EXPANSION))
     {
         struct token *tok = pop(lex);
         if (!tok)
             goto ERROR;
         ast_cmd->words[w] = tok->value;
+        ast_cmd->types = realloc(ast_cmd->types, (w + 1) * sizeof(enum type));
+        if (!ast_cmd->types)
+        {
+            goto ERROR;
+        }
+        ast_cmd->types[w] = tok->token_type;
         free(tok);
         w++;
         ast_cmd->words = realloc(ast_cmd->words, (w + 1) * sizeof(char *));
         if (!ast_cmd->words)
         {
-            free_ast((struct ast *)ast_cmd);
-            return NULL;
+            goto ERROR;
         }
         ast_cmd->words[w] = NULL;
 
         while (peek(lex) != NULL
                && (peek(lex)->token_type == IO_NUMBER
                    || peek(lex)->token_type == WORD
-                   || is_redir(peek(lex)->token_type)))
+                   || is_redir(peek(lex)->token_type)
+                   || peek(lex)->token_type == EXPANSION))
         {
             if (parser_element(lex, ast_cmd, &w))
             {
                 goto ERROR;
             }
         }
-        lex->context = KEYWORD;
-        return (struct ast *)ast_cmd;
     }
 
     lex->context = KEYWORD;
-    if (ast_cmd->redirs && ast_cmd->redirs[0])
+    if ((ast_cmd->redirs && ast_cmd->redirs[0])
+        || (ast_cmd->assignment && ast_cmd->assignment[0]) || w > 0)
     {
         return (struct ast *)ast_cmd;
     }

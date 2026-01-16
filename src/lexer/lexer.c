@@ -11,15 +11,27 @@ static int sub_switch_op(struct lex *lex, struct token *tok, char *buf,
     switch (buf[0])
     {
     case '$': // case 5
-    case '`':
-    // int result = handle_expansion(); //TODO
+    case '`': {
+        int result = handle_expansion(tok, lex->entry);
+        if (result < 0)
+            return 1;
+        if (result > 0)
+        {
+            lex->current_token = tok;
+            if (lex->current_token->token_type == KEYWORD
+                && lex->context == KEYWORD)
+                lex->current_token->token_type =
+                    check_type(lex->current_token->value);
+            return 0;
+        }
+        break;
+    }
     case '&': // case 6
     case '|':
     case '>':
     case '<': {
-        int result = new_op(
-            tok, (quote_status->double_quote || quote_status->single_quote),
-            lex->entry, buf[0]);
+        int result =
+            new_op(tok, quote_status->double_quote, lex->entry, buf[0]);
         if (result < 0)
             return 1;
         if (result > 0)
@@ -34,9 +46,12 @@ static int sub_switch_op(struct lex *lex, struct token *tok, char *buf,
         break;
     }
     default:
-        tok->value = concat(tok->value, buf[0]);
-        if (!tok->value)
-            return 1;
+        if (!(tok->token_type == EXPANSION && buf[0] == '{'))
+        {
+            tok->value = concat(tok->value, buf[0]);
+            if (!tok->value)
+                return 1;
+        }
     }
     return -1;
 }
@@ -48,8 +63,7 @@ static int sub_switch_delim(struct lex *lex, struct token *tok, char *buf,
     {
     case '\\': // cas 4
         if (handle_backslash(&tok->value, lex->entry,
-                             quote_status->double_quote
-                                 || quote_status->single_quote))
+                             quote_status->double_quote))
             return 1;
         break;
     case ';':
@@ -82,6 +96,14 @@ static int sub_switch_delim(struct lex *lex, struct token *tok, char *buf,
 static int sub_switch(struct lex *lex, struct token *tok, char *buf,
                       struct quote_status *quote_status)
 {
+    if (quote_status->single_quote && buf[0] != '\'')
+    {
+        tok->value = concat(tok->value, buf[0]);
+        if (!tok->value)
+            return 1;
+        return -1;
+    }
+
     switch (buf[0])
     {
     case '#':
@@ -110,6 +132,13 @@ static int sub_switch(struct lex *lex, struct token *tok, char *buf,
             return 0;
         }
         break;
+    case '=': {
+        tok->value = concat(tok->value, '=');
+        if (!tok->value)
+            return 1;
+        tok->token_type = ASSIGNMENT;
+        break;
+    }
     default:
         return sub_switch_delim(lex, tok, buf, quote_status);
     }
@@ -137,15 +166,16 @@ int lexer(struct lex *lex)
         if (tok->value && tok->value[0] && !quote_status.single_quote
             && !quote_status.double_quote
             && (tok->value[0] == '&' || tok->value[0] == '|'
-                || tok->value[0] == '>'
-                || tok->value[0]
-                    == '<')) // cas 2/3 !!! verif redir entre dedans nuh uh ?
+                || tok->value[0] == '>' || tok->value[0] == '<'
+                || tok->token_type == EXPANSION)) // cas 2/3
         {
             int res;
             if (tok->value[0] == '&' || tok->value[0] == '|')
                 res = manage_op(lex, tok, buf);
-            else
+            else if (tok->value[0] == '>' || tok->value[0] == '<')
                 res = manage_redir(lex, tok, buf);
+            else
+                res = manage_expansion(lex, tok, buf);
             if (!res)
                 return 0;
             goto ERROR;

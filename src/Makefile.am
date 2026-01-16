@@ -1,4 +1,4 @@
-SUBDIRS = ast builtin exec io lexer parser utils
+SUBDIRS = ast builtin exec expand io lexer parser utils
 
 bin_PROGRAMS = 42sh
 42sh_SOURCES = 42sh.c
@@ -13,4 +13,6 @@ AM_CPPFLAGS = -I$(top_srcdir)/src
   io/libio.a \
   lexer/liblexer.a \
   parser/libparser.a \
-  utils/libutils.a
+  utils/libutils.a \
+  expand/libexpand.a
+

@@ -11,6 +11,7 @@ struct redir *init_redir(void)
     }
     redir->io_num = NULL;
     redir->target = NULL;
+    redir->type = REDIR_OUT;
     return redir;
 }
 
