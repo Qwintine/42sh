@@ -33,6 +33,7 @@ int main(int argc, char **argv)
     if (!entry)
     {
         fprintf(stderr, "42sh: error file entry\n");
+        free_dict(vars);
         return 2;
     }
 
@@ -46,6 +47,7 @@ int main(int argc, char **argv)
         {
             fclose(entry);
             free(buff);
+            free_dict(vars);
             fprintf(stderr, "42sh: grammar/syntax error\n");
             return 2;
         }
@@ -60,6 +62,7 @@ int main(int argc, char **argv)
 
     fclose(entry);
     free(buff);
+    free_dict(vars);
 
     return res;
 }

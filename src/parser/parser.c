@@ -67,7 +67,9 @@ struct ast *parser(FILE *entry, int *eof)
         return NULL;
     }
 
-    *eof = (pop(lex)->token_type == END);
+    struct token *tok = pop(lex);
+    *eof = (tok->token_type == END);
+    free_token(tok);
 
     free_lex(lex);
     return ast;
