@@ -1,14 +1,26 @@
+static int hash(char *str)
+{
+    size_t res = 0;
+    for (size_t i = 0; str[i] != 0; i++)
+    {
+        res += str[i];
+    }
+    res *= res;
+    res = res % 20;
+    int r = res;
+    return r;
+}
+
 /*Description:
  *	Initialise the dictionnary
  *Argument:
  *	The hashing function used by the dictionnary to hash the key
  */
-struct dictionnary *init_dict(hashing_func *h)
+struct dictionnary *init_dict()
 {
     struct dictionnary *dict = malloc(sizeof(struct dictionnary));
 
-    dict->hash = h;
-    for (size_t i = 0; i < /*#*/; i++)
+    for (size_t i = 0; i < 20; i++)
     {
         dict->values = NULL;
     }
@@ -16,15 +28,39 @@ struct dictionnary *init_dict(hashing_func *h)
     return dict;
 }
 
+int is_env(char *key)
+{
+    if (strcmp(key, "?"))
+        return 1;
+    if (strcmp(key, "$"))
+        return 1;
+    if (strcmp(key, "RANDOM"))
+        return 1;
+    if (strcmp(key, "UID"))
+        return 1;
+    if (strcmp(key, "OLPWD"))
+        return 1;
+    if (strcmp(key, "PWD"))
+        return 1;
+    if (strcmp(key, "IFS"))
+        return 1;
+    return 0;
+}
+
 /*Description:
  *  Add a variable to the dictionnary
  *Arguments:
  *  key: the variable name
  *  val: the variable value
- *  ind: the result of hash(key)
  */
 int add_var(char *key, char *val)
 {
+    if (is_env(key))
+    {
+        if (!setenv(key, val, 1))
+            return 1;
+    }
+
     struct values *new = malloc(sizeof(struct value));
 
     if (!new)
@@ -40,7 +76,7 @@ int add_var(char *key, char *val)
     new->elt[1] = NULL;
     new->next = NULL;
 
-    int ind = dict->hashing(key);
+    int ind = hash(key);
     if (!dict->values[ind])
     {
         dict->values[ind] = new;
@@ -53,13 +89,27 @@ int add_var(char *key, char *val)
     {
         target = target->next;
     }
-    target->naext = new;
+    target->next = new;
     return 0;
 }
 
+/*Description:
+ *  Get the variable from the dictionnary
+ *Arguments:
+ *  key: the variable name
+ */
 char **get_var(char *key)
 {
-    int ind = dict->hashing(key);
+    if (is_env(key))
+    {
+        char *g = getenv(key);
+        char **res = malloc(2 * sizeof(char *));
+        res[0] = g;
+        res[1] = NULL;
+        return res;
+    }
+
+    int ind = hash(key);
 
     struct values *target = dict->val[ind];
     while (target && strcmp(target->key, key) != 0)
@@ -91,7 +141,7 @@ void free_val(struct values *val)
 
 void free_dict(struct dictionnary *dict)
 {
-    for (size_t i = 0; i < /*#*/; i++)
+    for (size_t i = 0; i < 20; i++)
     {
         free_val(dict->val[i]);
     }
