@@ -1,3 +1,10 @@
+#define _POSIX_C_SOURCE 200809L
+#include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "expand.h"
+
 static int hash(char *str)
 {
     size_t res = 0;
@@ -22,7 +29,7 @@ struct dictionnary *init_dict()
 
     for (size_t i = 0; i < 20; i++)
     {
-        dict->values = NULL;
+        dict->values[i] = NULL;
     }
 
     return dict;
@@ -73,18 +80,18 @@ int add_var(struct dictionnary *dict, char *varas)
             return 1;
     }
 
-    struct values *new = malloc(sizeof(struct value));
+    struct values *new = malloc(sizeof(struct values));
 
     if (!new)
     {
         return 1;
     }
 
-    char *newKey = malloc(strlen(key));
-    char *newVal = malloc(strlen(val));
+    char *newKey = malloc(strlen(key) + 1);
+    char *newVal = malloc(strlen(val) + 1);
     new->key = newKey;
     new->elt = malloc(2 * sizeof(char *));
-    new->elt[0] = &newVal;
+    new->elt[0] = newVal;
     new->elt[1] = NULL;
     new->next = NULL;
 
@@ -123,7 +130,7 @@ char **get_var(struct dictionnary *dict, char *key)
 
     int ind = hash(key);
 
-    struct values *target = dict->val[ind];
+    struct values *target = dict->values[ind];
     while (target && strcmp(target->key, key) != 0)
     {
         target = target->next;
@@ -155,7 +162,7 @@ void free_dict(struct dictionnary *dict)
 {
     for (size_t i = 0; i < 20; i++)
     {
-        free_val(dict->val[i]);
+        free_val(dict->values[i]);
     }
     free(dict);
 }

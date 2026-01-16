@@ -1,4 +1,4 @@
-SUBDIRS = ast builtin exec io lexer parser utils
+SUBDIRS = ast builtin exec expand io lexer parser utils
 
 bin_PROGRAMS = 42sh
 42sh_SOURCES = 42sh.c
