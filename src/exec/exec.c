@@ -29,6 +29,26 @@ static int exec_builtin(char **words)
     return -1;
 }
 
+static void insert_arr(char **val, char **words, size_t i)
+{
+    size_t len = 0;
+    while (val[len])
+        len++;
+
+    size_t l = 0;
+    while (words[l])
+    {
+        l++;
+    }
+
+    words = realloc(words, l + len);
+
+    while (l > i)
+        words[l + len] = words[l];
+    for (size_t k = 0; k < len; k++)
+        val[k] = words[i + k];
+}
+
 static void expand(struct dictionnary *vars, enum type *types, char **words)
 {
     size_t i = 0;
@@ -36,9 +56,16 @@ static void expand(struct dictionnary *vars, enum type *types, char **words)
     {
         if (types[i] == EXPANSION)
         {
-            char *val = *(get_var(vars, words[i]));
-            free(words[i]);
-            words[i] = val;
+            char **val = get_var(vars, words[i]);
+            if (!val[1])
+            {
+                free(words[i]);
+                words[i] = *val;
+            }
+            else
+            {
+                insert_arr(val, words, i);
+            }
         }
         i++;
     }
@@ -56,7 +83,8 @@ static void expand(struct dictionnary *vars, enum type *types, char **words)
  */
 int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars)
 {
-    if (!ast_cmd->words || !ast_cmd->words[0])
+    if (!ast_cmd->words
+        || (!ast_cmd->words[0] && !ast_cmd->redirs && !ast_cmd->assignment[0]))
         return 2;
 
     size_t i = 0;

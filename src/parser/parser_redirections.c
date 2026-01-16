@@ -84,9 +84,10 @@ int parser_prefix(struct lex *lex, struct ast_cmd *ast_cmd)
         while (ast_cmd->assignment[i])
             i++;
 
-        ast_cmd->assignment[i] = peek(lex)->value;
+		struct token *tok = pop(lex);
+        ast_cmd->assignment[i] = tok->value;
         i++;
-        discard_token(pop(lex));
+        free(tok);
         ast_cmd->assignment = realloc(ast_cmd->assignment, i + 1);
         ast_cmd->assignment[i] = NULL;
         return 0;

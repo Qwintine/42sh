@@ -37,19 +37,19 @@ struct dictionnary *init_dict()
 
 int is_env(char *key)
 {
-    if (strcmp(key, "?"))
+    if (!strcmp(key, "?"))
         return 1;
-    if (strcmp(key, "$"))
+    if (!strcmp(key, "$"))
         return 1;
-    if (strcmp(key, "RANDOM"))
+    if (!strcmp(key, "RANDOM"))
         return 1;
-    if (strcmp(key, "UID"))
+    if (!strcmp(key, "UID"))
         return 1;
-    if (strcmp(key, "OLPWD"))
+    if (!strcmp(key, "OLPWD"))
         return 1;
-    if (strcmp(key, "PWD"))
+    if (!strcmp(key, "PWD"))
         return 1;
-    if (strcmp(key, "IFS"))
+    if (!strcmp(key, "IFS"))
         return 1;
     return 0;
 }
@@ -72,7 +72,7 @@ int add_var(struct dictionnary *dict, char *varas)
     char *key = malloc(i);
     char *val = malloc(strlen(varas + i + 1));
     key = strcpy(key, varas);
-    val = strcpy(key, varas + i + 1);
+    val = strcpy(val, varas + i + 1);
 
     if (is_env(key))
     {
@@ -87,11 +87,9 @@ int add_var(struct dictionnary *dict, char *varas)
         return 1;
     }
 
-    char *newKey = malloc(strlen(key) + 1);
-    char *newVal = malloc(strlen(val) + 1);
-    new->key = newKey;
+    new->key = key;
     new->elt = malloc(2 * sizeof(char *));
-    new->elt[0] = newVal;
+    new->elt[0] = val;
     new->elt[1] = NULL;
     new->next = NULL;
 
