@@ -9,6 +9,7 @@
 #include "../../src/io/io.h"
 #include "../../src/utils/token.h"
 #include "../../src/lexer/lexer.h"
+#include "../../src/lexer/lexer_aux.h"
 
 TestSuite(Test42sh);
 
@@ -304,6 +305,41 @@ Test(Test42sh, lex_redir, .init = cr_redirect_stdout)
     cr_expect(eq(int, lexer(lx), 0));
     cr_expect(eq(int, lx->current_token->token_type, WORD));
     cr_expect(eq(str, lx->current_token->value, "2"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, END));
+
+    free_lex(lx);
+}
+
+Test(Test42sh, lex_expand, .init = cr_redirect_stdout)
+{
+    char *buff;
+    FILE *f = arg_file(3, (char*[]){"program", "-c", "test=ok; echo ${test} $test"}, NULL, &buff);
+    cr_assert_not_null(f);
+
+    struct lex *lx = init_lex(f);
+    cr_assert_not_null(lx);
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, ASSIGNMENT));
+    cr_expect(eq(str, lx->current_token->value, "test=ok"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, SEMI_COLON));
+    cr_expect(eq(str, lx->current_token->value, ";"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, WORD));
+    cr_expect(eq(str, lx->current_token->value, "echo"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, EXPANSION));
+    cr_expect(eq(str, lx->current_token->value, "test"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, EXPANSION));
+    cr_expect(eq(str, lx->current_token->value, "test"));
 
     cr_expect(eq(int, lexer(lx), 0));
     cr_expect(eq(int, lx->current_token->token_type, END));

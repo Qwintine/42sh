@@ -116,3 +116,25 @@ int manage_redir(struct lex *lex, struct token *tok, char buf[])
     lex->current_token = tok;
     return 0;
 }
+
+int manage_expansion(struct lex *lex, struct token *tok, char buf[])
+{
+    if (!tok->value || !tok->value[0])
+        return 1;
+    tok->value = concat(tok->value, buf[0]);
+    if (!tok->value)
+        return 1;
+    while (fread(buf, 1, 1, lex->entry))
+    {
+        if (buf[0] == '{')
+            return 0;
+        if (buf[0] == '}')
+            break;
+        tok->value = concat(tok->value, buf[0]);
+        if (!tok->value)
+            return 1;
+    }
+    
+    lex->current_token = tok;
+    return 0;
+}

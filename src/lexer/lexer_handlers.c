@@ -41,30 +41,46 @@ int handle_com(int in_quotes, struct lex *lex, struct token *tok, char *buf)
     return 0;
 }
 
-int handle_backslash(char **value, FILE *entry, int in_quotes)
+int handle_backslash(char **value, FILE *entry, int in_double_quote)
 {
     char buf[1];
-    if (in_quotes)
+    if (!fread(buf, 1, 1, entry))
     {
         *value = concat(*value, '\\');
         if (!*value)
             return 1;
+        return 0;
     }
-    else
+
+    if (in_double_quote)
     {
-        if (!fread(buf, 1, 1, entry))
+        if (buf[0] == '$' || buf[0] == '`' || buf[0] == '"' || buf[0] == '\\'
+            || buf[0] == '\n')
+        {
+            if (buf[0] != '\n')
+            {
+                *value = concat(*value, buf[0]);
+                if (!*value)
+                    return 1;
+            }
+        }
+        else
         {
             *value = concat(*value, '\\');
             if (!*value)
                 return 1;
-            return 0;
-        }
-        if (buf[0] != '\n')
-        {
             *value = concat(*value, buf[0]);
             if (!*value)
                 return 1;
         }
+        return 0;
+    }
+
+    if (buf[0] != '\n')
+    {
+        *value = concat(*value, buf[0]);
+        if (!*value)
+            return 1;
     }
     return 0;
 }
@@ -168,5 +184,16 @@ int new_op(struct token *tok, int quote, FILE *entry, char val)
     tok->value = concat(tok->value, val);
     if (!tok->value)
         return -1;
+    return 0;
+}
+
+int handle_expansion(struct token *tok, FILE *entry)
+{
+    if (strlen(tok->value) > 0)
+    {
+        fseek(entry, -1, SEEK_CUR);
+        return 1;
+    }
+    tok->token_type = EXPANSION;
     return 0;
 }

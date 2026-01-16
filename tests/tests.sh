@@ -40,13 +40,13 @@ testcase() {
   fi
 
   if diff -u "$REF_OUT" "$TEST_OUT" 2>/dev/null; then
-    echo "$name ==> OK"
+    # echo "$name ==> OK"
     PASS=$((PASS + 1))
   else
     echo "$name ==> FAIL"
     diff -u "$REF_OUT" "$TEST_OUT" | grep -E '^(@@|[-+])' | grep -vE '^(---|\+\+\+)' || true
+    echo
   fi
-  echo
 }
 
 run_criterion() {
@@ -61,6 +61,10 @@ run_criterion() {
     src/io/io.c \
     src/utils/token.c \
     src/lexer/lexer.c \
+    src/lexer/lexer_handlers.c \
+    src/lexer/lexer_operators.c \
+    src/lexer/lexer_tokens.c \
+    src/lexer/lexer_utils.c \
     $(pkg-config --libs criterion) \
     -o tests/crit_tests >/dev/null 2>&1
 
