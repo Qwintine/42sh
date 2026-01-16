@@ -13,4 +13,6 @@ AM_CPPFLAGS = -I$(top_srcdir)/src
   io/libio.a \
   lexer/liblexer.a \
   parser/libparser.a \
-  utils/libutils.a
+  utils/libutils.a \
+  expand/libexpand.a
+

@@ -3,6 +3,7 @@
 
 #include "../utils/redir.h"
 #include "../utils/token.h"
+#include "../expand/expand.h"
 
 enum ast_type
 {
@@ -38,6 +39,8 @@ struct ast_pipe
 struct ast_cmd
 {
     struct ast base;
+    char **assignment;
+    enum type *types;
     char **words; // arguments de la commande
     struct redir **redirs; // redir à appliquer dans l'ordre
 };
@@ -74,7 +77,7 @@ struct ast_shell_redir
 };
 
 typedef void (*ast_handler_free)(struct ast *);
-typedef int (*ast_handler_run)(struct ast *);
+typedef int (*ast_handler_run)(struct ast *, struct dictionnary *);
 
 struct ast *init_ast_list(void);
 struct ast *init_ast_cmd(void);
@@ -84,6 +87,6 @@ struct ast *init_ast_loop(void);
 struct ast *init_ast_and_or(void);
 struct ast *init_ast_shell_redir(void);
 void free_ast(struct ast *node);
-int run_ast(struct ast *node);
+int run_ast(struct ast *node, struct dictionnary *vars);
 
 #endif /* AST_H */

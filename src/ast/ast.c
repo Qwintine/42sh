@@ -39,6 +39,13 @@ struct ast *init_ast_cmd(void)
     if (!node)
         return NULL;
     node->base.type = AST_CMD;
+    node->assignment = calloc(1, sizeof(char *));
+    if (!node->assignment)
+    {
+        free(node);
+        return NULL;
+    }
+    node->types = NULL;
     node->words = calloc(1, sizeof(char *));
     if (!node->words)
     {
@@ -114,6 +121,14 @@ static void ast_free_cmd(struct ast *ast)
 {
     int i = 0;
     struct ast_cmd *ast_cmd = (struct ast_cmd *)ast;
+    while (ast_cmd->assignment[i])
+    {
+        free(ast_cmd->assignment[i]);
+        i++;
+    }
+    free(ast_cmd->assignment);
+    free(ast_cmd->types);
+    i = 0;
     while (ast_cmd->words[i])
     {
         free(ast_cmd->words[i]);
@@ -206,47 +221,47 @@ static void ast_free_shell_redir(struct ast *ast)
 //===================== Run ast from specific type =============================
 
 // TODO adapter à redir
-static int ast_run_cmd(struct ast *ast)
+static int ast_run_cmd(struct ast *ast, struct dictionnary *vars)
 {
     if (!ast)
         return 2;
     struct ast_cmd *ast_cmd = (struct ast_cmd *)ast;
-    int res = exec_cmd(ast_cmd->words, ast_cmd->redirs);
+    int res = exec_cmd(ast_cmd, vars);
     return res;
 }
 
-static int ast_run_if(struct ast *ast)
+static int ast_run_if(struct ast *ast, struct dictionnary *vars)
 {
     struct ast_if *ast_if = (struct ast_if *)ast;
     int res = 0;
-    if (!run_ast(ast_if->condition))
-        res = run_ast(ast_if->then_body);
+    if (!run_ast(ast_if->condition, vars))
+        res = run_ast(ast_if->then_body, vars);
     else if (ast_if->else_body)
-        res = run_ast(ast_if->else_body);
+        res = run_ast(ast_if->else_body, vars);
     return res;
 }
 
-static int ast_run_list(struct ast *ast)
+static int ast_run_list(struct ast *ast, struct dictionnary *vars)
 {
     struct ast_list *ast_list = (struct ast_list *)ast;
     int res = 0;
     if (ast_list->elt)
-        res = run_ast(ast_list->elt);
+        res = run_ast(ast_list->elt, vars);
     if (ast_list->next)
-        res = ast_run_list((struct ast *)ast_list->next);
+        res = ast_run_list((struct ast *)ast_list->next, vars);
     return res;
 }
 
-static int ast_run_loop(struct ast *ast)
+static int ast_run_loop(struct ast *ast, struct dictionnary *vars)
 {
     struct ast_loop *ast_loop = (struct ast_loop *)ast;
     int res = 0;
-    if (run_ast(ast_loop->condition) == ast_loop->truth)
-        res = run_ast(ast_loop->body);
+    if (run_ast(ast_loop->condition, vars) == ast_loop->truth)
+        res = run_ast(ast_loop->body, vars);
     return res;
 }
 
-static int ast_run_pipe(struct ast *ast)
+static int ast_run_pipe(struct ast *ast, struct dictionnary *vars)
 {
     if (!ast)
         return 2;
@@ -254,7 +269,7 @@ static int ast_run_pipe(struct ast *ast)
     if (!ast_pipe->cmd[0])
         return 2;
     int fd[2] = { 0, 0 };
-    int res = exec_pipe(ast_pipe->cmd, fd);
+    int res = exec_pipe(ast_pipe->cmd, fd, vars);
     if (ast_pipe->negation)
     {
         res = !res;
@@ -262,39 +277,39 @@ static int ast_run_pipe(struct ast *ast)
     return res;
 }
 
-static int ast_run_and_or(struct ast *ast)
+static int ast_run_and_or(struct ast *ast, struct dictionnary *vars)
 {
     struct ast_and_or *ast_and_or = (struct ast_and_or *)ast;
-    int res = run_ast(ast_and_or->left);
+    int res = run_ast(ast_and_or->left, vars);
 
     if (ast_and_or->operator== AND)
     {
         if (res == 0)
-            res = run_ast(ast_and_or->right);
+            res = run_ast(ast_and_or->right, vars);
     }
     else if (ast_and_or->operator== OR)
     {
         if (res != 0)
-            res = run_ast(ast_and_or->right);
+            res = run_ast(ast_and_or->right, vars);
     }
 
     return res;
 }
 
-static int ast_run_shell_redir(struct ast *ast)
+static int ast_run_shell_redir(struct ast *ast, struct dictionnary *vars)
 {
     struct ast_shell_redir *ast_shell = (struct ast_shell_redir *)ast;
     struct redir_saved redir_saved;
     if (redir_apply(ast_shell->redirs, &redir_saved))
         return 1;
-    int res = run_ast(ast_shell->child);
+    int res = run_ast(ast_shell->child, vars);
     restore_redirs(&redir_saved);
     return res;
 }
 
 //=========================== Lookup Tables ===================================
 
-int run_ast(struct ast *ast)
+int run_ast(struct ast *ast, struct dictionnary *vars)
 {
     static const ast_handler_run functions[] = {
         [AST_LOOP] = &ast_run_loop,
@@ -305,7 +320,7 @@ int run_ast(struct ast *ast)
         [AST_AND_OR] = &ast_run_and_or,
         [AST_SHELL_REDIR] = &ast_run_shell_redir,
     };
-    return ((*functions[ast->type])(ast));
+    return ((*functions[ast->type])(ast,vars));
 }
 
 void free_ast(struct ast *ast)

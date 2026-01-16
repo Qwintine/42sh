@@ -53,8 +53,20 @@ int is_env(char *key)
  *  key: the variable name
  *  val: the variable value
  */
-int add_var(char *key, char *val)
+int add_var(struct dictionnary *dict, char *varas)
 {
+    size_t i = 0;
+    while (varas[i] != '=')
+    {
+        i++;
+    }
+    varas[i] = 0;
+
+    char *key = malloc(i);
+    char *val = malloc(strlen(varas + i + 1));
+    key = strcpy(key, varas);
+    val = strcpy(key, varas + i + 1);
+
     if (is_env(key))
     {
         if (!setenv(key, val, 1))
@@ -98,7 +110,7 @@ int add_var(char *key, char *val)
  *Arguments:
  *  key: the variable name
  */
-char **get_var(char *key)
+char **get_var(struct dictionnary *dict, char *key)
 {
     if (is_env(key))
     {

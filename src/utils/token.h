@@ -24,8 +24,8 @@ enum type
     REDIR_NO_CLOBB, // >|
     REDIR_IO, // <>
     IO_NUMBER,
-    VARIABLE,
-    EXPENSION,
+    ASSIGNMENT,
+    EXPANSION,
     NEGATION,
     AND,
     OR,

@@ -5,6 +5,7 @@
 #include "io/io.h"
 #include "parser/parser.h"
 #include "utils/prettyprint.h"
+#include "expand/expand.h"
 
 /*
 Truc a corriger:
@@ -38,6 +39,8 @@ int main(int argc, char **argv)
     int res = 0;
     while (!eof)
     {
+		struct dictionnary *vars = init_dict();
+
         struct ast *ast = parser(entry, &eof);
 
         if (!ast)
@@ -51,7 +54,7 @@ int main(int argc, char **argv)
         if (prettyprint)
             print_ast(ast);
         else
-            res = run_ast(ast); // derniere valeur de retour
+            res = run_ast(ast,vars); // derniere valeur de retour
 
         free_ast(ast);
     }

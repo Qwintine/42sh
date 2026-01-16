@@ -78,5 +78,18 @@ int parser_element(struct lex *lex, struct ast_cmd *ast_cmd, size_t *w)
 /* TODO */
 int parser_prefix(struct lex *lex, struct ast_cmd *ast_cmd)
 {
+    if (peek(lex) && peek(lex)->token_type == ASSIGNMENT)
+    {
+        size_t i = 0;
+        while (ast_cmd->assignment[i])
+            i++;
+
+        ast_cmd->assignment[i] = peek(lex)->value;
+        i++;
+        discard_token(pop(lex));
+        ast_cmd->assignment = realloc(ast_cmd->assignment, i + 1);
+        ast_cmd->assignment[i] = NULL;
+        return 0;
+    }
     return parser_redir(lex, ast_cmd);
 }
