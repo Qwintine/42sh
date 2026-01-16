@@ -1,9 +1,9 @@
 #ifndef AST_H
 #define AST_H
 
+#include "../expand/expand.h"
 #include "../utils/redir.h"
 #include "../utils/token.h"
-#include "../expand/expand.h"
 
 enum ast_type
 {
@@ -71,7 +71,7 @@ struct ast_and_or
 struct ast_shell_redir
 {
     struct ast base;
-    char **words; 
+    char **words;
     struct redir **redirs;
     struct ast *child; // shell_command (if/while/until)
 };

@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 200809L
 #include "exec.h"
 
 #include <stdio.h>
@@ -29,26 +30,6 @@ static int exec_builtin(char **words)
     return -1;
 }
 
-static void insert_arr(char **val, char **words, size_t i)
-{
-    size_t len = 0;
-    while (val[len])
-        len++;
-
-    size_t l = 0;
-    while (words[l])
-    {
-        l++;
-    }
-
-    words = realloc(words, l + len);
-
-    while (l > i)
-        words[l + len] = words[l];
-    for (size_t k = 0; k < len; k++)
-        val[k] = words[i + k];
-}
-
 static void expand(struct dictionnary *vars, enum type *types, char **words)
 {
     size_t i = 0;
@@ -57,14 +38,15 @@ static void expand(struct dictionnary *vars, enum type *types, char **words)
         if (types[i] == EXPANSION)
         {
             char **val = get_var(vars, words[i]);
-            if (!val[1])
+            if (!val)
             {
                 free(words[i]);
-                words[i] = *val;
+                words[i] = strdup("");
             }
             else
             {
-                insert_arr(val, words, i);
+                free(words[i]);
+                words[i] = strdup(val[0]);
             }
         }
         i++;
@@ -95,6 +77,17 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars)
             return 1;
         }
         i++;
+    }
+    if (!ast_cmd->words || !ast_cmd->words[0])
+    {
+        if (ast_cmd->redirs)
+        {
+            struct redir_saved redir_saved;
+            if (redir_apply(ast_cmd->redirs, &redir_saved))
+                return 1;
+            restore_redirs(&redir_saved);
+        }
+        return 0;
     }
 
     expand(vars, ast_cmd->types, ast_cmd->words);

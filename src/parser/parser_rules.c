@@ -233,7 +233,7 @@ ERROR:
 
 /*struct ast *parser_for(struct lex *lex)
 {
-	if(!peek(lex) || peek(lex)->token_type != FOR)
-		return NULL;
-	discard_token
+    if(!peek(lex) || peek(lex)->token_type != FOR)
+        return NULL;
+    discard_token
 }*/

@@ -320,7 +320,7 @@ int run_ast(struct ast *ast, struct dictionnary *vars)
         [AST_AND_OR] = &ast_run_and_or,
         [AST_SHELL_REDIR] = &ast_run_shell_redir,
     };
-    return ((*functions[ast->type])(ast,vars));
+    return ((*functions[ast->type])(ast, vars));
 }
 
 void free_ast(struct ast *ast)

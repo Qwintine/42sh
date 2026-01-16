@@ -83,7 +83,7 @@ struct ast *parser_simple_command(struct lex *lex)
         if (!tok)
             goto ERROR;
         ast_cmd->words[w] = tok->value;
-        ast_cmd->types = realloc(ast_cmd->types, w * sizeof(char));
+        ast_cmd->types = realloc(ast_cmd->types, (w + 1) * sizeof(enum type));
         if (!ast_cmd->types)
         {
             goto ERROR;
@@ -109,13 +109,11 @@ struct ast *parser_simple_command(struct lex *lex)
                 goto ERROR;
             }
         }
-        lex->context = KEYWORD;
-        return (struct ast *)ast_cmd;
     }
 
     lex->context = KEYWORD;
     if ((ast_cmd->redirs && ast_cmd->redirs[0])
-        || (ast_cmd->assignment && ast_cmd->assignment[0]))
+        || (ast_cmd->assignment && ast_cmd->assignment[0]) || w > 0)
     {
         return (struct ast *)ast_cmd;
     }

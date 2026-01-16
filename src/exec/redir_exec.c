@@ -101,7 +101,7 @@ int redir_apply(struct redir **redirs, struct redir_saved *redir_saved)
         int fd = open_redir_file(redirect->type, redirect->target);
         if (fd < 0)
             return 1;
-			
+
         if (dup2(fd, target) < 0)
         {
             close(fd);

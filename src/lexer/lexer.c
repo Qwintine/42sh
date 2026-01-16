@@ -30,8 +30,8 @@ static int sub_switch_op(struct lex *lex, struct token *tok, char *buf,
     case '|':
     case '>':
     case '<': {
-        int result = new_op(tok, quote_status->double_quote,
-                            lex->entry, buf[0]);
+        int result =
+            new_op(tok, quote_status->double_quote, lex->entry, buf[0]);
         if (result < 0)
             return 1;
         if (result > 0)
@@ -46,7 +46,8 @@ static int sub_switch_op(struct lex *lex, struct token *tok, char *buf,
         break;
     }
     default:
-        if (!(tok->token_type == EXPANSION && buf[0] == '{')) {
+        if (!(tok->token_type == EXPANSION && buf[0] == '{'))
+        {
             tok->value = concat(tok->value, buf[0]);
             if (!tok->value)
                 return 1;
@@ -131,8 +132,7 @@ static int sub_switch(struct lex *lex, struct token *tok, char *buf,
             return 0;
         }
         break;
-    case '=':
-    {
+    case '=': {
         tok->value = concat(tok->value, '=');
         if (!tok->value)
             return 1;
@@ -167,7 +167,7 @@ int lexer(struct lex *lex)
             && !quote_status.double_quote
             && (tok->value[0] == '&' || tok->value[0] == '|'
                 || tok->value[0] == '>' || tok->value[0] == '<'
-                || tok->token_type == EXPANSION)) // cas 2/3 
+                || tok->token_type == EXPANSION)) // cas 2/3
         {
             int res;
             if (tok->value[0] == '&' || tok->value[0] == '|')

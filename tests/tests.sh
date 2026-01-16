@@ -153,6 +153,9 @@ echo "================================= LOOP =================================\n
 echo "========================== Redirection ===========================\n"
 . tests/test_files/redirection.sh
 
+echo "========================== Expansion ===========================\n"
+. tests/test_files/expansion.sh
+
 printf "Fonctionel => Total: %d | Passed: %d | Failed: %d\n\n" "$TOTAL" "$PASS" "$((TOTAL - PASS))"
 
 if [ "${COVERAGE:-no}" = "yes" ]; then

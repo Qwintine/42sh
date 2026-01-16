@@ -315,7 +315,7 @@ Test(Test42sh, lex_redir, .init = cr_redirect_stdout)
 Test(Test42sh, lex_expand, .init = cr_redirect_stdout)
 {
     char *buff;
-    FILE *f = arg_file(3, (char*[]){"program", "-c", "test=ok; echo ${test} $test"}, NULL, &buff);
+    FILE *f = arg_file(3, (char*[]){"program", "-c", "test=ok; echo $test ${test}"}, NULL, &buff);
     cr_assert_not_null(f);
 
     struct lex *lx = init_lex(f);

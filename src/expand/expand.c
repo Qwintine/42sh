@@ -1,9 +1,9 @@
 #define _POSIX_C_SOURCE 200809L
+#include "expand.h"
+
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "expand.h"
 
 static int hash(char *str)
 {
@@ -63,32 +63,47 @@ int is_env(char *key)
 int add_var(struct dictionnary *dict, char *varas)
 {
     size_t i = 0;
-    while (varas[i] != '=')
+    while (varas && varas[i] && varas[i] != '=')
     {
         i++;
     }
-    varas[i] = 0;
 
-    char *key = malloc(i);
-    char *val = malloc(strlen(varas + i + 1));
-    key = strcpy(key, varas);
-    val = strcpy(val, varas + i + 1);
+    if (!dict || !varas || varas[i] != '=')
+        return 1;
+
+    char *key = malloc(i + 1);
+    char *val = malloc(strlen(varas + i + 1) + 1);
+    if (!key || !val)
+    {
+        goto ERROR;
+    }
+
+    strncpy(key, varas, i);
+    key[i] = '\0';
+    strcpy(val, varas + i + 1);
 
     if (is_env(key))
     {
-        if (!setenv(key, val, 1))
-            return 1;
+        if (setenv(key, val, 1) != 0)
+        {
+            goto ERROR;
+        }
     }
 
     struct values *new = malloc(sizeof(struct values));
 
     if (!new)
     {
-        return 1;
+        goto ERROR;
     }
 
     new->key = key;
     new->elt = malloc(2 * sizeof(char *));
+    if (!new->elt)
+    {
+        free(new);
+        goto ERROR;
+    }
     new->elt[0] = val;
     new->elt[1] = NULL;
     new->next = NULL;
@@ -108,6 +123,11 @@ int add_var(struct dictionnary *dict, char *varas)
     }
     target->next = new;
     return 0;
+
+ERROR:
+    free(key);
+    free(val);
+    return 1;
 }
 
 /*Description:

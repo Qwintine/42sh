@@ -121,20 +121,50 @@ int manage_expansion(struct lex *lex, struct token *tok, char buf[])
 {
     if (!tok->value || !tok->value[0])
         return 1;
+
+    if (buf[0] == '{')
+    {
+        tok->value = concat(tok->value, buf[0]);
+        return 0;
+    }
+
+    if (!((buf[0] >= 'a' && buf[0] <= 'z') || (buf[0] >= 'A' && buf[0] <= 'Z')
+          || (buf[0] >= '0' && buf[0] <= '9') || buf[0] == '_'
+          || buf[0] == '?'))
+    {
+        fseek(lex->entry, -1, SEEK_CUR);
+        lex->current_token = tok;
+        return 0;
+    }
+
     tok->value = concat(tok->value, buf[0]);
     if (!tok->value)
         return 1;
+
     while (fread(buf, 1, 1, lex->entry))
     {
         if (buf[0] == '{')
             return 0;
         if (buf[0] == '}')
             break;
+        if (buf[0] == ' ' || buf[0] == '\t' || buf[0] == '\n' || buf[0] == ';'
+            || buf[0] == '$')
+        {
+            fseek(lex->entry, -1, SEEK_CUR);
+            break;
+        }
+        if (!((buf[0] >= 'a' && buf[0] <= 'z')
+              || (buf[0] >= 'A' && buf[0] <= 'Z')
+              || (buf[0] >= '0' && buf[0] <= '9') || buf[0] == '_'))
+        {
+            fseek(lex->entry, -1, SEEK_CUR);
+            break;
+        }
         tok->value = concat(tok->value, buf[0]);
         if (!tok->value)
             return 1;
     }
-    
+
     lex->current_token = tok;
     return 0;
 }

@@ -52,12 +52,17 @@ int parser_element(struct lex *lex, struct ast_cmd *ast_cmd, size_t *w)
 {
     if (peek(lex))
     {
-        if (peek(lex)->token_type == WORD)
+        if (peek(lex)->token_type == WORD || peek(lex)->token_type == EXPANSION)
         {
             struct token *tok = pop(lex);
             if (!tok)
                 return 1;
             ast_cmd->words[*w] = tok->value;
+            ast_cmd->types =
+                realloc(ast_cmd->types, (*w + 1) * sizeof(enum type));
+            if (!ast_cmd->types)
+                return 1;
+            ast_cmd->types[*w] = tok->token_type;
             free(tok);
             (*w)++;
             ast_cmd->words = realloc(ast_cmd->words, (*w + 1) * sizeof(char *));
@@ -84,11 +89,12 @@ int parser_prefix(struct lex *lex, struct ast_cmd *ast_cmd)
         while (ast_cmd->assignment[i])
             i++;
 
-		struct token *tok = pop(lex);
+        struct token *tok = pop(lex);
         ast_cmd->assignment[i] = tok->value;
         i++;
         free(tok);
-        ast_cmd->assignment = realloc(ast_cmd->assignment, i + 1);
+        ast_cmd->assignment =
+            realloc(ast_cmd->assignment, (i + 1) * sizeof(char *));
         ast_cmd->assignment[i] = NULL;
         return 0;
     }

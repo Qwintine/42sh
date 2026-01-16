@@ -2,10 +2,10 @@
 #include <stdlib.h>
 
 #include "ast/ast.h"
+#include "expand/expand.h"
 #include "io/io.h"
 #include "parser/parser.h"
 #include "utils/prettyprint.h"
-#include "expand/expand.h"
 
 /*
 Truc a corriger:
@@ -26,7 +26,7 @@ grammaire dans parser, builtin dans fct builtin, etc...)
 
 int main(int argc, char **argv)
 {
-	struct dictionnary *vars = init_dict();
+    struct dictionnary *vars = init_dict();
     int prettyprint = 0;
     char *buff = NULL;
     FILE *entry = arg_file(argc, argv, &prettyprint, &buff);
@@ -40,7 +40,6 @@ int main(int argc, char **argv)
     int res = 0;
     while (!eof)
     {
-
         struct ast *ast = parser(entry, &eof);
 
         if (!ast)
@@ -54,7 +53,7 @@ int main(int argc, char **argv)
         if (prettyprint)
             print_ast(ast);
         else
-            res = run_ast(ast,vars); // derniere valeur de retour
+            res = run_ast(ast, vars); // derniere valeur de retour
 
         free_ast(ast);
     }
