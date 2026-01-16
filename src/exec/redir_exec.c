@@ -51,107 +51,63 @@ static int fd_save(struct redir_saved *redir_saved, int fd)
     return 0;
 }
 
+static int open_redir_file(enum type type, char *target)
+{
+    if (type == REDIR_OUT || type == REDIR_NO_CLOBB)
+        return open(target, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if (type == REDIR_APPEND)
+        return open(target, O_WRONLY | O_CREAT | O_APPEND, 0644);
+    if (type == REDIR_IO)
+        return open(target, O_RDWR | O_CREAT, 0644);
+    if (type == REDIR_IN)
+        return open(target, O_RDONLY);
+    return -1;
+}
+
+static int handle_dup_redir(struct redir *redirect, int target)
+{
+    int source_fd = read_io(redirect->target, -1);
+    if (source_fd < 0 || fcntl(source_fd, F_GETFD) < 0)
+        return 1;
+    return dup2(source_fd, target) < 0 ? 1 : 0;
+}
+
 int redir_apply(struct redir **redirs, struct redir_saved *redir_saved)
 {
     redir_saved->saved = NULL;
     redir_saved->size = 0;
     if (!redirs)
-    {
         return 0;
-    }
 
     for (size_t i = 0; redirs[i]; i++)
     {
         struct redir *redirect = redirs[i];
         int target = STDOUT_FILENO;
-        if (redirect->type == REDIR_IN || redirect->type == REDIR_DUP_IN)
+        if (redirect->type == REDIR_IN || redirect->type == REDIR_DUP_IN
+            || redirect->type == REDIR_IO)
             target = STDIN_FILENO;
+
         target = read_io(redirect->io_num, target);
         if (fd_save(redir_saved, target))
             return 1;
-        if (redirect->type == REDIR_OUT) // same
-        {
-            int fd = open(redirect->target, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-            if (fd < 0)
-                return 1;
-            if (dup2(fd, target) < 0)
-            {
-                close(fd);
-                return 1;
-            }
-            close(fd);
-        }
-        else if (redirect->type == REDIR_IN)
-        {
-            int fd = open(redirect->target, O_RDONLY);
-            if (fd < 0)
-                return 1;
-            if (dup2(fd, target) < 0)
-            {
-                close(fd);
-                return 1;
-            }
-            close(fd);
-        }
-        else if (redirect->type == REDIR_DUP_OUT
-                 || redirect->type == REDIR_DUP_IN)
-        {
-            // Duplicate file descriptor: target is a fd number, not a file
-            // Example: 2>&1 means duplicate fd 1 to fd 2
-            int source_fd = read_io(redirect->target, -1);
-            if (source_fd < 0)
-                return 1;
 
-            // Check if source fd is valid
-            if (fcntl(source_fd, F_GETFD) < 0)
+        if (redirect->type == REDIR_DUP_OUT || redirect->type == REDIR_DUP_IN)
+        {
+            if (handle_dup_redir(redirect, target))
                 return 1;
+            continue;
+        }
 
-            // Duplicate source_fd to target
-            if (dup2(source_fd, target) < 0)
-                return 1;
-        }
-        else if (redirect->type == REDIR_APPEND)
+        int fd = open_redir_file(redirect->type, redirect->target);
+        if (fd < 0)
+            return 1;
+			
+        if (dup2(fd, target) < 0)
         {
-            int fd =
-                open(redirect->target, O_WRONLY | O_CREAT | O_APPEND, 0644);
-            if (fd < 0)
-                return 1;
-            if (dup2(fd, target) < 0)
-            {
-                close(fd);
-                return 1;
-            }
             close(fd);
-        }
-        else if (redirect->type == REDIR_NO_CLOBB)
-        {
-            int fd = open(redirect->target, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-            if (fd < 0)
-                return 1;
-            if (dup2(fd, target) < 0)
-            {
-                close(fd);
-                return 1;
-            }
-            close(fd);
-        }
-        else if (redirect->type == REDIR_IO)
-        {
-            int fd = open(redirect->target, O_RDWR | O_CREAT, 0644);
-            if (fd < 0)
-                return 1;
-            if (dup2(fd, target) < 0)
-            {
-                close(fd);
-                return 1;
-            }
-            close(fd);
-        }
-        else
-        {
-            // not supported
             return 1;
         }
+        close(fd);
     }
     return 0;
 }

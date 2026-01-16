@@ -20,16 +20,31 @@ struct ast *parser_shell_command(struct lex *lex)
         ast = parser_rule_while(lex);
     else
         ast = parser_rule_until(lex);
+    
     if (peek(lex)
         && (peek(lex)->token_type == IO_NUMBER
             || is_redir(peek(lex)->token_type)))
     {
-        int error = parser_redir(lex, (struct ast_cmd *)ast);
-        if (!error)
+        struct ast_shell_redir *wrapper = 
+            (struct ast_shell_redir *)init_ast_shell_redir();
+        if (!wrapper)
         {
             free_ast(ast);
             return NULL;
         }
+        wrapper->child = ast;
+        while (peek(lex)
+               && (peek(lex)->token_type == IO_NUMBER
+                   || is_redir(peek(lex)->token_type)))
+        {
+            int error = parser_redir(lex, (struct ast_cmd *)wrapper);
+            if (error)
+            {
+                free_ast((struct ast *)wrapper);
+                return NULL;
+            }
+        }
+        return (struct ast *)wrapper;
     }
     return ast;
 }
