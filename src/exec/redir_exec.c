@@ -69,7 +69,9 @@ static int handle_dup_redir(struct redir *redirect, int target)
     int source_fd = read_io(redirect->target, -1);
     if (source_fd < 0 || fcntl(source_fd, F_GETFD) < 0)
         return 1;
-    return dup2(source_fd, target) < 0 ? 1 : 0;
+    if (dup2(source_fd, target) < 0)
+        return 1;
+    return 0;
 }
 
 int redir_apply(struct redir **redirs, struct redir_saved *redir_saved)

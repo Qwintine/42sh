@@ -1,6 +1,7 @@
 #include "exec.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -63,6 +64,17 @@ int exec_cmd(char **words, struct redir **redirs)
 {
     if (!words || !redirs || (!words[0] && !redirs[0]))
         return 2;
+    
+    if (!words[0] && redirs[0])
+    {
+        struct redir_saved redir_saved;
+        if (redir_apply(redirs, &redir_saved))
+            return 1;
+            
+        restore_redirs(&redir_saved);
+        return 0;
+    }
+    
     if (is_builtin(words))
     {
         struct redir_saved redir_saved;
@@ -112,29 +124,31 @@ int exec_pipe(struct ast_cmd **cmd, int fd[2])
         int child = fork();
         if (!child)
         {
-            dup2(fd[1], STDOUT_FILENO);
             close(fd[0]);
+            dup2(fd[1], STDOUT_FILENO);
             close(fd[1]);
-            return run_ast((struct ast *)cmd[0]);
+            exit(run_ast((struct ast *)cmd[0]));
         }
+        close(fd[1]);
         int w;
         waitpid(child, &w, 0);
         return exec_pipe(cmd + 1, fd);
     }
     dup2(fd[0], STDIN_FILENO);
-    close(fd[1]);
     close(fd[0]);
+    close(fd[1]);
     int fdbis[2];
     if (pipe(fdbis) == -1)
         return 1;
     int child = fork();
     if (!child)
     {
-        dup2(fdbis[1], STDOUT_FILENO);
         close(fdbis[0]);
+        dup2(fdbis[1], STDOUT_FILENO);
         close(fdbis[1]);
-        return run_ast((struct ast *)cmd[0]);
+         exit(run_ast((struct ast *)cmd[0]));
     }
+    close(fdbis[1]);
     int w;
     waitpid(child, &w, 0);
     return exec_pipe(cmd + 1, fdbis);

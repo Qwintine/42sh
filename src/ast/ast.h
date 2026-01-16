@@ -68,8 +68,8 @@ struct ast_and_or
 struct ast_shell_redir
 {
     struct ast base;
-    char **words; // NULL pour shell_command (compatibilité offset)
-    struct redir **redirs; // redirections à appliquer
+    char **words; 
+    struct redir **redirs; 
     struct ast *child; // shell_command (if/while/until)
 };
 

@@ -100,11 +100,7 @@ struct ast *parser_simple_command(struct lex *lex)
                 goto ERROR;
             }
         }
-        if (!peek(lex))
-            goto ERROR;
         lex->context = KEYWORD;
-        if (!peek(lex))
-            goto ERROR;
         return (struct ast *)ast_cmd;
     }
 

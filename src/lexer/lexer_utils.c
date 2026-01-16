@@ -55,11 +55,8 @@ int valid_io(char *str)
     long max_fd = sysconf(_SC_OPEN_MAX);
     if (max_fd == -1)
     {
-        max_fd = 1024;
+        max_fd = 1024; // default fd max
     }
-
-    if (max_fd > INT_MAX)
-        max_fd = INT_MAX;
 
     if (num > max_fd)
         return 0;

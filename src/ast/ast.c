@@ -205,7 +205,7 @@ static void ast_free_shell_redir(struct ast *ast)
 
 //===================== Run ast from specific type =============================
 
-// TODO adapter à redir
+
 static int ast_run_cmd(struct ast *ast)
 {
     if (!ast)
