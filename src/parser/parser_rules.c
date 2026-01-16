@@ -230,3 +230,10 @@ ERROR:
     free_ast((struct ast *)ast_loop);
     return NULL;
 }
+
+/*struct ast *parser_for(struct lex *lex)
+{
+	if(!peek(lex) || peek(lex)->token_type != FOR)
+		return NULL;
+	discard_token
+}*/

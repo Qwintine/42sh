@@ -66,7 +66,8 @@ struct ast *parser_simple_command(struct lex *lex)
     size_t w = 0;
     while (peek(lex)
            && (peek(lex)->token_type == IO_NUMBER
-               || is_redir(peek(lex)->token_type)))
+               || is_redir(peek(lex)->token_type)
+	       || peek(lex)->token_type == ASSIGNMENT))
     {
         if (parser_prefix(lex, ast_cmd))
         {
@@ -80,13 +81,18 @@ struct ast *parser_simple_command(struct lex *lex)
         if (!tok)
             goto ERROR;
         ast_cmd->words[w] = tok->value;
+	ast_cmd->types = realloc(ast_cmd->types, w * sizeof(char));
+	if(!ast_cmd->types)
+	{
+		goto ERROR;
+	}
+	ast_cmd->types[w] = tok->token_type;
         free(tok);
         w++;
         ast_cmd->words = realloc(ast_cmd->words, (w + 1) * sizeof(char *));
         if (!ast_cmd->words)
         {
-            free_ast((struct ast *)ast_cmd);
-            return NULL;
+		goto ERROR;
         }
         ast_cmd->words[w] = NULL;
 
@@ -100,11 +106,7 @@ struct ast *parser_simple_command(struct lex *lex)
                 goto ERROR;
             }
         }
-        if (!peek(lex))
-            goto ERROR;
         lex->context = KEYWORD;
-        if (!peek(lex))
-            goto ERROR;
         return (struct ast *)ast_cmd;
     }
 
