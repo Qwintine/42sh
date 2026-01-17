@@ -33,7 +33,7 @@ static int exec_builtin(char **words)
 
 static char **expand(struct dictionnary *vars, enum type *types, char **words)
 {
-    //saves variable name
+    // saves variable name
     char **res = malloc(sizeof(char *));
     if (!res)
         return NULL;
@@ -65,8 +65,8 @@ static char **expand(struct dictionnary *vars, enum type *types, char **words)
     return res;
 }
 
-//reverse the expansion of variables in words
-//so that they can be expanded again later if needed
+// reverse the expansion of variables in words
+// so that they can be expanded again later if needed
 static void unexpand(enum type *types, char **words, char **res)
 {
     size_t i = 0;
@@ -101,7 +101,7 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars)
         return 2;
 
     size_t i = 0;
-    
+
     while (ast_cmd->assignment[i])
     {
         if (add_var(vars, ast_cmd->assignment[i]))
