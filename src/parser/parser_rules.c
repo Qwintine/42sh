@@ -231,9 +231,80 @@ ERROR:
     return NULL;
 }
 
-/*struct ast *parser_for(struct lex *lex)
+static int parser_rule_for_aux(struct lex *lex, struct ast_for *ast_for)
 {
-    if(!peek(lex) || peek(lex)->token_type != FOR)
+    if (peek(lex)
+        && (peek(lex)->token_type == IN || peek(lex)->token_type == NEWLINE))
+    {
+        while (peek(lex) && peek(lex)->token_type == NEWLINE)
+            discard_token(pop(lex));
+        if (!peek(lex) || peek(lex)->token_type != IN)
+            return 1;
+        discard_token(pop(lex));
+
+        size_t w = 0;
+        while (peek(lex)
+               && (peek(lex)->token_type == WORD
+                   || peek(lex)->token_type == EXPANSION))
+        {
+            struct token *tok = pop(lex);
+            if (!tok)
+                return 1;
+
+            ast_for->words[w] = tok->value;
+            w++;
+            ast_for->words = realloc(ast_for->words, (w + 1) * sizeof(char *));
+            ast_for->words[w] = NULL;
+            if (!ast_for->words)
+                return 1;
+            free(tok);
+        }
+    }
+    return 0;
+}
+
+struct ast *parser_rule_for(struct lex *lex)
+{
+    if (!peek(lex) || peek(lex)->token_type != FOR)
         return NULL;
-    discard_token
-}*/
+    discard_token(pop(lex));
+
+    struct ast_for *ast_for = (struct ast_for *)init_ast_for();
+
+    if (!peek(lex)
+        || (peek(lex)->token_type != WORD
+            && peek(lex)->token_type != EXPANSION))
+        goto ERROR;
+
+    struct token *tok = pop(lex);
+    if (!tok)
+        goto ERROR;
+
+    ast_for->var = tok->value;
+    free(tok);
+
+    if (parser_rule_for_aux(lex, ast_for))
+        goto ERROR;
+
+    if (peek(lex) && peek(lex)->token_type == SEMI_COLON)
+        discard_token(pop(lex));
+
+    while (peek(lex) && peek(lex)->token_type == NEWLINE)
+        discard_token(pop(lex));
+
+    if (!peek(lex) || peek(lex)->token_type != DO)
+        goto ERROR;
+    discard_token(pop(lex));
+
+    ast_for->body = parser_compound_list(lex);
+
+    if (!peek(lex) || peek(lex)->token_type != DONE)
+        goto ERROR;
+    discard_token(pop(lex));
+
+    return (struct ast *)ast_for;
+
+ERROR:
+    free_ast((struct ast *)ast_for);
+    return NULL;
+}

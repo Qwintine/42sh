@@ -13,7 +13,8 @@ enum ast_type
     AST_IF,
     AST_LIST,
     AST_AND_OR,
-    AST_SHELL_REDIR
+    AST_SHELL_REDIR,
+    AST_FOR,
 };
 
 struct ast
@@ -26,6 +27,14 @@ struct ast_loop
     struct ast base;
     int truth;
     struct ast *condition;
+    struct ast *body;
+};
+
+struct ast_for
+{
+    struct ast base;
+    char *var;
+    char **words;
     struct ast *body;
 };
 
@@ -86,6 +95,7 @@ struct ast *init_ast_pipe(void);
 struct ast *init_ast_loop(void);
 struct ast *init_ast_and_or(void);
 struct ast *init_ast_shell_redir(void);
+struct ast *init_ast_for(void);
 void free_ast(struct ast *node);
 int run_ast(struct ast *node, struct dictionnary *vars);
 

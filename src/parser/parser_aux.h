@@ -23,6 +23,7 @@ struct ast *parser_else_clause(struct lex *lex);
 struct ast *parser_rule_if(struct lex *lex);
 struct ast *parser_rule_while(struct lex *lex);
 struct ast *parser_rule_until(struct lex *lex);
+struct ast *parser_rule_for(struct lex *lex);
 
 // parser_commands.c
 struct ast *parser_shell_command(struct lex *lex);

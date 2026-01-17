@@ -31,27 +31,57 @@ static int exec_builtin(char **words)
     return -1;
 }
 
-static void expand(struct dictionnary *vars, enum type *types, char **words)
+static char **expand(struct dictionnary *vars, enum type *types, char **words)
 {
+    // saves variable name
+    char **res = malloc(sizeof(char *));
+    if (!res)
+        return NULL;
+    res[0] = NULL;
     size_t i = 0;
+    size_t r = 0;
     while (words[i])
     {
         if (types[i] == EXPANSION)
         {
+            res[r] = words[i];
+            r++;
+            res = realloc(res, (r + 1) * sizeof(char *));
+            if (!res)
+                return NULL;
+            res[r] = NULL;
             char **val = get_var(vars, words[i]);
             if (!val)
             {
-                free(words[i]);
                 words[i] = strdup("");
             }
             else
             {
-                free(words[i]);
                 words[i] = strdup(val[0]);
             }
         }
         i++;
     }
+    return res;
+}
+
+// reverse the expansion of variables in words
+// so that they can be expanded again later if needed
+static void unexpand(enum type *types, char **words, char **res)
+{
+    size_t i = 0;
+    size_t r = 0;
+    while (words[i])
+    {
+        if (types[i] == EXPANSION)
+        {
+            free(words[i]);
+            words[i] = res[r];
+            r++;
+        }
+        i++;
+    }
+    free(res);
 }
 
 /* Description:
@@ -71,6 +101,7 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars)
         return 2;
 
     size_t i = 0;
+
     while (ast_cmd->assignment[i])
     {
         if (add_var(vars, ast_cmd->assignment[i]))
@@ -79,6 +110,7 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars)
         }
         i++;
     }
+
     if (!ast_cmd->words || !ast_cmd->words[0])
     {
         if (ast_cmd->redirs)
@@ -91,7 +123,7 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars)
         return 0;
     }
 
-    expand(vars, ast_cmd->types, ast_cmd->words);
+    char **expanded = expand(vars, ast_cmd->types, ast_cmd->words);
 
     if (is_builtin(ast_cmd->words))
     {
@@ -100,9 +132,12 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars)
             _exit(1);
         int r = exec_builtin(ast_cmd->words);
         restore_redirs(&redir_saved);
+        unexpand(ast_cmd->types, ast_cmd->words, expanded);
         return r;
     }
+
     pid_t pid = fork();
+
     if (pid == 0)
     {
         struct redir_saved redir_saved;
@@ -111,8 +146,10 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars)
         execvp(ast_cmd->words[0], ast_cmd->words);
         _exit(127);
     }
+
     int status;
     waitpid(pid, &status, 0);
+    unexpand(ast_cmd->types, ast_cmd->words, expanded);
     if (WIFEXITED(status))
     {
         return WEXITSTATUS(status);
