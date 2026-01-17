@@ -3,6 +3,7 @@
 #include <fcntl.h>
 #include <stddef.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "../exec/exec.h"
@@ -115,6 +116,19 @@ struct ast *init_ast_shell_redir(void)
     return (struct ast *)node;
 }
 
+struct ast *init_ast_for(void)
+{
+    struct ast_for *node = malloc(sizeof(struct ast_for));
+    if (!node)
+        return NULL;
+    node->base.type = AST_FOR;
+    node->var = NULL;
+    node->words = malloc(sizeof(char *));
+    node->words[0] = NULL;
+    node->body = NULL;
+    return (struct ast *)node;
+}
+
 //===================== Free ast from specific type ===========================
 
 static void ast_free_cmd(struct ast *ast)
@@ -176,6 +190,24 @@ static void ast_free_loop(struct ast *ast)
     if (ast_loop->body)
         free_ast(ast_loop->body);
     free(ast_loop);
+}
+
+static void ast_free_for(struct ast *ast)
+{
+    struct ast_for *ast_for = (struct ast_for *)ast;
+    if (ast_for->var)
+        free(ast_for->var);
+    if (ast_for->words)
+    {
+        for (size_t i = 0; ast_for->words[i] != NULL; i++)
+        {
+            free(ast_for->words[i]);
+        }
+        free(ast_for->words);
+    }
+    if (ast_for->body)
+        free_ast(ast_for->body);
+    free(ast_for);
 }
 
 static void ast_free_pipe(struct ast *ast)
@@ -261,6 +293,43 @@ static int ast_run_loop(struct ast *ast, struct dictionnary *vars)
     return res;
 }
 
+static int ast_run_for(struct ast *ast, struct dictionnary *vars)
+{
+    struct ast_for *ast_for = (struct ast_for *)ast;
+    int res = 0;
+    if (!ast_for->words[0])
+    {
+        //varas = var_assignment, format "<name>=<value>"
+        //in this case, the value is empty
+        /*char *varas = calloc(strlen(ast_for->var) + strlen("=") + 1,1);
+        if (!varas)
+            return 1;
+        strcpy(varas, ast_for->var);
+        strcat(varas, "=");
+        add_var(vars, varas);
+        res = run_ast(ast_for->body, vars);
+        free(varas);*/
+        return 0;
+    }
+    else
+    {
+        for (size_t i = 0; ast_for->words[i] != NULL; i++)
+        {
+            //varas = var_assignment, format "<name>=<value>"
+            char *varas = malloc(strlen(ast_for->var) + strlen("=") + strlen(ast_for->words[i]) + 1);
+            if (!varas)
+                return 1;
+            strcpy(varas, ast_for->var);
+            strcat(varas, "=");
+            strcat(varas,  ast_for->words[i]);
+            add_var(vars, varas);
+            res = run_ast(ast_for->body, vars);
+            free(varas);
+        }
+    }
+    return res;
+}
+
 static int ast_run_pipe(struct ast *ast, struct dictionnary *vars)
 {
     if (!ast)
@@ -319,6 +388,7 @@ int run_ast(struct ast *ast, struct dictionnary *vars)
         [AST_PIPE] = &ast_run_pipe,
         [AST_AND_OR] = &ast_run_and_or,
         [AST_SHELL_REDIR] = &ast_run_shell_redir,
+        [AST_FOR] = &ast_run_for,
     };
     return ((*functions[ast->type])(ast, vars));
 }
@@ -333,6 +403,7 @@ void free_ast(struct ast *ast)
         [AST_PIPE] = &ast_free_pipe,
         [AST_AND_OR] = &ast_free_and_or,
         [AST_SHELL_REDIR] = &ast_free_shell_redir,
+        [AST_FOR] = &ast_free_for,
     };
     (*functions[ast->type])(ast);
 }
