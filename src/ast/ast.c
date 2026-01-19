@@ -135,13 +135,13 @@ static void ast_free_cmd(struct ast *ast)
 {
     int i = 0;
     struct ast_cmd *ast_cmd = (struct ast_cmd *)ast;
+    free(ast_cmd->types);
     while (ast_cmd->assignment[i])
     {
         free(ast_cmd->assignment[i]);
         i++;
     }
     free(ast_cmd->assignment);
-    free(ast_cmd->types);
     i = 0;
     while (ast_cmd->words[i])
     {
@@ -290,7 +290,7 @@ static int ast_run_loop(struct ast *ast, struct dictionnary *vars)
 {
     struct ast_loop *ast_loop = (struct ast_loop *)ast;
     int res = 0;
-    if (run_ast(ast_loop->condition, vars) == ast_loop->truth)
+    while (run_ast(ast_loop->condition, vars) == ast_loop->truth)
         res = run_ast(ast_loop->body, vars);
     return res;
 }

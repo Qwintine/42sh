@@ -23,7 +23,7 @@ static int hash(char *str)
  *Argument:
  *	The hashing function used by the dictionnary to hash the key
  */
-struct dictionnary *init_dict()
+struct dictionnary *init_dict(void)
 {
     struct dictionnary *dict = malloc(sizeof(struct dictionnary));
 
@@ -171,7 +171,17 @@ char **get_var(struct dictionnary *dict, char *key)
     }
     if (!target)
         return NULL;
-    return target->elt;
+    size_t i = 0;
+    while (target->elt[i])
+    {
+        i++;
+    }
+    char **res == malloc(i * sizeof(char *));
+    for (size_t j = 0; j < i + 1; i++)
+    {
+        res[j] = target->elt[j];
+    }
+    return res;
 }
 
 void free_val(struct values *val)

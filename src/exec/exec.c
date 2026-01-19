@@ -58,6 +58,7 @@ static char **expand(struct dictionnary *vars, enum type *types, char **words)
             else
             {
                 words[i] = strdup(val[0]);
+                free(val);
             }
         }
         i++;
@@ -157,6 +158,7 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars)
     {
         return WEXITSTATUS(status);
     }
+    fprintf(stderr, "Command unknown");
     return 127;
 }
 
