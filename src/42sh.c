@@ -55,7 +55,11 @@ int main(int argc, char **argv)
         if (prettyprint)
             print_ast(ast);
         else
-            res = run_ast(ast, vars); // derniere valeur de retour
+        {
+            if (ast->type != AST_LIST
+                || ((struct ast_list *)ast)->elt != NULL)
+                res = run_ast(ast, vars); // derniere valeur de retour
+        }
 
         free_ast(ast);
     }
