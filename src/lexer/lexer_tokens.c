@@ -20,6 +20,10 @@ struct token *end_token(struct token *tok, struct lex *lex)
                 tok->token_type = SEMI_COLON;
             else if (tok->value[0] == '|')
                 tok->token_type = PIPE;
+            else if (tok->value[0] == '<')
+                return NULL; 
+            else if (tok->value[0] == '>')
+                return NULL; 
         }
         return tok;
     }

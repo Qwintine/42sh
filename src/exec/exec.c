@@ -129,7 +129,10 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars)
     {
         struct redir_saved redir_saved;
         if (redir_apply(ast_cmd->redirs, &redir_saved))
-            _exit(1);
+        {
+            unexpand(ast_cmd->types, ast_cmd->words, expanded);
+            return 1;
+        }
         int r = exec_builtin(ast_cmd->words);
         restore_redirs(&redir_saved);
         unexpand(ast_cmd->types, ast_cmd->words, expanded);

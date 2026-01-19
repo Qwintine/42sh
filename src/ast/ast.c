@@ -152,6 +152,8 @@ static void ast_free_cmd(struct ast *ast)
     i = 0;
     while (ast_cmd->redirs[i])
     {
+        if (ast_cmd->redirs[i]->io_num)
+            free(ast_cmd->redirs[i]->io_num);
         free(ast_cmd->redirs[i]->target);
         free(ast_cmd->redirs[i]);
         i++;
