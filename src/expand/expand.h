@@ -18,7 +18,7 @@ struct dictionnary
 
 typedef int (*hashing_func)(int);
 
-struct dictionnary *init_dict();
+struct dictionnary *init_dict(void);
 int is_env(char *key);
 int add_var(struct dictionnary *dict, char *varas);
 char **get_var(struct dictionnary *dict, char *key);
