@@ -39,6 +39,8 @@ int main(int argc, char **argv)
 
     int eof = 0;
     int res = 0;
+    int exit= 0;
+
     while (!eof)
     {
         struct ast *ast = parser(entry, &eof);
@@ -58,7 +60,12 @@ int main(int argc, char **argv)
         {
             if (ast->type != AST_LIST
                 || ((struct ast_list *)ast)->elt != NULL)
-                res = run_ast(ast, vars); // derniere valeur de retour
+                res = run_ast(ast, vars, &exit); // derniere valeur de retour
+            if (exit)
+            {
+                free_ast(ast);
+                break;
+            }
         }
 
         free_ast(ast);

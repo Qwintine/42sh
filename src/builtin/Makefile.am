@@ -2,7 +2,9 @@ noinst_LIBRARIES = libbuiltin.a
 
 libbuiltin_a_SOURCES =  \
   echo.c \
-  echo.h
+  echo.h \
+  exit.c \
+  exit.h
   
 libbuiltin_a_CPPFLAGS = -I$(top_srcdir)/src
 

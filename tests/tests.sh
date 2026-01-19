@@ -147,6 +147,9 @@ echo "=============================== Single quotes ============================
 echo "=============================== True/False ===================================\n"
 . tests/test_files/true_false.sh
 
+echo "================================= Exit =======================================\n"
+. tests/test_files/exit.sh
+
 echo "============================ Echo Corner case ================================\n"
 . tests/test_files/echo_corner_case.sh
 
