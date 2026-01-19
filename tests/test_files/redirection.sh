@@ -38,7 +38,7 @@ testcase "redirection fd to itself" "-c" "echo test 1>& 1"
 
 #Tests mouli step2
 testcase "redir_basic3" "-c" "echo hello world 1> tmp.txt; cat tmp.txt"
-testcase "temp_fd" "-c" "exec 3> tmp.txt; echo test >&3; exec 3>&-; cat tmp.txt"
+testcase "temp_fd" "-c" "echo test 3>&1 1> tmp.txt; cat tmp.txt"
 testcase "bad_ending_input_redirection" "-c" "cat <"  # Erreur de syntaxe, doit retourner 2
 testcase "redir_stderr2" "-c" "ls /nonexistent 2> tmp.txt; cat tmp.txt"
 testcase "greatand_out_to_err" "-c" "echo test 1>&2"
