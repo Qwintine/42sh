@@ -18,6 +18,7 @@ testcase "-E then -e" "-c" "echo -E -e \"a\nb\""
 testcase "unknown option" "-c" "echo -u ok"
 testcase "unknown option + n" "-c" "echo -un ok"
 testcase "-n as argument" "-c" "echo '-n' ok"
+testcase "multiple quotes" "-c" "echo ''''''hello''''''"
 
 testcase "dquote: escape quote" "-c" "echo \"hello\\\"world\""
 testcase "dquote: escape backslash" "-c" "echo \"hello\\\\world\""
@@ -31,3 +32,4 @@ testcase "squote: all literal" "-c" "echo '\\n\\t\\\"'"
 testcase "mixed quotes" "-c" "echo \"\\n\"'\\n'"
 testcase "complex escape" "-c" "echo \"a\\\"b\\\\c\""
 
+testcase "tower" "" "tests/test_files/from_files/tower.sh"

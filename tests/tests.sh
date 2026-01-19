@@ -6,6 +6,8 @@ OUTFILE="${OUTPUT_FILE:-./out}"
 
 REF_OUT=".expected"
 TEST_OUT=".got"
+REF_ERR=".expected_err"
+TEST_ERR=".got_err"
 
 PASS=0
 TOTAL=0
@@ -18,33 +20,52 @@ testcase() {
   TOTAL=$((TOTAL + 1))
 
   if [ "$flag" = "<" ]; then
-    timeout 5 $REF_SHELL <"$cmd" >"$REF_OUT" 2>/dev/null
+    timeout 5 $REF_SHELL <"$cmd" >"$REF_OUT" 2>"$REF_ERR"
     ref_status=$?
     printf "\n[exit:%d]\n" "$ref_status" >>"$REF_OUT"
     rm -f tmp.txt
 
-    timeout 5 "$BIN" <"$cmd" >"$TEST_OUT" 2>/dev/null
+    timeout 5 "$BIN" <"$cmd" >"$TEST_OUT" 2>"$TEST_ERR"
     test_status=$?
     printf "\n[exit:%d]\n" "$test_status" >>"$TEST_OUT"
     rm -f tmp.txt
   else
-    timeout 5 $REF_SHELL $flag "$cmd" >"$REF_OUT" 2>/dev/null
+    timeout 5 $REF_SHELL $flag "$cmd" >"$REF_OUT" 2>"$REF_ERR"
     ref_status=$?
     printf "\n[exit:%d]\n" "$ref_status" >>"$REF_OUT"
     rm -f tmp.txt
 
-    timeout 5 "$BIN" $flag "$cmd" >"$TEST_OUT" 2>/dev/null
+    timeout 5 "$BIN" $flag "$cmd" >"$TEST_OUT" 2>"$TEST_ERR"
     test_status=$?
     printf "\n[exit:%d]\n" "$test_status" >>"$TEST_OUT"
     rm -f tmp.txt
   fi
 
-  if diff -u "$REF_OUT" "$TEST_OUT" 2>/dev/null; then
+  ref_has_stderr=0
+  test_has_stderr=0
+  
+  if [ -s "$REF_ERR" ]; then
+    ref_has_stderr=1
+  fi
+  
+  if [ -s "$TEST_ERR" ]; then
+    test_has_stderr=1
+  fi
+
+  if diff -u "$REF_OUT" "$TEST_OUT" 2>/dev/null && [ "$ref_has_stderr" -eq "$test_has_stderr" ]; then
     # echo "$name ==> OK"
     PASS=$((PASS + 1))
   else
     echo "$name ==> FAIL"
     diff -u "$REF_OUT" "$TEST_OUT" | grep -E '^(@@|[-+])' | grep -vE '^(---|\+\+\+)' || true
+    
+    if [ "$ref_has_stderr" -ne "$test_has_stderr" ]; then
+      if [ "$ref_has_stderr" -eq 1 ]; then
+        echo "Expected stderr but got none"
+      else
+        echo "Got unexpected stderr"
+      fi
+    fi
     echo
   fi
 }
@@ -172,6 +193,6 @@ fi
 
 printf "%d" "$SCORE" > "$OUTFILE"
 
-rm -f "$REF_OUT" "$TEST_OUT"
+rm -f "$REF_OUT" "$TEST_OUT" "$REF_ERR" "$TEST_ERR"
 
 exit 0

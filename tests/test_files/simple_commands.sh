@@ -32,3 +32,16 @@ echo 3
 
 testcase "test_files: test_multiple_echo.sh" "" "tests/test_files/from_files/test_multiple_echo.sh"
 testcase "test_files: test_multiple_echo.sh" "<" "tests/test_files/from_files/test_multiple_echo.sh"
+
+testcase "pwd command" "-c" "pwd"
+testcase "echo only" "-c" "echo"
+testcase "echo with -n" "-c" "echo -n test"
+testcase "true command" "-c" "true"
+testcase "false command" "-c" "false"
+testcase "command with pipe char in quotes" "-c" "echo '|'"
+testcase "command with semicolon in quotes" "-c" "echo ';'"
+testcase "echo with equals" "-c" "echo a=b"
+testcase "echo multiple spaces" "-c" "echo a    b    c"
+testcase "command substitution simple" "-c" "echo test"
+
+testcase "sort files" "" "tests/test_files/from_files/sort_files.sh"
