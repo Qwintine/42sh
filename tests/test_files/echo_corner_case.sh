@@ -33,3 +33,6 @@ testcase "mixed quotes" "-c" "echo \"\\n\"'\\n'"
 testcase "complex escape" "-c" "echo \"a\\\"b\\\\c\""
 
 testcase "tower" "" "tests/test_files/from_files/tower.sh"
+
+testcase "# in word 1" "-c" "echo hello #this is a comment"
+testcase "# in word 2" "-c" "echo hello#comment"
