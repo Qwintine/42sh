@@ -10,22 +10,7 @@ static int sub_switch_op(struct lex *lex, struct token *tok, char *buf,
 {
     switch (buf[0])
     {
-    case '$': // case 5
-    case '`': {
-        int result = handle_expansion(tok, lex->entry);
-        if (result < 0)
-            return 1;
-        if (result > 0)
-        {
-            lex->current_token = tok;
-            if (lex->current_token->token_type == KEYWORD
-                && lex->context == KEYWORD)
-                lex->current_token->token_type =
-                    check_type(lex->current_token->value);
-            return 0;
-        }
-        break;
-    }
+    case '`':
     case '&': // case 6
     case '|':
     case '>':
@@ -46,12 +31,9 @@ static int sub_switch_op(struct lex *lex, struct token *tok, char *buf,
         break;
     }
     default:
-        if (!(tok->token_type == EXPANSION && buf[0] == '{'))
-        {
-            tok->value = concat(tok->value, buf[0]);
-            if (!tok->value)
-                return 1;
-        }
+        tok->value = concat(tok->value, buf[0]);
+        if (!tok->value)
+            return 1;
     }
     return -1;
 }
@@ -114,21 +96,19 @@ static int sub_switch(struct lex *lex, struct token *tok, char *buf,
 
     case '"': // cas 4
         if (handle_quote(&quote_status->double_quote,
-                         quote_status->single_quote, tok))
+                         quote_status->single_quote, tok, buf[0]))
         {
             lex->current_token = tok;
-            if (tok->token_type == KEYWORD && lex->context == KEYWORD)
-                tok->token_type = check_type(tok->value);
+            tok->token_type = WORD;
             return 0;
         }
         break;
     case '\'': // cas 4
         if (handle_quote(&quote_status->single_quote,
-                         quote_status->double_quote, tok))
+                         quote_status->double_quote, tok, buf[0]))
         {
             lex->current_token = tok;
-            if (tok->token_type == KEYWORD && lex->context == KEYWORD)
-                tok->token_type = check_type(tok->value);
+            tok->token_type = WORD;
             return 0;
         }
         break;
@@ -166,16 +146,13 @@ int lexer(struct lex *lex)
         if (tok->value && tok->value[0] && !quote_status.single_quote
             && !quote_status.double_quote
             && (tok->value[0] == '&' || tok->value[0] == '|'
-                || tok->value[0] == '>' || tok->value[0] == '<'
-                || tok->token_type == EXPANSION)) // cas 2/3
+                || tok->value[0] == '>' || tok->value[0] == '<')) // cas 2/3
         {
             int res;
             if (tok->value[0] == '&' || tok->value[0] == '|')
                 res = manage_op(lex, tok, buf);
             else if (tok->value[0] == '>' || tok->value[0] == '<')
                 res = manage_redir(lex, tok, buf);
-            else
-                res = manage_expansion(lex, tok, buf);
             if (!res)
                 return 0;
             goto ERROR;

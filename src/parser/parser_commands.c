@@ -78,8 +78,7 @@ struct ast *parser_simple_command(struct lex *lex)
     }
     lex->context = WORD;
     if (peek(lex)
-        && (peek(lex)->token_type == WORD
-            || peek(lex)->token_type == EXPANSION))
+        && peek(lex)->token_type == WORD)
     {
         struct token *tok = pop(lex);
         if (!tok)
@@ -103,8 +102,7 @@ struct ast *parser_simple_command(struct lex *lex)
         while (peek(lex) != NULL
                && (peek(lex)->token_type == IO_NUMBER
                    || peek(lex)->token_type == WORD
-                   || is_redir(peek(lex)->token_type)
-                   || peek(lex)->token_type == EXPANSION))
+                   || is_redir(peek(lex)->token_type)))
         {
             if (parser_element(lex, ast_cmd, &w))
             {

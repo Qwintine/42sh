@@ -85,8 +85,9 @@ int handle_backslash(char **value, FILE *entry, int in_double_quote)
     return 0;
 }
 
-int handle_quote(int *quote, int other_quote, struct token *tok)
+int handle_quote(int *quote, int other_quote, struct token *tok, char val)
 {
+    tok->value = concat(tok->value, val);
     if (!other_quote)
     {
         *quote = !(*quote);
@@ -184,16 +185,5 @@ int new_op(struct token *tok, int quote, FILE *entry, char val)
     tok->value = concat(tok->value, val);
     if (!tok->value)
         return -1;
-    return 0;
-}
-
-int handle_expansion(struct token *tok, FILE *entry)
-{
-    if (strlen(tok->value) > 0)
-    {
-        fseek(entry, -1, SEEK_CUR);
-        return 1;
-    }
-    tok->token_type = EXPANSION;
     return 0;
 }

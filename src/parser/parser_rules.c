@@ -244,8 +244,7 @@ static int parser_rule_for_aux(struct lex *lex, struct ast_for *ast_for)
 
         size_t w = 0;
         while (peek(lex)
-               && (peek(lex)->token_type == WORD
-                   || peek(lex)->token_type == EXPANSION))
+               && (peek(lex)->token_type == WORD))
         {
             struct token *tok = pop(lex);
             if (!tok)
@@ -272,8 +271,7 @@ struct ast *parser_rule_for(struct lex *lex)
     struct ast_for *ast_for = (struct ast_for *)init_ast_for();
 
     if (!peek(lex)
-        || (peek(lex)->token_type != WORD
-            && peek(lex)->token_type != EXPANSION))
+        || (peek(lex)->token_type != WORD))
         goto ERROR;
 
     struct token *tok = pop(lex);

@@ -25,7 +25,6 @@ enum type
     REDIR_IO, // <>
     IO_NUMBER,
     ASSIGNMENT,
-    EXPANSION,
     NEGATION,
     AND,
     OR,

@@ -31,7 +31,7 @@ static int exec_builtin(char **words)
     return -1;
 }
 
-static char **expand(struct dictionnary *vars, enum type *types, char **words)
+/*static char **expand(struct dictionnary *vars, enum type *types, char **words)
 {
     // saves variable name
     char **res = malloc(sizeof(char *));
@@ -65,25 +65,7 @@ static char **expand(struct dictionnary *vars, enum type *types, char **words)
     }
     return res;
 }
-
-// reverse the expansion of variables in words
-// so that they can be expanded again later if needed
-static void unexpand(enum type *types, char **words, char **res)
-{
-    size_t i = 0;
-    size_t r = 0;
-    while (words[i])
-    {
-        if (types[i] == EXPANSION)
-        {
-            free(words[i]);
-            words[i] = res[r];
-            r++;
-        }
-        i++;
-    }
-    free(res);
-}
+*/
 
 /* Description:
  *  	execute les commandes avec les args donnes
@@ -124,19 +106,19 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars)
         return 0;
     }
 
-    char **expanded = expand(vars, ast_cmd->types, ast_cmd->words);
+    //char **expanded = expand(vars, ast_cmd->types, ast_cmd->words);
 
     if (is_builtin(ast_cmd->words))
     {
         struct redir_saved redir_saved;
         if (redir_apply(ast_cmd->redirs, &redir_saved))
         {
-            unexpand(ast_cmd->types, ast_cmd->words, expanded);
+            //unexpand(ast_cmd->types, ast_cmd->words, expanded);
             return 1;
         }
         int r = exec_builtin(ast_cmd->words);
         restore_redirs(&redir_saved);
-        unexpand(ast_cmd->types, ast_cmd->words, expanded);
+        //unexpand(ast_cmd->types, ast_cmd->words, expanded);
         return r;
     }
 
@@ -154,7 +136,7 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars)
 
     int status;
     waitpid(pid, &status, 0);
-    unexpand(ast_cmd->types, ast_cmd->words, expanded);
+    //unexpand(ast_cmd->types, ast_cmd->words, expanded);
     if (WIFEXITED(status))
     {
         return WEXITSTATUS(status);
