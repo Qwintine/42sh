@@ -176,8 +176,8 @@ char **get_var(struct dictionnary *dict, char *key)
     {
         i++;
     }
-    char **res == malloc(i * sizeof(char *));
-    for (size_t j = 0; j < i + 1; i++)
+    char **res = malloc(i * sizeof(char *));
+    for (size_t j = 0; j < i + 1; j++)
     {
         res[j] = target->elt[j];
     }
