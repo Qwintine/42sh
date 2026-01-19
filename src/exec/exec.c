@@ -108,6 +108,7 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars)
         if (redir_apply(ast_cmd->redirs, &redir_saved))
             _exit(1);
         execvp(ast_cmd->words[0], ast_cmd->words);
+        warnx("Command is unknown");
         _exit(127);
     }
     int status;
@@ -116,6 +117,7 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars)
     {
         return WEXITSTATUS(status);
     }
+    warnx("Command is unknown");
     return 127;
 }
 
