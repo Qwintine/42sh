@@ -43,7 +43,6 @@ static char **var_expand(struct dictionnary *vars, char *key, char **res,
     size_t j = 0;
     while(val[j]!=NULL)
     {
-        res[ind] = calloc(strlen(val[j]) + 1,1);
         res[ind] = strdup(val[j]);
         res[ind][strlen(val[j])] = 0;
         free(val[j]);
@@ -134,14 +133,24 @@ static char **double_quotes_expand(struct dictionnary *vars, char *word, char **
             }
             res[ind][i] = 0;
             char **val = get_var(vars,var);
-            char *tail = malloc(strlen((res[ind])+i+1));
-            tail = strdup((res[ind])+i+1);
+            char *tail = strdup((res[ind])+i+1);
             glue(res[ind],val, tail);
         }
         else
             i++;
     }
     return res;
+}
+
+static void free_ex(char **ex)
+{
+    size_t i = 0;
+    while (ex[i])
+    {
+        free(ex[i]);
+        i++;
+    }
+    free(ex);
 }
 
 static char **expand(struct dictionnary *vars, char **words)
@@ -192,26 +201,19 @@ static char **expand(struct dictionnary *vars, char **words)
         }
         else
         {
-            res[j] = malloc(strlen(words[i]) + 1);
             res[j] = strdup(words[i]);
             j++;
             res = realloc(res, (j+1)*sizeof(char*));
+            if(!res)
+            {
+                free_ex(res);
+                return NULL;
+            }   
             res[j] = NULL;
         }
         i++;
     }
     return res;
-}
-
-static void free_ex(char **ex)
-{
-    size_t i = 0;
-    while (ex[i])
-    {
-        free(ex[i]);
-        i++;
-    }
-    free(ex);
 }
 
 /* Description:
@@ -279,6 +281,7 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars)
             _exit(1);
         execvp(expanded[0], expanded);
         fprintf(stderr, "Command unknown\n");
+        free_ex(expanded);
         _exit(127);
     }
 

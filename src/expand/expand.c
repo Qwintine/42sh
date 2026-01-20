@@ -185,7 +185,6 @@ char **get_var(struct dictionnary *dict, char *key)
     size_t j = 0;
     while(j < i)
     {
-        res[j] = calloc(strlen(target->elt[j])+1,1);
         res[j] = strdup(target->elt[j]);
         j++;
     }
