@@ -235,48 +235,31 @@ static char **expand(struct dictionnary *vars, char **words)
  */
 int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars, int *exit)
 {
-    if(!*exit)
+    if (*exit)
+        return 0;
+
+    if (!ast_cmd->words
+        || (!ast_cmd->words[0] && !ast_cmd->redirs && !ast_cmd->assignment[0]))
+        return 2;
+
+    size_t i = 0;
+    while (ast_cmd->assignment[i])
     {
-        if (!ast_cmd->words
-            || (!ast_cmd->words[0] && !ast_cmd->redirs && !ast_cmd->assignment[0]))
-            return 2;
-
-        size_t i = 0;
-
-        while (ast_cmd->assignment[i])
+        if (add_var(vars, ast_cmd->assignment[i]))
         {
-            if (add_var(vars, ast_cmd->assignment[i]))
-            {
-                return 1;
-            }
+            return 1;
+        }
         i++;
-        }
+    }
 
-        if (!ast_cmd->words || !ast_cmd->words[0])
-        {
-            if (ast_cmd->redirs)
-            {
-                struct redir_saved redir_saved;
-                if (redir_apply(ast_cmd->redirs, &redir_saved))
-                    return 1;
-                restore_redirs(&redir_saved);
-            }
-            return 0;
-        }
-
-        //char **expanded = expand(vars, ast_cmd->types, ast_cmd->words);
-
-        if (is_builtin(ast_cmd->words))
+    if (!ast_cmd->words || !ast_cmd->words[0])
+    {
+        if (ast_cmd->redirs)
         {
             struct redir_saved redir_saved;
             if (redir_apply(ast_cmd->redirs, &redir_saved))
-            {
-                //unexpand(ast_cmd->types, ast_cmd->words, expanded);
                 return 1;
-            }
-            int r = exec_builtin(ast_cmd->words, exit, vars);
             restore_redirs(&redir_saved);
-            return r;
         }
         return 0;
     }
@@ -290,6 +273,7 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars, int *exit)
         struct redir_saved redir_saved;
         if (redir_apply(ast_cmd->redirs, &redir_saved))
         {
+            free_ex(expanded);
             return 1;
         }
         int r = exec_builtin(expanded, exit, vars);

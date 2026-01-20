@@ -393,7 +393,7 @@ Test(Test42sh, expand_dictionnary, .init = cr_redirect_stdout)
     cr_expect(eq(str, val[0], "world"));
 
     val = get_var(dict, "notexist");
-    cr_expect(eq(ptr, val, NULL));
+    cr_expect(eq(ptr, val[0], NULL));
 
     free_dict(dict);
 }

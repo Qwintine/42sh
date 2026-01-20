@@ -147,9 +147,6 @@ echo "=============================== Single quotes ============================
 echo "=============================== True/False ===================================\n"
 . tests/test_files/true_false.sh
 
-echo "================================= Exit =======================================\n"
-. tests/test_files/exit.sh
-
 echo "============================ Echo Corner case ================================\n"
 . tests/test_files/echo_corner_case.sh
 
@@ -182,7 +179,10 @@ echo "========================== Redirection ===========================\n"
 echo "========================== Expansion ===========================\n"
 . tests/test_files/expansion.sh
 
-echo "========================== Builtin cd ===========================\n"
+echo "================================= Builtin exit =================================\n"
+. tests/test_files/exit.sh
+
+echo "============================= Builtin cd ==============================\n"
 . tests/test_files/cd.sh
 
 printf "Fonctionel => Total: %d | Passed: %d | Failed: %d\n\n" "$TOTAL" "$PASS" "$((TOTAL - PASS))"
