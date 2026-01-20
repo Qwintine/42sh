@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "echo.h"
 
 /* Description:
  *  	insert 2 character

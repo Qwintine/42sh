@@ -116,7 +116,9 @@ static int sub_switch(struct lex *lex, struct token *tok, char *buf,
         tok->value = concat(tok->value, '=');
         if (!tok->value)
             return 1;
-        tok->token_type = ASSIGNMENT;
+        if (!quote_status->double_quote && !quote_status->single_quote
+            && strlen(tok->value) > 1)
+            tok->token_type = ASSIGNMENT;
         break;
     }
     default:

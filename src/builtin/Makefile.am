@@ -4,7 +4,9 @@ libbuiltin_a_SOURCES =  \
   echo.c \
   echo.h \
   exit.c \
-  exit.h
+  exit.h \
+  cd.c \
+  cd.h
   
 libbuiltin_a_CPPFLAGS = -I$(top_srcdir)/src
 

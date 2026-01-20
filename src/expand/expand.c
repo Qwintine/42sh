@@ -46,11 +46,13 @@ int is_env(char *key)
         return 1;
     if (!strcmp(key, "UID"))
         return 1;
-    if (!strcmp(key, "OLPWD"))
+    if (!strcmp(key, "OLDPWD"))
         return 1;
     if (!strcmp(key, "PWD"))
         return 1;
     if (!strcmp(key, "IFS"))
+        return 1;
+    if (!strcmp(key, "HOME"))
         return 1;
     return 0;
 }

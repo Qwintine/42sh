@@ -182,6 +182,9 @@ echo "========================== Redirection ===========================\n"
 echo "========================== Expansion ===========================\n"
 . tests/test_files/expansion.sh
 
+echo "========================== Builtin cd ===========================\n"
+. tests/test_files/cd.sh
+
 printf "Fonctionel => Total: %d | Passed: %d | Failed: %d\n\n" "$TOTAL" "$PASS" "$((TOTAL - PASS))"
 
 if [ "${COVERAGE:-no}" = "yes" ]; then
