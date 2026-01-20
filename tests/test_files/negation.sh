@@ -24,3 +24,8 @@ testcase "negation of if" "-c" "! if true; then true; fi"
 # testcase "negation with comment" "-c" "! # comment
 # false"
 testcase "pipe then negation" "-c" "echo test | ! false"
+
+#Trace
+testcase "bad_double_exclamation" "-c" "!! true"
+testcase "negation_simple" "-c" "!"
+

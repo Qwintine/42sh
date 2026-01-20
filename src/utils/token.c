@@ -9,7 +9,7 @@ struct lex *init_lex(FILE *entry)
 	    return NULL;
     lex->entry = entry;
     lex->current_token = NULL;
-    lex->context = WORD;
+    lex->context = KEYWORD;
     lex->error = 0;
     return lex;
 }
