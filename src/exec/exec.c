@@ -129,13 +129,9 @@ static char **double_quotes_expand(struct dictionnary *vars, char *word, char **
     {
         res[j] = calloc(1,1);
         j++;
-        res = realloc(res, (j+1)*sizeof(char*));
-        if(!res)
-        {
-            free_ex(res);
-            return NULL;
-        }   
+        res = realloc(res, (j+1)*sizeof(char*));   
         res[j] = NULL;
+        return res;
     }
     ind--;
     size_t i = 0;
