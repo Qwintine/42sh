@@ -276,34 +276,7 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars, int *exit)
             }
             int r = exec_builtin(ast_cmd->words, exit, vars);
             restore_redirs(&redir_saved);
-<<<<<<< HEAD
-            //unexpand(ast_cmd->types, ast_cmd->words, expanded);
             return r;
-        }
-
-        pid_t pid = fork();
-
-        if (pid == 0)
-        {
-            struct redir_saved redir_saved;
-            if (redir_apply(ast_cmd->redirs, &redir_saved))
-                _exit(1);
-            execvp(ast_cmd->words[0], ast_cmd->words);
-            fprintf(stderr, "Command unknown\n");
-            _exit(127);
-        }
-
-        int status;
-        waitpid(pid, &status, 0);
-        //unexpand(ast_cmd->types, ast_cmd->words, expanded);
-        if (WIFEXITED(status))
-        {
-            return WEXITSTATUS(status);
-        }
-        return 127;
-    }
-    return 0;
-=======
         }
         return 0;
     }
@@ -319,7 +292,7 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars, int *exit)
         {
             return 1;
         }
-        int r = exec_builtin(expanded);
+        int r = exec_builtin(expanded, exit, vars);
         free_ex(expanded);
         restore_redirs(&redir_saved);
         return r;
@@ -346,7 +319,6 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars, int *exit)
         return WEXITSTATUS(status);
     }
     return 127;
->>>>>>> expand_le_retour
 }
 
 int exec_pipe(struct ast_cmd **cmd, int fd[2], struct dictionnary *vars, int *exit)
