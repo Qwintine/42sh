@@ -88,7 +88,7 @@ static void glue(char *prefix, char **vals, char *tail)
     free(tail);
 }
 
-static int double_quotes_expand(struct dictionnary *vars, char *word, char **res)
+static char **double_quotes_expand(struct dictionnary *vars, char *word, char **res)
 {
     size_t ind = 0;
     while(res[ind])
@@ -141,7 +141,7 @@ static int double_quotes_expand(struct dictionnary *vars, char *word, char **res
         else
             i++;
     }
-    return 1;
+    return res;
 }
 
 static char **expand(struct dictionnary *vars, char **words)
@@ -187,7 +187,8 @@ static char **expand(struct dictionnary *vars, char **words)
         }
         else if(words[i][0] == '"')
         {
-            j+=double_quotes_expand(vars,words[i],res);
+            res = double_quotes_expand(vars,words[i],res);
+            j++;
         }
         else
         {
@@ -243,6 +244,8 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars)
     }
 
     char **expanded = expand(vars, ast_cmd->words);
+    if (!expanded)
+        return 1;
 
     if (is_builtin(expanded))
     {
