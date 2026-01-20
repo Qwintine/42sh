@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 static int hash(char *str)
@@ -170,17 +171,25 @@ char **get_var(struct dictionnary *dict, char *key)
         target = target->next;
     }
     if (!target)
-        return NULL;
+    {
+        char **res = malloc(sizeof(char *));
+        res[0] = NULL;
+        return res;
+    }
     size_t i = 0;
     while (target->elt[i])
     {
         i++;
     }
-    char **res = malloc(i * sizeof(char *));
-    for (size_t j = 0; j < i + 1; j++)
+    char **res = malloc((i+1) * sizeof(char *));
+    size_t j = 0;
+    while(j < i)
     {
-        res[j] = target->elt[j];
+        res[j] = calloc(strlen(target->elt[j])+1,1);
+        res[j] = strdup(target->elt[j]);
+        j++;
     }
+    res[j] = NULL;
     return res;
 }
 
