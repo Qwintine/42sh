@@ -78,11 +78,15 @@ int cd_b(char **args, struct dictionnary *vars)
     
     if (chdir(path) != 0)
     {
+        fprintf(stderr, "cd: wrong path: %s\n", path);
         return 1;
     }
     
     if (print_path)
+    {
         printf("%s\n", path);
+        fflush(stdout);
+    }
 
     return update_pwd(vars);
 }
