@@ -109,15 +109,13 @@ static char **double_quotes_expand(struct dictionnary *vars, char *word, char **
     if(j>2)
     {
         res[ind] = malloc((j-1));
-        j = 0;
+        j = 1;
         size_t indbis = 0;
-        while(word[j] != 0)
+        size_t len = strlen(word);
+        while(j < len - 1)
         {
-            if(word[j] != '"')
-            {
-                res[ind][indbis] = word[j];
-                indbis++;
-            }
+            res[ind][indbis] = word[j];
+            indbis++;
             j++;
         }
         res[ind][indbis] = 0;

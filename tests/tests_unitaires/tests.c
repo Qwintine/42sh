@@ -376,6 +376,60 @@ Test(Test42sh, lex_quotes, .init = cr_redirect_stdout)
     free_lex(lx);
 }
 
+Test(Test42sh, lex_backslash, .init = cr_redirect_stdout)
+{
+    char *buff;
+    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo a\\ b \\n \\\\"}, NULL, &buff);
+    cr_assert_not_null(f);
+
+    struct lex *lx = init_lex(f);
+    cr_assert_not_null(lx);
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, WORD));
+    cr_expect(eq(str, lx->current_token->value, "echo"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, WORD));
+    cr_expect(eq(str, lx->current_token->value, "a b"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, WORD));
+    cr_expect(eq(str, lx->current_token->value, "n"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, WORD));
+    cr_expect(eq(str, lx->current_token->value, "\\"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, END));
+
+    free_lex(lx);
+}
+
+Test(Test42sh, lex_single_quotes, .init = cr_redirect_stdout)
+{
+    char *buff;
+    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo a'b'c"}, NULL, &buff);
+    cr_assert_not_null(f);
+
+    struct lex *lx = init_lex(f);
+    cr_assert_not_null(lx);
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, WORD));
+    cr_expect(eq(str, lx->current_token->value, "echo"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, WORD));
+    cr_expect(eq(str, lx->current_token->value, "a'b'c"));
+    
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, END));
+
+    free_lex(lx);
+}
+
 Test(Test42sh, expand_dictionnary, .init = cr_redirect_stdout)
 {
     struct dictionnary *dict = init_dict();
