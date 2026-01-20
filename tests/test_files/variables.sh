@@ -19,4 +19,6 @@ testcase "ifs2" "-c" "echo \"\$IFS\"
 echo 
 IFS=newifs
 echo \$IFS"
-
+#modif testsuite pour accepter plus d'args
+testcase "special_args" "-c" "echo @:\$@ \n *:\$* \n {\\#}:\${\\#} \n arg1:\$1 arg2:\$ \n"
+testcase "test for" "-c" "for arg in \$@; do echo \$arg; done " 
