@@ -55,6 +55,7 @@ Test(Test42sh, lex_medium_1, .init = cr_redirect_stdout)
     cr_expect(eq(int, lx->current_token->token_type, WORD));
     cr_expect(eq(str, lx->current_token->value, "echo"));
 
+    lx->context = WORD;
     cr_expect(eq(int, lexer(lx), 0));
     cr_expect(eq(int, lx->current_token->token_type, WORD));
     cr_expect(eq(str, lx->current_token->value, "'W  o'"));
