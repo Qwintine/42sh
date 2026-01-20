@@ -149,6 +149,64 @@ ERROR:
     return 1;
 }
 
+int add_var_arg(struct dictionnary *dict, char *key, char **val)
+{
+    struct values *new = malloc(sizeof(struct values));
+
+    if (!new)
+    {
+        goto ERROR;
+    }
+
+    new->key = strdup(key);
+    size_t i = 0;
+    while (val[i])
+        i++;
+    new->elt = malloc((i + 1) * sizeof(char *));
+    if (!new->elt)
+    {
+        free(new);
+        goto ERROR;
+    }
+    for (size_t j = 0; j < i; j++)
+    {
+        new->elt[j] = strdup(val[j]);
+    }
+    new->elt[i] = NULL;
+    new->next = NULL;
+    if (!new->elt)
+    {
+        free(new);
+        goto ERROR;
+    }
+
+    int ind = hash(key);
+    if (!dict->values[ind])
+    {
+        dict->values[ind] = new;
+        return 0;
+    }
+
+    struct values *target = dict->values[ind];
+    while (target->next)
+    {
+        if (strcmp(target->key, key) == 0)
+        {
+            free_val(new);
+            target->elt = val;
+            return 0;
+        }
+        target = target->next;
+    }
+    target->next = new;
+    return 0;
+
+ERROR:
+    free(key);
+    free(val);
+    return 1;
+}
+
 /*Description:
  *  Get the variable from the dictionnary
  *Arguments:

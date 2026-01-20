@@ -28,8 +28,7 @@ int main(int argc, char **argv)
 {
     struct dictionnary *vars = init_dict();
     int prettyprint = 0;
-    char *buff = NULL;
-    FILE *entry = arg_file(argc, argv, &prettyprint, &buff);
+    FILE *entry = arg_file(argc, argv, &prettyprint, vars);//&buff);
     if (!entry)
     {
         fprintf(stderr, "42sh: error file entry\n");
@@ -48,7 +47,6 @@ int main(int argc, char **argv)
         if (!ast)
         {
             fclose(entry);
-            free(buff);
             free_dict(vars);
             fprintf(stderr, "42sh: grammar/syntax error\n");
             return 2;
@@ -72,7 +70,6 @@ int main(int argc, char **argv)
     }
 
     fclose(entry);
-    free(buff);
     free_dict(vars);
 
     return res;
