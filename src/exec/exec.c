@@ -125,6 +125,18 @@ static char **double_quotes_expand(struct dictionnary *vars, char *word, char **
         res = realloc(res, (ind+1)*sizeof(char*));
         res[ind] = NULL;
     }
+    else
+    {
+        res[j] = calloc(1,1);
+        j++;
+        res = realloc(res, (j+1)*sizeof(char*));
+        if(!res)
+        {
+            free_ex(res);
+            return NULL;
+        }   
+        res[j] = NULL;
+    }
     ind--;
     size_t i = 0;
     while(res[ind][i]!=0)
@@ -183,22 +195,34 @@ static char **expand(struct dictionnary *vars, char **words)
             }
             if(ind>2)
             {
-            res[j] = malloc((ind-1));
-            ind = 0;
-            size_t indbis = 0;
-            while(words[i][ind] != 0)
-            {
-                if(words[i][ind] != '\'')
+                res[j] = malloc((ind-1));
+                ind = 0;
+                size_t indbis = 0;
+                while(words[i][ind] != 0)
                 {
-                    res[j][indbis] = words[i][ind];
-                    indbis++;
+                    if(words[i][ind] != '\'')
+                    {
+                        res[j][indbis] = words[i][ind];
+                        indbis++;
+                    }
+                    ind++;
                 }
-                ind++;
+                res[j][indbis] = 0;
+                j++;
+                res = realloc(res, (j+1)*sizeof(char*));
+                res[j] = NULL;
             }
-            res[j][indbis] = 0;
-            j++;
-            res = realloc(res, (j+1)*sizeof(char*));
-            res[j] = NULL;
+            else
+            {
+                res[j] = calloc(1,1);
+                j++;
+                res = realloc(res, (j+1)*sizeof(char*));
+                if(!res)
+                {
+                    free_ex(res);
+                    return NULL;
+                }   
+                res[j] = NULL;
             }
         }
         else if(words[i][0] == '"')
