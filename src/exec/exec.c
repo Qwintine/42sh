@@ -102,22 +102,22 @@ static char **double_quotes_expand(struct dictionnary *vars, char *word, char **
     }
     if(j>2)
     {
-    res[ind] = malloc((j-2));
-    j = 0;
-    size_t indbis = 0;
-    while(word[j] != 0)
-    {
-        if(word[j] != '"')
+        res[ind] = malloc((j-1));
+        j = 0;
+        size_t indbis = 0;
+        while(word[j] != 0)
         {
-            res[ind][indbis] = word[j];
-            indbis++;
+            if(word[j] != '"')
+            {
+                res[ind][indbis] = word[j];
+                indbis++;
+            }
+            j++;
         }
-        j++;
-    }
-    res[ind][indbis] = 0;
-    ind++;
-    res = realloc(res, (ind+1)*sizeof(char*));
-    res[ind] = NULL;
+        res[ind][indbis] = 0;
+        ind++;
+        res = realloc(res, (ind+1)*sizeof(char*));
+        res[ind] = NULL;
     }
     ind--;
     size_t i = 0;
@@ -203,6 +203,16 @@ static char **expand(struct dictionnary *vars, char **words)
     return res;
 }
 
+static void free_ex(char **ex)
+{
+    size_t i = 0;
+    while (ex[i])
+    {
+        free(ex[i]);
+        i++;
+    }
+    free(ex);
+}
 
 /* Description:
  *  	execute les commandes avec les args donnes
@@ -255,6 +265,7 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars)
             return 1;
         }
         int r = exec_builtin(expanded);
+        free_ex(expanded);
         restore_redirs(&redir_saved);
         return r;
     }
@@ -271,6 +282,7 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars)
         _exit(127);
     }
 
+    free_ex(expanded);
     int status;
     waitpid(pid, &status, 0);
     if (WIFEXITED(status))
