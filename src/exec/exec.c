@@ -47,7 +47,7 @@ static char *var_expand(struct dictionnary *vars, char *word, size_t *ind)
 {
     char *key = malloc(1);
     key[0] = 0;
-    if (word[(*ind)+1] != '{')
+    if (word[(*ind)+1] == '{')
     {
         (*ind)++;
         while(word[*ind] != 0 && word[*ind] != '}')
@@ -77,12 +77,14 @@ static char *var_expand(struct dictionnary *vars, char *word, size_t *ind)
     }
     char **val = get_var(vars, key);
     char *res = malloc(1);
+    res[0] = 0;
     size_t j = 0;
     while(val[j]!=NULL)
     {
         res = realloc(res, strlen(res) + strlen(val[j]) + 2);
         strcat(res, val[j]);
-        strcat(res, " ");
+        if (val[j + 1] != NULL)
+            strcat(res, " ");
         free(val[j]);
         j++;
     }
@@ -146,7 +148,10 @@ static char *double_quotes_expand(struct dictionnary *vars, char *word, size_t *
             }
         }
         else
+        {
+            (*ind)++;
             quotes++;
+        }
     }
     return res;
 }
@@ -183,7 +188,10 @@ static char *single_quote_expand(char *word, size_t *ind)
             (*ind)++;
         }
         else
+        {
+            (*ind)++;
             quotes++;
+        }
     }
     return res;
 }
@@ -195,12 +203,12 @@ static char **expand(struct dictionnary *vars, char **words)
         return NULL;
     res[0] = NULL;
     size_t i = 0;
-    size_t ibis = 0;
     size_t j = 0;
     while (words[i]!=NULL)
     {
         res[j] = malloc(1);
         res[j][0] = 0;
+        size_t ibis = 0;
         while(words[i][ibis] != 0)
         {
             if(words[i][ibis] == '$')
@@ -223,7 +231,6 @@ static char **expand(struct dictionnary *vars, char **words)
                 res[j] = realloc(res[j], strlen(res[j]) + strlen(var) + 1);
                 strcat(res[j], var);
                 free(var);
-                j++;
             }
             else
             {
@@ -232,10 +239,13 @@ static char **expand(struct dictionnary *vars, char **words)
                 res[j][len] = words[i][ibis];
                 res[j][len + 1] = 0;
             }
-            ibis++;
+            if (words[i][ibis] != 0)
+                ibis++;
         }
         i++;
         j++;
+        res = realloc(res, (j + 1) * sizeof(char *));
+        res[j] = NULL;
     }
     return res;
 }
