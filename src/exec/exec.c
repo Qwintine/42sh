@@ -10,7 +10,7 @@
 #include "../builtin/echo.h"
 #include "../builtin/exit.h"
 #include "../builtin/cd.h"
-#include "expand/expand.h"
+#include "../expand/expand.h"
 #include "redir_exec.h"
 
 static int is_builtin(char **words)
@@ -76,6 +76,7 @@ static char *var_expand(struct dictionnary *vars, char *word, size_t *ind)
         }
     }
     char **val = get_var(vars, key);
+    free(key);
     char *res = malloc(1);
     res[0] = 0;
     size_t j = 0;
@@ -88,6 +89,7 @@ static char *var_expand(struct dictionnary *vars, char *word, size_t *ind)
         free(val[j]);
         j++;
     }
+    free(val);
     return res;
 }
 
@@ -213,8 +215,9 @@ static char **expand(struct dictionnary *vars, char **words)
         {
             if(words[i][ibis] == '$')
             {
+                size_t ibis_start = ibis;
                 char *var = var_expand(vars,words[i],&ibis);
-                res[j] = realloc(res[j], strlen(res[j])+ibis+1);
+                res[j] = realloc(res[j], strlen(res[j])+(ibis - ibis_start)+strlen(var)+1);
                 strcat(res[j],var);
                 free(var);
             }
