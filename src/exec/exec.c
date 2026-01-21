@@ -38,41 +38,62 @@ static int exec_builtin(char **words, int *exit, struct dictionnary *vars)
     return -1;
 }
 
-static char **var_expand(struct dictionnary *vars, char *key, char **res,
-    size_t *i)
-{
-    size_t ind = 0;
-    while(res[ind])
-    {
-        ind++;
-    }
-    char **val = get_var(vars, key+1);
-    size_t j = 0;
-    while(val[j]!=NULL)
-    {
-        res[ind] = strdup(val[j]);
-        res[ind][strlen(val[j])] = 0;
-        free(val[j]);
-        ind++;
-        j++;
-        res = realloc(res,(ind+1)*sizeof(char*));
-        res[ind] = NULL;
-    }
-    *i+=j;
-    free(val);
-    return res;
-}
-
 static int is_word(char c)
 {
     return (c!=' ' && c!='\n' && c!='\t' && c!=';' && c!='&' && c!='|' && c!='\'' && c!=0);
+}
+
+static char *var_expand(struct dictionnary *vars, char *word, size_t *ind)
+{
+    char *key = malloc(1);
+    key[0] = 0;
+    if (word[(*ind)+1] != '{')
+    {
+        (*ind)++;
+        while(word[*ind] != 0 && word[*ind] != '}')
+        {
+            key = realloc(key,strlen(key)+2);
+            size_t len = strlen(key);
+            key[len] = word[*ind];
+            key[len + 1] = 0;
+            (*ind)++;
+        }
+        if(word[*ind] == 0)
+        {
+            free(key);
+            return NULL;
+        }
+    }
+    else
+    {
+        while(is_word(word[(*ind)+1]))
+        {
+            (*ind)++;
+            key = realloc(key,strlen(key)+2);
+            size_t len = strlen(key);
+            key[len] = word[(*ind)];
+            key[len + 1] = 0;
+        }
+    }
+    char **val = get_var(vars, key);
+    char *res = malloc(1);
+    size_t j = 0;
+    while(val[j]!=NULL)
+    {
+        res = realloc(res, strlen(res) + strlen(val[j]) + 2);
+        strcat(res, val[j]);
+        strcat(res, " ");
+        free(val[j]);
+        j++;
+    }
+    return res;
 }
 
 /* Description:
  *  	insert all vals value in between prefix and tail
  * Arguments:
  *  	TODO
- */
+
 static void glue(char *prefix, char **vals, char *tail)
 {
     size_t i = 0;
@@ -92,65 +113,40 @@ static void glue(char *prefix, char **vals, char *tail)
     strcat(prefix, tail);
     free(res);
     free(tail);
-}
+}*/
 
-static char **double_quotes_expand(struct dictionnary *vars, char *word, char **res)
+static char *double_quotes_expand(struct dictionnary *vars, char *word, size_t *ind)
 {
-    size_t ind = 0;
-    while(res[ind])
+    char *res = malloc(1);
+    res[0] = 0;
+    int quotes = 0;
+    while (quotes < 2)
     {
-        ind++;
-    }
-    size_t j = 0;
-    while(word[j] != 0)
-    {
-        j++;
-    }
-    if(j>2)
-    {
-        res[ind] = malloc((j-1));
-        j = 1;
-        size_t indbis = 0;
-        size_t len = strlen(word);
-        while(j < len - 1)
+        if (word[*ind] == 0)
         {
-            res[ind][indbis] = word[j];
-            indbis++;
-            j++;
+            free(res);
+            return NULL;
         }
-        res[ind][indbis] = 0;
-        ind++;
-        res = realloc(res, (ind+1)*sizeof(char*));
-        res[ind] = NULL;
-    }
-    else
-    {
-        res[j] = calloc(1,1);
-        j++;
-        res = realloc(res, (j+1)*sizeof(char*));   
-        res[j] = NULL;
-        return res;
-    }
-    ind--;
-    size_t i = 0;
-    while(res[ind][i]!=0)
-    {
-        if(res[ind][i] == '$')
+        if (word[*ind] != '"')
         {
-            res[ind][i] = 0;
-            i++;
-            char *var = (res[ind])+i;
-            while(is_word(res[ind][i]))
+            if(word[*ind] == '$')
             {
-                i++;
+                char *var = var_expand(vars, word, ind);
+                res = realloc(res, strlen(res) + strlen(var) + 1);
+                strcat(res, var);
+                free(var);
             }
-            res[ind][i] = 0;
-            char **val = get_var(vars,var);
-            char *tail = strdup((res[ind])+i+1);
-            glue(res[ind],val, tail);
+            else
+            {
+                res = realloc(res, strlen(res) + 2);
+                size_t len = strlen(res);
+                res[len] = word[*ind];
+                res[len + 1] = 0;
+                (*ind)++;
+            }
         }
         else
-            i++;
+            quotes++;
     }
     return res;
 }
@@ -166,6 +162,32 @@ static void free_ex(char **ex)
     free(ex);
 }
 
+static char *single_quote_expand(char *word, size_t *ind)
+{
+    char *res = malloc(1);
+    res[0] = 0;
+    int quotes = 0;
+    while(quotes < 2)
+    {
+        if(word[*ind] == 0)
+        {
+            free(res);
+            return NULL;
+        }
+        if(word[*ind] != '\'')
+        {
+            res = realloc(res, strlen(res)+2);
+            size_t len = strlen(res);
+            res[len] = word[*ind];
+            res[len + 1] = 0;
+            (*ind)++;
+        }
+        else
+            quotes++;
+    }
+    return res;
+}
+
 static char **expand(struct dictionnary *vars, char **words)
 {
     char **res = malloc(sizeof(char *));
@@ -173,70 +195,47 @@ static char **expand(struct dictionnary *vars, char **words)
         return NULL;
     res[0] = NULL;
     size_t i = 0;
+    size_t ibis = 0;
     size_t j = 0;
     while (words[i]!=NULL)
     {
-        if(words[i][0] == '$')
+        res[j] = malloc(1);
+        res[j][0] = 0;
+        while(words[i][ibis] != 0)
         {
-            res = var_expand(vars,(words[i]),res,&j);
-        }
-        else if(words[i][0] == '\'')
-        {
-            size_t ind = 0;
-            while(words[i][ind] != 0)
+            if(words[i][ibis] == '$')
             {
-                ind++;
+                char *var = var_expand(vars,words[i],&ibis);
+                res[j] = realloc(res[j], strlen(res[j])+ibis+1);
+                strcat(res[j],var);
+                free(var);
             }
-            if(ind>2)
+            else if(words[i][ibis] == '\'')
             {
-                res[j] = malloc((ind-1));
-                ind = 0;
-                size_t indbis = 0;
-                while(words[i][ind] != 0)
-                {
-                    if(words[i][ind] != '\'')
-                    {
-                        res[j][indbis] = words[i][ind];
-                        indbis++;
-                    }
-                    ind++;
-                }
-                res[j][indbis] = 0;
+                char *var = single_quote_expand(words[i], &ibis);
+                res[j] = realloc(res[j], strlen(res[j]) + strlen(var) + 1);
+                strcat(res[j], var);
+                free(var);
+            }
+            else if(words[i][ibis] == '"')
+            {
+                char *var = double_quotes_expand(vars,words[i], &ibis);
+                res[j] = realloc(res[j], strlen(res[j]) + strlen(var) + 1);
+                strcat(res[j], var);
+                free(var);
                 j++;
-                res = realloc(res, (j+1)*sizeof(char*));
-                res[j] = NULL;
             }
             else
             {
-                res[j] = calloc(1,1);
-                j++;
-                res = realloc(res, (j+1)*sizeof(char*));
-                if(!res)
-                {
-                    free_ex(res);
-                    return NULL;
-                }   
-                res[j] = NULL;
+                res[j] = realloc(res[j], strlen(res[j]) + 2);
+                size_t len = strlen(res[j]);
+                res[j][len] = words[i][ibis];
+                res[j][len + 1] = 0;
             }
-        }
-        else if(words[i][0] == '"')
-        {
-            res = double_quotes_expand(vars,words[i],res);
-            j++;
-        }
-        else
-        {
-            res[j] = strdup(words[i]);
-            j++;
-            res = realloc(res, (j+1)*sizeof(char*));
-            if(!res)
-            {
-                free_ex(res);
-                return NULL;
-            }   
-            res[j] = NULL;
+            ibis++;
         }
         i++;
+        j++;
     }
     return res;
 }
