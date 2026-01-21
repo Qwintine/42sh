@@ -50,11 +50,13 @@ static int update_pwd(struct dictionnary *vars)
 int cd_b(char **args, struct dictionnary *vars)
 {
     char *path;
+    char **home = NULL;
+    char **oldpwd = NULL;
     int print_path = 0;
     
     if (args[0] == NULL)
     {
-        char **home = get_var(vars, "HOME");
+        home = get_var(vars, "HOME");
         if (home == NULL || home[0] == NULL)
         {
             return 1;
@@ -63,7 +65,7 @@ int cd_b(char **args, struct dictionnary *vars)
     }
     else if (strcmp(args[0], "-") == 0)
     {
-        char **oldpwd = get_var(vars, "OLDPWD");
+        oldpwd = get_var(vars, "OLDPWD");
         if (oldpwd == NULL || oldpwd[0] == NULL)
         {
             return 1;
@@ -82,11 +84,25 @@ int cd_b(char **args, struct dictionnary *vars)
         return 1;
     }
     
+    char *path_to_print = NULL;
     if (print_path)
     {
-        printf("%s\n", path);
-        fflush(stdout);
+        path_to_print = strdup(path);
     }
-
-    return update_pwd(vars);
+    
+    int result = update_pwd(vars);
+    
+    if (path_to_print != NULL)
+    {
+        printf("%s\n", path_to_print);
+        fflush(stdout);
+        free(path_to_print);
+    }
+    
+    if (home != NULL)
+        free(home);
+    if (oldpwd != NULL)
+        free(oldpwd);
+    
+    return result;
 }
