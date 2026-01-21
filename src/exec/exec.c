@@ -140,6 +140,15 @@ static char *double_quotes_expand(struct dictionnary *vars, char *word, size_t *
                 strcat(res, var);
                 free(var);
             }
+            else if (word[*ind] == '\\')
+            {
+                (*ind)++;
+                res = realloc(res, strlen(res) + 2);
+                size_t len = strlen(res);
+                res[len] = word[*ind];
+                res[len + 1] = 0;
+                (*ind)++;
+            }
             else
             {
                 res = realloc(res, strlen(res) + 2);
@@ -155,6 +164,7 @@ static char *double_quotes_expand(struct dictionnary *vars, char *word, size_t *
             quotes++;
         }
     }
+    (*ind)--;
     return res;
 }
 
@@ -189,12 +199,22 @@ static char *single_quote_expand(char *word, size_t *ind)
             res[len + 1] = 0;
             (*ind)++;
         }
+        else if (word[*ind] == '\\')
+        {
+            (*ind)++;
+            res = realloc(res, strlen(res) + 2);
+            size_t len = strlen(res);
+            res[len] = word[*ind];
+            res[len + 1] = 0;
+            (*ind)++;
+        }
         else
         {
             (*ind)++;
             quotes++;
         }
     }
+    (*ind)--;
     return res;
 }
 
@@ -234,6 +254,14 @@ static char **expand(struct dictionnary *vars, char **words)
                 res[j] = realloc(res[j], strlen(res[j]) + strlen(var) + 1);
                 strcat(res[j], var);
                 free(var);
+            }
+            else if (words[i][ibis] == '\\')
+            {
+                ibis++;
+                res[j] = realloc(res[j], strlen(res[j]) + 2);
+                size_t len = strlen(res[j]);
+                res[j][len] = words[i][ibis];
+                res[j][len + 1] = 0;
             }
             else
             {

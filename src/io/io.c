@@ -36,6 +36,7 @@ static FILE *stdin_to_mem(void)
         free(buffer);
         return NULL;
     }
+    free(buffer);
     return mem;
 }
 
