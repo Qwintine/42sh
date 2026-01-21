@@ -44,8 +44,7 @@ static int sub_switch_delim(struct lex *lex, struct token *tok, char *buf,
     switch (buf[0])
     {
     case '\\': // cas 4
-        if (handle_backslash(&tok->value, lex->entry,
-                             quote_status->double_quote))
+        if (handle_backslash(&tok->value, lex->entry))
             return 1;
         break;
     case ';':

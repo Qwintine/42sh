@@ -64,7 +64,7 @@ Test(Test42sh, lex_medium_1, .init = cr_redirect_stdout)
 
     cr_expect(eq(int, lexer(lx), 0));
     cr_expect(eq(int, lx->current_token->token_type, WORD));
-    cr_expect(eq(str, lx->current_token->value, "n"));
+    cr_expect(eq(str, lx->current_token->value, "\\n"));
 
     cr_expect(eq(int, lexer(lx), 0));
     cr_expect(eq(int, lx->current_token->token_type, WORD));
@@ -82,7 +82,7 @@ Test(Test42sh, lex_medium_1, .init = cr_redirect_stdout)
 
 Test(Test42sh, lex_medium_2, .init = cr_redirect_stdout)
 {
-    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo \"hello\\\"world\"; cat"}, NULL, NULL);
+    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo \"hello\\\"world\"  a\\\"b; cat"}, NULL, NULL);
     cr_assert_not_null(f);
 
     struct lex *lx = init_lex(f);
@@ -95,6 +95,10 @@ Test(Test42sh, lex_medium_2, .init = cr_redirect_stdout)
     cr_expect(eq(int, lexer(lx), 0));
     cr_expect(eq(int, lx->current_token->token_type, WORD));
     cr_expect(eq(str, lx->current_token->value, "\"hello\\\"world\""));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, WORD));
+    cr_expect(eq(str, lx->current_token->value, "a\\\"b"));
 
     cr_expect(eq(int, lexer(lx), 0));
     cr_expect(eq(int, lx->current_token->token_type, SEMI_COLON));
@@ -382,15 +386,14 @@ Test(Test42sh, lex_backslash, .init = cr_redirect_stdout)
 
     cr_expect(eq(int, lexer(lx), 0));
     cr_expect(eq(int, lx->current_token->token_type, WORD));
-    cr_expect(eq(str, lx->current_token->value, "a b"));
+    cr_expect(eq(str, lx->current_token->value, "a\\ b"));
 
     cr_expect(eq(int, lexer(lx), 0));
     cr_expect(eq(int, lx->current_token->token_type, WORD));
-    cr_expect(eq(str, lx->current_token->value, "n"));
-
+    cr_expect(eq(str, lx->current_token->value, "\\n"));
     cr_expect(eq(int, lexer(lx), 0));
     cr_expect(eq(int, lx->current_token->token_type, WORD));
-    cr_expect(eq(str, lx->current_token->value, "\\"));
+    cr_expect(eq(str, lx->current_token->value, "\\\\"));
 
     cr_expect(eq(int, lexer(lx), 0));
     cr_expect(eq(int, lx->current_token->token_type, END));

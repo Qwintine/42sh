@@ -13,7 +13,7 @@ int valid_io(char *str);
 
 // lexer_handlers.c
 int handle_com(int in_quotes, struct lex *lex, struct token *tok, char *buf);
-int handle_backslash(char **value, FILE *entry, int in_double_quote);
+int handle_backslash(char **value, FILE *entry);
 int handle_quote(int *quote, int other_quote, struct token *tok, char val);
 int handle_newline(struct token *tok, int quote, FILE *entry);
 int handle_semicolon(struct token *tok, int quote, FILE *entry);
