@@ -345,11 +345,7 @@ static int ast_run_for(struct ast *ast, struct dictionnary *vars, int *exit)
 
 static int ast_run_pipe(struct ast *ast, struct dictionnary *vars, int *exit)
 {
-    if (!ast)
-        return 2;
     struct ast_pipe *ast_pipe = (struct ast_pipe *)ast;
-    if (!ast_pipe->cmd[0])
-        return 2;
     int fd[2] = { 0, 0 };
     int res = exec_pipe(ast_pipe->cmd, fd, vars, exit);
     if (ast_pipe->negation)

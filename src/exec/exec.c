@@ -326,7 +326,7 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars, int *exit)
 int exec_pipe(struct ast_cmd **cmd, int fd[2], struct dictionnary *vars, int *exit)
 {
     if (cmd[0] == NULL)
-        return 2;
+        return 0;
     if (cmd[1] == NULL)
     {
         if (fd[0] == 0 && fd[1] == 0)

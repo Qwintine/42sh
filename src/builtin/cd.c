@@ -13,13 +13,8 @@ static int update_pwd(struct dictionnary *vars)
     if (pwd == NULL || pwd[0] == NULL)
         return 1;
     
-    char **oldpwd = get_var(vars, "OLDPWD");
-    if (oldpwd == NULL || oldpwd[0] == NULL)
-        return 1;
-    
     char *saved_pwd = strdup(pwd[0]);
     free(pwd);
-    free(oldpwd);
     if (saved_pwd == NULL)
         return 1;
     
