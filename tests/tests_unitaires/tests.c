@@ -17,8 +17,7 @@ TestSuite(Test42sh);
 
 Test(Test42sh, lex_simple, .init = cr_redirect_stdout)
 {
-    char *buff;
-    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo hello\n"}, NULL, &buff);
+    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo hello\n"}, NULL, NULL);
     cr_assert_not_null(f);
 
     struct lex *lx = init_lex(f);
@@ -44,8 +43,7 @@ Test(Test42sh, lex_simple, .init = cr_redirect_stdout)
 
 Test(Test42sh, lex_medium_1, .init = cr_redirect_stdout)
 {
-    char *buff;
-    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo 'W  o'   \n   \\n 'r   ld'     !"}, NULL, &buff);
+    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo 'W  o'   \n   \\n 'r   ld'     !"}, NULL, NULL);
     cr_assert_not_null(f);
 
     struct lex *lx = init_lex(f);
@@ -84,8 +82,7 @@ Test(Test42sh, lex_medium_1, .init = cr_redirect_stdout)
 
 Test(Test42sh, lex_medium_2, .init = cr_redirect_stdout)
 {
-    char *buff;
-    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo hello; cat"}, NULL, &buff);
+    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo \"hello\\\"world\"; cat"}, NULL, NULL);
     cr_assert_not_null(f);
 
     struct lex *lx = init_lex(f);
@@ -97,7 +94,7 @@ Test(Test42sh, lex_medium_2, .init = cr_redirect_stdout)
 
     cr_expect(eq(int, lexer(lx), 0));
     cr_expect(eq(int, lx->current_token->token_type, WORD));
-    cr_expect(eq(str, lx->current_token->value, "hello"));
+    cr_expect(eq(str, lx->current_token->value, "\"hello\\\"world\""));
 
     cr_expect(eq(int, lexer(lx), 0));
     cr_expect(eq(int, lx->current_token->token_type, SEMI_COLON));
@@ -115,8 +112,7 @@ Test(Test42sh, lex_medium_2, .init = cr_redirect_stdout)
 
 Test(Test42sh, lex_medium_operator, .init = cr_redirect_stdout)
 {
-    char *buff;
-    FILE *f = arg_file(3, (char*[]){"program", "-c", "if ! false && false; then echo ok& fi"}, NULL, &buff);
+    FILE *f = arg_file(3, (char*[]){"program", "-c", "if ! false && false; then echo ok& fi"}, NULL, NULL);
     cr_assert_not_null(f);
 
     struct lex *lx = init_lex(f);
@@ -175,8 +171,7 @@ Test(Test42sh, lex_medium_operator, .init = cr_redirect_stdout)
 
 Test(Test42sh, lex_syntax_error, .init = cr_redirect_stdout)
 {
-    char *buff;
-    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo 'a"}, NULL, &buff);
+    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo 'a"}, NULL, NULL);
     cr_assert_not_null(f);
 
     struct lex *lx = init_lex(f);
@@ -193,8 +188,7 @@ Test(Test42sh, lex_syntax_error, .init = cr_redirect_stdout)
 
 Test(Test42sh, lex_loop, .init = cr_redirect_stdout)
 {
-    char *buff;
-    FILE *f = arg_file(3, (char*[]){"program", "-c", "while true; do echo a; done"}, NULL, &buff);
+    FILE *f = arg_file(3, (char*[]){"program", "-c", "while true; do echo a; done"}, NULL, NULL);
     cr_assert_not_null(f);
 
     struct lex *lx = init_lex(f);
@@ -241,8 +235,7 @@ Test(Test42sh, lex_loop, .init = cr_redirect_stdout)
 
 Test(Test42sh, lex_redir, .init = cr_redirect_stdout)
 {
-    char *buff;
-    FILE *f = arg_file(3, (char*[]){"program", "-c", "test > 2 < 4>> ok42>& 1234<&    ok >|  1<>2"}, NULL, &buff);
+    FILE *f = arg_file(3, (char*[]){"program", "-c", "test > 2 < 4>> ok42>& 1234<&    ok >|  1<>2"}, NULL, NULL);
     cr_assert_not_null(f);
 
     struct lex *lx = init_lex(f);
@@ -317,8 +310,7 @@ Test(Test42sh, lex_redir, .init = cr_redirect_stdout)
 
 Test(Test42sh, lex_expand, .init = cr_redirect_stdout)
 {
-    char *buff;
-    FILE *f = arg_file(3, (char*[]){"program", "-c", "test=ok; echo $test ${test}"}, NULL, &buff);
+    FILE *f = arg_file(3, (char*[]){"program", "-c", "test=ok; echo $test ${test}"}, NULL, NULL);
     cr_assert_not_null(f);
 
     struct lex *lx = init_lex(f);
@@ -352,8 +344,7 @@ Test(Test42sh, lex_expand, .init = cr_redirect_stdout)
 
 Test(Test42sh, lex_quotes, .init = cr_redirect_stdout)
 {
-    char *buff;
-    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo 'a b c' \"d $e f\""}, NULL, &buff);
+    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo 'a b c' \"d $e f\""}, NULL, NULL);
     cr_assert_not_null(f);
 
     struct lex *lx = init_lex(f);
@@ -379,8 +370,7 @@ Test(Test42sh, lex_quotes, .init = cr_redirect_stdout)
 
 Test(Test42sh, lex_backslash, .init = cr_redirect_stdout)
 {
-    char *buff;
-    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo a\\ b \\n \\\\"}, NULL, &buff);
+    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo a\\ b \\n \\\\"}, NULL, NULL);
     cr_assert_not_null(f);
 
     struct lex *lx = init_lex(f);
@@ -410,8 +400,7 @@ Test(Test42sh, lex_backslash, .init = cr_redirect_stdout)
 
 Test(Test42sh, lex_single_quotes, .init = cr_redirect_stdout)
 {
-    char *buff;
-    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo a'b'c"}, NULL, &buff);
+    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo a'b'c"}, NULL, NULL);
     cr_assert_not_null(f);
 
     struct lex *lx = init_lex(f);
@@ -515,8 +504,7 @@ Test(Test42sh, token_concat, .init = cr_redirect_stdout)
 
 Test(Test42sh, lex_pipe_operator, .init = cr_redirect_stdout)
 {
-    char *buff;
-    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo a | cat"}, NULL, &buff);
+    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo a | cat"}, NULL, NULL);
     cr_assert_not_null(f);
 
     struct lex *lx = init_lex(f);
@@ -546,8 +534,7 @@ Test(Test42sh, lex_pipe_operator, .init = cr_redirect_stdout)
 
 Test(Test42sh, lex_or_operator, .init = cr_redirect_stdout)
 {
-    char *buff;
-    FILE *f = arg_file(3, (char*[]){"program", "-c", "false || true"}, NULL, &buff);
+    FILE *f = arg_file(3, (char*[]){"program", "-c", "false || true"}, NULL, NULL);
     cr_assert_not_null(f);
 
     struct lex *lx = init_lex(f);
@@ -573,8 +560,7 @@ Test(Test42sh, lex_or_operator, .init = cr_redirect_stdout)
 
 Test(Test42sh, lex_comment, .init = cr_redirect_stdout)
 {
-    char *buff;
-    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo test # this is a comment"}, NULL, &buff);
+    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo test # this is a comment"}, NULL, NULL);
     cr_assert_not_null(f);
 
     struct lex *lx = init_lex(f);
