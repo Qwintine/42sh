@@ -54,6 +54,8 @@ int is_env(char *key)
         return 1;
     if (!strcmp(key, "HOME"))
         return 1;
+    if(!strcmp(key, "PATH"))
+	    return 1;
     return 0;
 }
 

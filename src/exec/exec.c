@@ -10,6 +10,7 @@
 #include "../builtin/echo.h"
 #include "../builtin/exit.h"
 #include "../builtin/cd.h"
+#include "../builtin/dot.h"
 #include "expand/expand.h"
 #include "redir_exec.h"
 
@@ -19,7 +20,7 @@ static int is_builtin(char **words)
         return 0;
     return !strcmp(words[0], "true") || !strcmp(words[0], "false")
         || !strcmp(words[0], "echo") || !strcmp(words[0], "exit")
-        || !strcmp(words[0], "cd");
+        || !strcmp(words[0], "cd") || !strcmp(words[0], ".");
 }
 
 static int exec_builtin(char **words, int *exit, struct dictionnary *vars)
@@ -35,6 +36,8 @@ static int exec_builtin(char **words, int *exit, struct dictionnary *vars)
         return exit_b(words + 1, exit);
     else if (!strcmp(cmd, "cd"))
         return cd_b(words + 1, vars);
+    else if (!strcmp(cmd, "."))
+	return dot_b(words + 1, vars, exit);
     return -1;
 }
 

@@ -6,7 +6,8 @@ libexec_a_SOURCES =  \
   redir_exec.c \
   ../builtin/echo.c \
   ../builtin/exit.c \
-  ../builtin/cd.c
+  ../builtin/cd.c \
+  ../builtin/dot.c
 
 libexec_a_CPPFLAGS = -I$(top_srcdir)/src
 
