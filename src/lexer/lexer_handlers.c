@@ -73,14 +73,6 @@ int handle_backslash(char **value, FILE *entry)
             return 1;
     }
     return 0;
-
-    if (buf[0] != '\n')
-    {
-        *value = concat(*value, buf[0]);
-        if (!*value)
-            return 1;
-    }
-    return 0;
 }
 
 int handle_quote(int *quote, int other_quote, struct token *tok, char val)

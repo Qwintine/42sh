@@ -119,6 +119,11 @@ static void glue(char *prefix, char **vals, char *tail)
     free(tail);
 }*/
 
+static int is_expandable(char c)
+{
+    return (c == '$' || c == '"' || c == '\'' || c == '\\');
+}
+
 static char *double_quotes_expand(struct dictionnary *vars, char *word, size_t *ind)
 {
     char *res = malloc(1);
@@ -140,9 +145,12 @@ static char *double_quotes_expand(struct dictionnary *vars, char *word, size_t *
                 strcat(res, var);
                 free(var);
             }
-            else if (word[*ind] == '\\')
+            if (word[*ind] == '\\')
             {
-                (*ind)++;
+                if(is_expandable(word[*ind + 1]))
+                {
+                    (*ind)++;
+                }
                 res = realloc(res, strlen(res) + 2);
                 size_t len = strlen(res);
                 res[len] = word[*ind];
@@ -201,7 +209,6 @@ static char *single_quote_expand(char *word, size_t *ind)
         }
         else if (word[*ind] == '\\')
         {
-            (*ind)++;
             res = realloc(res, strlen(res) + 2);
             size_t len = strlen(res);
             res[len] = word[*ind];
