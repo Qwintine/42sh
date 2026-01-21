@@ -71,6 +71,8 @@ char *itoa(int num)
 
 static void arg_num(int num, struct dictionnary *vars)
 {
+    if (vars == NULL)
+        return;
     if (num < 0)
         add_var(vars, "#=0");
     else
@@ -130,7 +132,7 @@ FILE *arg_file(int argc, char **argv, int *prettyprint, struct dictionnary *vars
         }
         else
         {
-            if(i>1)
+            if(i>1 && vars != NULL)
             {
                 char *arg_name = malloc(20);
                 char *inum = itoa(i-1);
@@ -143,7 +145,7 @@ FILE *arg_file(int argc, char **argv, int *prettyprint, struct dictionnary *vars
             }
         }
     }
-    if(add_var_arg(vars, "@", argv+2))
+    if(vars != NULL && add_var_arg(vars, "@", argv+2))
     {
         return NULL;
     }

@@ -57,6 +57,7 @@ int handle_backslash(char **value, FILE *entry, int in_double_quote)
         if (buf[0] == '$' || buf[0] == '`' || buf[0] == '"' || buf[0] == '\\'
             || buf[0] == '\n')
         {
+            *value = concat(*value, '\\');
             if (buf[0] != '\n')
             {
                 *value = concat(*value, buf[0]);
