@@ -119,7 +119,7 @@ FILE *arg_file(int argc, char **argv, int *prettyprint, struct dictionnary *vars
     {
         if (strcmp(argv[i], "-c") == 0)
         {
-            arg_num(argc-2, vars);
+            arg_num(argc-3, vars);
             i++;
             if (!argv[i])
             {
@@ -133,13 +133,13 @@ FILE *arg_file(int argc, char **argv, int *prettyprint, struct dictionnary *vars
         }
         else if (strcmp(argv[i], "--prettyprint") == 0)
         {
-            arg_num(argc-3, vars);
+            arg_num(argc-4, vars);
             *prettyprint = 1;
         }
         // autre arguments (pour plus tard)
         else if (!entry)
         {
-            arg_num(argc-2, vars);
+            arg_num(argc-3, vars);
             entry = fopen(argv[i], "r");
         }
         else

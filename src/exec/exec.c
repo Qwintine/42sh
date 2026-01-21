@@ -11,6 +11,7 @@
 #include "../builtin/exit.h"
 #include "../builtin/cd.h"
 #include "../expand/expand.h"
+#include "../io/io.h"
 #include "redir_exec.h"
 
 static int is_builtin(char **words)
@@ -40,7 +41,8 @@ static int exec_builtin(char **words, int *exit, struct dictionnary *vars)
 
 static int is_word(char c)
 {
-    return (c!=' ' && c!='\n' && c!='\t' && c!=';' && c!='&' && c!='|' && c!='\'' && c!=0);
+    return (c!=' ' && c!='\n' && c!='\t' && c!=';' && c!='&' && c!='|'
+        && c!='\'' && c!=0 && c!='"' && c!='<' && c!='>' );
 }
 
 static char *var_expand(struct dictionnary *vars, char *word, size_t *ind)
@@ -49,7 +51,7 @@ static char *var_expand(struct dictionnary *vars, char *word, size_t *ind)
     key[0] = 0;
     if (word[(*ind)+1] == '{')
     {
-        (*ind)++;
+        (*ind)+=2;
         while(word[*ind] != 0 && word[*ind] != '}')
         {
             key = realloc(key,strlen(key)+2);
@@ -144,8 +146,9 @@ static char *double_quotes_expand(struct dictionnary *vars, char *word, size_t *
                 res = realloc(res, strlen(res) + strlen(var) + 1);
                 strcat(res, var);
                 free(var);
+                (*ind)++;
             }
-            if (word[*ind] == '\\')
+            else if (word[*ind] == '\\')
             {
                 if(is_expandable(word[*ind + 1]))
                 {
@@ -307,16 +310,6 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars, int *exit)
         || (!ast_cmd->words[0] && !ast_cmd->redirs && !ast_cmd->assignment[0]))
         return 2;
 
-    size_t i = 0;
-    while (ast_cmd->assignment[i])
-    {
-        if (add_var(vars, ast_cmd->assignment[i]))
-        {
-            return 1;
-        }
-        i++;
-    }
-
     if (!ast_cmd->words || !ast_cmd->words[0])
     {
         if (ast_cmd->redirs)
@@ -326,6 +319,22 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars, int *exit)
                 return 1;
             restore_redirs(&redir_saved);
         }
+        size_t i = 0;
+        while (ast_cmd->assignment[i])
+        {
+            if (add_var(vars, ast_cmd->assignment[i]))
+            {
+                return 1;
+            }
+            i++;
+        }
+        char *wexit = itoa(0);
+        char *assignment = malloc(strlen("?=") + strlen(wexit) + 1);
+        assignment = strcpy(assignment, "?=");
+        assignment = strcat(assignment, wexit);
+        add_var(vars, assignment);
+        free(wexit);
+        free(assignment);
         return 0;
     }
 
@@ -344,6 +353,13 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars, int *exit)
         int r = exec_builtin(expanded, exit, vars);
         free_ex(expanded);
         restore_redirs(&redir_saved);
+        char *wexit = itoa(r);
+        char *assignment = malloc(strlen("?=") + strlen(wexit) + 1);
+        assignment = strcpy(assignment, "?=");
+        assignment = strcat(assignment, wexit);
+        add_var(vars, assignment);
+        free(wexit);
+        free(assignment);
         return r;
     }
 
@@ -360,13 +376,36 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars, int *exit)
         _exit(127);
     }
 
+    size_t i = 0;
+    while (ast_cmd->assignment[i])
+    {
+        if (add_var(vars, ast_cmd->assignment[i]))
+        {
+            return 1;
+        }
+        i++;
+    }
     free_ex(expanded);
     int status;
     waitpid(pid, &status, 0);
     if (WIFEXITED(status))
     {
+        char *wexit = itoa((int)WEXITSTATUS(status));
+        char *assignment = malloc(strlen("?=") + strlen(wexit) + 1);
+        assignment = strcpy(assignment, "?=");
+        assignment = strcat(assignment, wexit);
+        add_var(vars, assignment);
+        free(wexit);
+        free(assignment);
         return WEXITSTATUS(status);
     }
+    char *wexit = itoa(127);
+    char *assignment = malloc(strlen("?=") + strlen(wexit) + 1);
+    assignment = strcpy(assignment, "?=");
+    assignment = strcat(assignment, wexit);
+    add_var(vars, assignment);
+    free(wexit);
+    free(assignment);
     return 127;
 }
 

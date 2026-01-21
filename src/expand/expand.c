@@ -1,11 +1,6 @@
 #define _POSIX_C_SOURCE 200809L
 #include "expand.h"
 
-#include <stddef.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-
 static int hash(char *str)
 {
     size_t res = 0;
@@ -38,8 +33,6 @@ struct dictionnary *init_dict(void)
 
 int is_env(char *key)
 {
-    if (!strcmp(key, "?"))
-        return 1;
     if (!strcmp(key, "$"))
         return 1;
     if (!strcmp(key, "RANDOM"))
@@ -107,7 +100,13 @@ int add_var(struct dictionnary *dict, char *varas)
     strncpy(key, varas, i);
     key[i] = '\0';
     strcpy(val, varas + i + 1);
-
+    /*char **to_ex = malloc(2 * sizeof(char *));
+    to_ex[0] = val;
+    to_ex[1] = NULL;
+    char **expanded = expand(dict, to_ex);
+    val = expanded[0];
+    free(to_ex);
+    free(expanded);*/
     if (is_env(key))
     {
         if (setenv(key, val, 1) != 0)
@@ -218,7 +217,7 @@ char **get_var(struct dictionnary *dict, char *key)
     {
         char *g = getenv(key);
         char **res = malloc(2 * sizeof(char *));
-        res[0] = g;
+        res[0] = strdup(g);
         res[1] = NULL;
         return res;
     }

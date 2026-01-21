@@ -9,5 +9,6 @@
 
 FILE *arg_file(int argc, char **argv, int *prettyprint, struct dictionnary *vars);
 void free_stdin_buffer(void);
+char *itoa(int num);
 
 #endif /* IO_H */
