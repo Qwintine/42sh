@@ -8,5 +8,6 @@
 #include <string.h>
 
 FILE *arg_file(int argc, char **argv, int *prettyprint, struct dictionnary *vars);
+void free_stdin_buffer(void);
 
 #endif /* IO_H */

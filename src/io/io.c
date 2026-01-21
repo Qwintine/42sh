@@ -3,6 +3,17 @@
 #include <stdlib.h>
 #include <string.h>
 
+static char *stdin_buffer = NULL;
+
+void free_stdin_buffer(void)
+{
+    if (stdin_buffer)
+    {
+        free(stdin_buffer);
+        stdin_buffer = NULL;
+    }
+}
+
 // Solution de contournement pour lire stdin avec fmemopen
 // (pas sur que ça tienne dans le temps)
 static FILE *stdin_to_mem(void)
@@ -36,7 +47,7 @@ static FILE *stdin_to_mem(void)
         free(buffer);
         return NULL;
     }
-    free(buffer);
+    stdin_buffer = buffer;
     return mem;
 }
 

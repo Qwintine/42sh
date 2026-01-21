@@ -49,6 +49,7 @@ int main(int argc, char **argv)
             fclose(entry);
             free_dict(vars);
             fprintf(stderr, "42sh: grammar/syntax error\n");
+            free_stdin_buffer();
             return 2;
         }
 
@@ -71,6 +72,7 @@ int main(int argc, char **argv)
 
     fclose(entry);
     free_dict(vars);
+    free_stdin_buffer();
 
     return res;
 }
