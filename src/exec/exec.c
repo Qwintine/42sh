@@ -10,7 +10,7 @@
 #include "../builtin/echo.h"
 #include "../builtin/exit.h"
 #include "../builtin/cd.h"
-#include "expand/expand.h"
+#include "../expand/expand.h"
 #include "redir_exec.h"
 
 static int is_builtin(char **words)
