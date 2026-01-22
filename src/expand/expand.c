@@ -31,22 +31,41 @@ struct dictionnary *init_dict(void)
     return dict;
 }
 
-int is_env(char *key)
+char *special(char *key)
 {
     if (!strcmp(key, "$"))
-        return 1;
+    {
+        char *r = getenv("$");
+        return strdup(r);
+    }
     if (!strcmp(key, "RANDOM"))
-        return 1;
+    {
+        sleep(1);
+        srand((unsigned)time(NULL));
+        return itoa(rand());
+    }
     if (!strcmp(key, "UID"))
-        return 1;
+        return itoa((int)getuid());
     if (!strcmp(key, "OLDPWD"))
-        return 1;
+    {
+        char *r = getenv("OLPWD");
+        return strdup(r);
+    }
     if (!strcmp(key, "PWD"))
-        return 1;
+    {
+        char *r = getenv("PWD");
+        return strdup(r);
+    }
     if (!strcmp(key, "IFS"))
-        return 1;
+    {
+        char *r = getenv("IFS");
+        return strdup(r);
+    }
     if (!strcmp(key, "HOME"))
-        return 1;
+    {
+        char *r = getenv("HOME");
+        return strdup(r);
+    }
     return 0;
 }
 
@@ -107,13 +126,13 @@ int add_var(struct dictionnary *dict, char *varas)
     val = expanded[0];
     free(to_ex);
     free(expanded);*/
-    if (is_env(key))
+    /*if (is_env(key))
     {
         if (setenv(key, val, 1) != 0)
         {
             goto ERROR;
         }
-    }
+    }*/
 
     struct values *new = malloc(sizeof(struct values));
 
@@ -213,11 +232,11 @@ ERROR:
  */
 char **get_var(struct dictionnary *dict, char *key)
 {
-    if (is_env(key))
+    char *g = special(key);
+    if (g)
     {
-        char *g = getenv(key);
         char **res = malloc(2 * sizeof(char *));
-        res[0] = strdup(g);
+        res[0] = g;
         res[1] = NULL;
         return res;
     }

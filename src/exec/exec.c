@@ -11,7 +11,7 @@
 #include "../builtin/exit.h"
 #include "../builtin/cd.h"
 #include "../expand/expand.h"
-#include "../io/io.h"
+#include "../utils/itoa.h"
 #include "redir_exec.h"
 
 static int is_builtin(char **words)

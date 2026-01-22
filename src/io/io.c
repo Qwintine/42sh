@@ -51,36 +51,6 @@ static FILE *stdin_to_mem(void)
     return mem;
 }
 
-char *itoa(int num)
-{
-    int i = 0;
-    char *res = malloc(20);
-    if(num == 0)
-    {
-        res[0] = '0';
-        res[1] = 0;
-        return res;
-    }
-
-    while(num>0)
-    {
-        res[i] = (num % 10) + 48;
-        num = num / 10;
-        i++;
-    }
-
-    res[i] = 0;
-
-    for(int j=0; j<i/2; j++)
-    {
-        char c = res[j];
-        res[j] = res[i - j -1];
-        res[i - j -1] = c;
-    }
-
-    return res;
-}
-
 static void arg_num(int num, struct dictionnary *vars)
 {
     if (vars == NULL)
@@ -133,13 +103,13 @@ FILE *arg_file(int argc, char **argv, int *prettyprint, struct dictionnary *vars
         }
         else if (strcmp(argv[i], "--prettyprint") == 0)
         {
-            arg_num(argc-4, vars);
+            arg_num(argc-3, vars);
             *prettyprint = 1;
         }
         // autre arguments (pour plus tard)
         else if (!entry)
         {
-            arg_num(argc-3, vars);
+            arg_num(argc-2, vars);
             entry = fopen(argv[i], "r");
         }
         else
