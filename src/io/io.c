@@ -85,6 +85,7 @@ static void arg_num(int num, struct dictionnary *vars)
 FILE *arg_file(int argc, char **argv, int *prettyprint, struct dictionnary *vars)
 {
     FILE *entry = NULL;
+    add_var_arg(vars, "IFS", (char *[]){" ", "\t", "\n", NULL});
     for (int i = 1; i < argc; i++)
     {
         if (strcmp(argv[i], "-c") == 0)

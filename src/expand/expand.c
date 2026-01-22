@@ -31,13 +31,13 @@ struct dictionnary *init_dict(void)
     return dict;
 }
 
+int is_env(char *key)
+{
+    return !strcmp(key, "PATH") || !strcmp(key, "HOME") || !strcmp(key, "PWD") || !strcmp(key, "$");
+}
+
 char *special(char *key)
 {
-    if (!strcmp(key, "$"))
-    {
-        char *r = getenv("$");
-        return strdup(r);
-    }
     if (!strcmp(key, "RANDOM"))
     {
         sleep(1);
@@ -46,24 +46,9 @@ char *special(char *key)
     }
     if (!strcmp(key, "UID"))
         return itoa((int)getuid());
-    if (!strcmp(key, "OLDPWD"))
+    if (!strcmp(key, "$") || !strcmp(key, "PWD")|| !strcmp(key, "HOME"))
     {
-        char *r = getenv("OLPWD");
-        return strdup(r);
-    }
-    if (!strcmp(key, "PWD"))
-    {
-        char *r = getenv("PWD");
-        return strdup(r);
-    }
-    if (!strcmp(key, "IFS"))
-    {
-        char *r = getenv("IFS");
-        return strdup(r);
-    }
-    if (!strcmp(key, "HOME"))
-    {
-        char *r = getenv("HOME");
+        char *r = getenv(key);
         return strdup(r);
     }
     return 0;
@@ -81,7 +66,7 @@ static int update_or_append_var(struct values *bucket, struct values *new,
             target->elt[0] = val;
             free(key);
             free(new->elt);
-            free(new);
+            free(new); 
             return 0;
         }
         if (!target->next)
@@ -126,13 +111,13 @@ int add_var(struct dictionnary *dict, char *varas)
     val = expanded[0];
     free(to_ex);
     free(expanded);*/
-    /*if (is_env(key))
+    if (is_env(key))
     {
         if (setenv(key, val, 1) != 0)
         {
             goto ERROR;
         }
-    }*/
+    }
 
     struct values *new = malloc(sizeof(struct values));
 
@@ -252,6 +237,11 @@ char **get_var(struct dictionnary *dict, char *key)
     {
         char **res = malloc(sizeof(char *));
         res[0] = NULL;
+        if(!strcmp(key, "OLDPWD"))
+        {
+            free(res);
+            return get_var(dict, "PWD");
+        }        
         return res;
     }
     size_t i = 0;
