@@ -85,12 +85,19 @@ static void arg_num(int num, struct dictionnary *vars)
 FILE *arg_file(int argc, char **argv, int *prettyprint, struct dictionnary *vars)
 {
     FILE *entry = NULL;
-    add_var_arg(vars, "IFS", (char *[]){" ", "\t", "\n", NULL});
+    char **blank = malloc(4 * sizeof(char *));
+    blank[0] = " ";
+    blank[1] = "\t";
+    blank[2] = "\n";
+    blank[3] = NULL;
+    add_var_arg(vars, "IFS", blank);
+    free(blank);
+    int arg_count = 0;
     for (int i = 1; i < argc; i++)
     {
         if (strcmp(argv[i], "-c") == 0)
         {
-            arg_num(argc-3, vars);
+            arg_count = 3;
             i++;
             if (!argv[i])
             {
@@ -104,13 +111,13 @@ FILE *arg_file(int argc, char **argv, int *prettyprint, struct dictionnary *vars
         }
         else if (strcmp(argv[i], "--prettyprint") == 0)
         {
-            arg_num(argc-3, vars);
+            arg_count--;
             *prettyprint = 1;
         }
         // autre arguments (pour plus tard)
         else if (!entry)
         {
-            arg_num(argc-2, vars);
+            arg_count = 2;
             entry = fopen(argv[i], "r");
         }
         else
@@ -128,10 +135,8 @@ FILE *arg_file(int argc, char **argv, int *prettyprint, struct dictionnary *vars
             }
         }
     }
-    if(vars != NULL && add_var_arg(vars, "@", argv+2))
-    {
-        return NULL;
-    }
+    arg_num(argc - arg_count, vars);
+    add_var_arg(vars, "@", argv+arg_count);
     if (!entry)
     {
         entry = stdin_to_mem();

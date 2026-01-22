@@ -2,7 +2,9 @@ noinst_LIBRARIES = libio.a
 
 libio_a_SOURCES =  \
   io.c \
-  io.h
+  io.h \
+  ../expand/expand.c \
+  ../expand/expand.h
 
 libio_a_CPPFLAGS = -I$(top_srcdir)/src
 

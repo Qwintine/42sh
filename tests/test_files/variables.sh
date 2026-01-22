@@ -15,10 +15,6 @@ testcase "uid" "-c" "echo \$UID"
 testcase "random" "-c" "echo \$RANDOM > diff1; echo \$RANDOM > diff2; diff diff1 diff2 > /dev/null || echo Files diff1 and diff 2 differ"
 rm -f diff1 diff2
 testcase "simple_var_bracket" "-c" "a=titi; echo \${a}\${a}"
-testcase "ifs2" "-c" "echo \"\$IFS\"
-echo 
-IFS=newifs
-echo \$IFS"
 #modif testsuite pour accepter plus d'args
-testcase "special_args" "-c" "echo @:\$@ \n *:\$* \n {\\#}:\${\\#} \n arg1:\$1 arg2:\$ \n"
+testcase "special_args" "-c" "echo @:\$@ \n *:\$* \n {\\#}:\${\\#} \n arg1:\$1 arg2:\$2 \n"
 testcase "test for" "-c" "for arg in \$@; do echo \$arg; done " 

@@ -2,7 +2,9 @@ noinst_LIBRARIES = libexpand.a
 
 libexpand_a_SOURCES =  \
   expand.c \
-  expand.h
+  expand.h \
+  hashmap.c \
+  hashmap.h 
 
 libexpand_a_CPPFLAGS = -I$(top_srcdir)/src
 
