@@ -8,7 +8,9 @@ libbuiltin_a_SOURCES =  \
   cd.c \
   cd.h \
   dot.c \
-  dot.h
+  dot.h \
+  unset.c \
+  unset.c
   
 libbuiltin_a_CPPFLAGS = -I$(top_srcdir)/src
 

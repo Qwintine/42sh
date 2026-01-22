@@ -13,6 +13,7 @@
 #include "../builtin/dot.h"
 #include "expand/expand.h"
 #include "redir_exec.h"
+#include "../builtin/unset.h"
 
 static int is_builtin(char **words)
 {
@@ -20,7 +21,8 @@ static int is_builtin(char **words)
         return 0;
     return !strcmp(words[0], "true") || !strcmp(words[0], "false")
         || !strcmp(words[0], "echo") || !strcmp(words[0], "exit")
-        || !strcmp(words[0], "cd") || !strcmp(words[0], ".");
+        || !strcmp(words[0], "cd") || !strcmp(words[0], ".")
+			|| !strcmp(words[0], "unset");
 }
 
 static int exec_builtin(char **words, int *exit, struct dictionnary *vars)
@@ -38,6 +40,13 @@ static int exec_builtin(char **words, int *exit, struct dictionnary *vars)
         return cd_b(words + 1, vars);
     else if (!strcmp(cmd, "."))
 	return dot_b(words + 1, vars, exit);
+    else if(!strcmp(cmd, "unset"))
+    {
+	    if(!strcmp(words[1], "-v"))
+		    return unset(vars, words + 2);
+	    else
+		    return unset(vars, words + 1);
+    }
     return -1;
 }
 

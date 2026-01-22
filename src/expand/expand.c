@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 
-static int hash(char *str)
+int hash(char *str)
 {
     size_t res = 0;
     for (size_t i = 0; str[i] != 0; i++)
