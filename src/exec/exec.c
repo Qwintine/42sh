@@ -131,6 +131,12 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars, int *exit)
         fprintf(stderr, "Command not found\n");
         return 127;
     }
+    if(!expanded[1] && ast_cmd->words[1])
+    {
+        expanded[1] = ast_cmd->words[1];
+        expanded = realloc(3 * sizeof(char*));
+        expanded[2] = NULL;
+    }
 
     if (is_builtin(expanded))
     {
