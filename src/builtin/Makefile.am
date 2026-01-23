@@ -12,8 +12,10 @@ libbuiltin_a_SOURCES =  \
   dot.c \
   dot.h \
   unset.c \
-  unset.c
-
+  unset.c \
+  export.c \
+  export.h
+  
 libbuiltin_a_CPPFLAGS = -I$(top_srcdir)/src
 
 libbuiltin_a_CFLAGS = -std=c99 -pedantic -Werror -Wall -Wextra -Wvla
