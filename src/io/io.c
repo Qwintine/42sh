@@ -125,7 +125,7 @@ FILE *arg_file(int argc, char **argv, int *prettyprint, struct dictionnary *vars
             if(i>1 && vars != NULL)
             {
                 char *arg_name = malloc(20);
-                char *inum = itoa(i-1);
+                char *inum = itoa(i-arg_count);
                 arg_name = strcpy(arg_name, inum);
                 free(inum);
                 arg_name = strcat(arg_name, "=");
