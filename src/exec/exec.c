@@ -133,8 +133,8 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars, int *exit)
     }
     if(!expanded[1] && ast_cmd->words[1])
     {
-        expanded[1] = ast_cmd->words[1];
-        expanded = realloc(3 * sizeof(char*));
+        expanded[1] = strdup(ast_cmd->words[1]); // rajouter check
+        expanded = realloc(expanded,3 * sizeof(char*)); // rajouter check
         expanded[2] = NULL;
     }
 
