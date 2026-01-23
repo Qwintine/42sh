@@ -9,9 +9,9 @@ struct ast *parser_pipeline(struct lex *lex)
 {
     struct ast_pipe *ast_pipe = (struct ast_pipe *)init_ast_pipe();
     // while negation tokens
-    while (peek(lex) && peek(lex)->token_type == NEGATION)
+    if (peek(lex) && peek(lex)->token_type == NEGATION)
     {
-        ast_pipe->negation = !ast_pipe->negation;
+        ast_pipe->negation = 1;
         discard_token(pop(lex));
     }
     if (peek(lex) && peek(lex)->token_type == PIPE)
@@ -19,6 +19,8 @@ struct ast *parser_pipeline(struct lex *lex)
         free_ast((struct ast *)ast_pipe);
         return NULL;
     }
+    if(peek(lex) && peek(lex)->token_type == END && ast_pipe->negation)
+        return (struct ast *)ast_pipe;
     size_t ind = 0;
     int pipe = 1;
     struct ast_cmd *ast_cmd = (struct ast_cmd *)parser_command(lex);

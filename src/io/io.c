@@ -3,6 +3,17 @@
 #include <stdlib.h>
 #include <string.h>
 
+static char *stdin_buffer = NULL;
+
+void free_stdin_buffer(void)
+{
+    if (stdin_buffer)
+    {
+        free(stdin_buffer);
+        stdin_buffer = NULL;
+    }
+}
+
 // Solution de contournement pour lire stdin avec fmemopen
 // (pas sur que ça tienne dans le temps)
 static FILE *stdin_to_mem(void)
@@ -36,41 +47,14 @@ static FILE *stdin_to_mem(void)
         free(buffer);
         return NULL;
     }
+    stdin_buffer = buffer;
     return mem;
-}
-
-char *itoa(int num)
-{
-    int i = 0;
-    char *res = malloc(20);
-    if(num == 0)
-    {
-        res[0] = '0';
-        res[1] = 0;
-        return res;
-    }
-
-    while(num>0)
-    {
-        res[i] = (num % 10) + 48;
-        num = num / 10;
-        i++;
-    }
-
-    res[i] = 0;
-
-    for(int j=0; j<i/2; j++)
-    {
-        char c = res[j];
-        res[j] = res[i - j -1];
-        res[i - j -1] = c;
-    }
-
-    return res;
 }
 
 static void arg_num(int num, struct dictionnary *vars)
 {
+    if (vars == NULL)
+        return;
     if (num < 0)
         add_var(vars, "#=0");
     else
@@ -101,11 +85,19 @@ static void arg_num(int num, struct dictionnary *vars)
 FILE *arg_file(int argc, char **argv, int *prettyprint, struct dictionnary *vars)
 {
     FILE *entry = NULL;
+    char **blank = malloc(4 * sizeof(char *));
+    blank[0] = " ";
+    blank[1] = "\t";
+    blank[2] = "\n";
+    blank[3] = NULL;
+    add_var_arg(vars, "IFS", blank);
+    free(blank);
+    int arg_count = 0;
     for (int i = 1; i < argc; i++)
     {
         if (strcmp(argv[i], "-c") == 0)
         {
-            arg_num(argc-2, vars);
+            arg_count = 3;
             i++;
             if (!argv[i])
             {
@@ -119,21 +111,21 @@ FILE *arg_file(int argc, char **argv, int *prettyprint, struct dictionnary *vars
         }
         else if (strcmp(argv[i], "--prettyprint") == 0)
         {
-            arg_num(argc-3, vars);
+            arg_count--;
             *prettyprint = 1;
         }
         // autre arguments (pour plus tard)
         else if (!entry)
         {
-            arg_num(argc-2, vars);
+            arg_count = 2;
             entry = fopen(argv[i], "r");
         }
         else
         {
-            if(i>1)
+            if(i>1 && vars != NULL)
             {
                 char *arg_name = malloc(20);
-                char *inum = itoa(i-1);
+                char *inum = itoa(i-arg_count);
                 arg_name = strcpy(arg_name, inum);
                 free(inum);
                 arg_name = strcat(arg_name, "=");
@@ -143,10 +135,8 @@ FILE *arg_file(int argc, char **argv, int *prettyprint, struct dictionnary *vars
             }
         }
     }
-    if(add_var_arg(vars, "@", argv+2))
-    {
-        return NULL;
-    }
+    arg_num(argc - arg_count, vars);
+    add_var_arg(vars, "@", argv+arg_count);
     if (!entry)
     {
         entry = stdin_to_mem();

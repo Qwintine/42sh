@@ -1,12 +1,7 @@
 #define _POSIX_C_SOURCE 200809L
 #include "expand.h"
 
-#include <stddef.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-
-int hash(char *str)
+static int hash(char *str)
 {
     size_t res = 0;
     for (size_t i = 0; str[i] != 0; i++)
@@ -38,24 +33,24 @@ struct dictionnary *init_dict(void)
 
 int is_env(char *key)
 {
-    if (!strcmp(key, "?"))
-        return 1;
-    if (!strcmp(key, "$"))
-        return 1;
+    return !strcmp(key, "PATH") || !strcmp(key, "HOME") || !strcmp(key, "PWD") || !strcmp(key, "$");
+}
+
+char *special(char *key)
+{
     if (!strcmp(key, "RANDOM"))
-        return 1;
+    {
+        sleep(1);
+        srand((unsigned)time(NULL));
+        return itoa(rand());
+    }
     if (!strcmp(key, "UID"))
-        return 1;
-    if (!strcmp(key, "OLDPWD"))
-        return 1;
-    if (!strcmp(key, "PWD"))
-        return 1;
-    if (!strcmp(key, "IFS"))
-        return 1;
-    if (!strcmp(key, "HOME"))
-        return 1;
-    if(!strcmp(key, "PATH"))
-	    return 1;
+        return itoa((int)getuid());
+    if (!strcmp(key, "$") || !strcmp(key, "PWD")|| !strcmp(key, "HOME"))
+    {
+        char *r = getenv(key);
+        return strdup(r);
+    }
     return 0;
 }
 
@@ -71,7 +66,7 @@ static int update_or_append_var(struct values *bucket, struct values *new,
             target->elt[0] = val;
             free(key);
             free(new->elt);
-            free(new);
+            free(new); 
             return 0;
         }
         if (!target->next)
@@ -109,7 +104,17 @@ int add_var(struct dictionnary *dict, char *varas)
     strncpy(key, varas, i);
     key[i] = '\0';
     strcpy(val, varas + i + 1);
-
+    char **to_ex = malloc(2 * sizeof(char *));
+    to_ex[0] = val;
+    to_ex[1] = NULL;
+    char **expanded = expand(dict, to_ex);
+    if(expanded && expanded[0])
+    {
+        free(val);
+        val = expanded[0];
+    }
+    free(to_ex);
+    free(expanded);
     if (is_env(key))
     {
         if (setenv(key, val, 1) != 0)
@@ -216,9 +221,9 @@ ERROR:
  */
 char **get_var(struct dictionnary *dict, char *key)
 {
-    if (is_env(key))
+    char *g = special(key);
+    if (g)
     {
-        char *g = getenv(key);
         char **res = malloc(2 * sizeof(char *));
         res[0] = g;
         res[1] = NULL;
@@ -236,6 +241,11 @@ char **get_var(struct dictionnary *dict, char *key)
     {
         char **res = malloc(sizeof(char *));
         res[0] = NULL;
+        if(!strcmp(key, "OLDPWD"))
+        {
+            free(res);
+            return get_var(dict, "PWD");
+        }        
         return res;
     }
     size_t i = 0;
