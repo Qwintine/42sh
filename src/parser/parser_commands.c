@@ -20,8 +20,10 @@ struct ast *parser_shell_command(struct lex *lex)
         ast = parser_rule_while(lex);
     else if (peek(lex) && peek(lex)->token_type == UNTIL)
         ast = parser_rule_until(lex);
-    else
+    else if (peek(lex) && peek(lex)->token_type == FOR)
         ast = parser_rule_for(lex);
+    else
+        ast = parser_rule_command_block(lex);
 
     if (peek(lex)
         && (peek(lex)->token_type == IO_NUMBER
@@ -128,7 +130,8 @@ struct ast *parser_command(struct lex *lex)
 {
     if (peek(lex)
         && (peek(lex)->token_type == IF || peek(lex)->token_type == WHILE
-            || peek(lex)->token_type == UNTIL || peek(lex)->token_type == FOR))
+            || peek(lex)->token_type == UNTIL || peek(lex)->token_type == FOR
+            || peek(lex)->token_type == OPENING_BRACKET))
     {
         return parser_shell_command(lex);
     }

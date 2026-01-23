@@ -306,3 +306,21 @@ ERROR:
     free_ast((struct ast *)ast_for);
     return NULL;
 }
+
+struct ast *parser_rule_command_block(struct lex *lex)
+{
+    if(!peek(lex) || !(peek(lex)->token_type == OPENING_BRACKET))
+        return NULL;
+    discard_token(pop(lex));
+
+    struct ast *ast = parser_compound_list(lex);
+
+    if(!peek(lex) || !(peek(lex)->token_type == CLOSING_BRACKET))
+    {
+        free_ast(ast);
+        return NULL;
+    }
+    discard_token(pop(lex));
+
+    return ast;
+}
