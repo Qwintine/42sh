@@ -46,6 +46,8 @@ struct dictionnary *init_dict(void)
     for (size_t i = 0; key[i] != NULL; i++)
     {
         char *r = getenv(key[i]);
+        if (r == NULL)
+            continue;
         char *varas = malloc(strlen(key[i]) + strlen(r) + 2);
         varas = strcpy(varas,key[i]);
         varas = strcat(varas, "=");
