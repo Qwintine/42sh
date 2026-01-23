@@ -1,5 +1,19 @@
 #ifndef EXEC_H
 #define EXEC_H
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/wait.h>
+#include <unistd.h>
+
+#include "../builtin/echo.h"
+#include "../builtin/exit.h"
+#include "../builtin/cd.h"
+#include "../builtin/export.h"
+#include "../expand/expand.h"
+#include "../utils/itoa.h"
+#include "redir_exec.h"
 #include "../ast/ast.h"
 #include "../utils/redir.h"
 

@@ -28,12 +28,35 @@ struct dictionnary *init_dict(void)
         dict->values[i] = NULL;
     }
 
-    return dict;
-}
+    char *r = itoa(getpid());
+    char *varas = malloc(strlen("$") + strlen(r) + 2);
+    varas = strcpy(varas,"$");
+    varas = strcat(varas, "=");
+    varas = strcat(varas, r);
+    add_var(dict,varas);
+    free(varas);
+    free(r);
 
-int is_env(char *key)
-{
-    return !strcmp(key, "PATH") || !strcmp(key, "HOME") || !strcmp(key, "PWD") || !strcmp(key, "$");
+    char **key = malloc(4 * sizeof(char *));
+    key[0] = "PWD";
+    key[1] = "HOME";
+    key[2] = "PATH";
+    key[3] = NULL;
+
+    for (size_t i = 0; key[i] != NULL; i++)
+    {
+        char *r = getenv(key[i]);
+        char *varas = malloc(strlen(key[i]) + strlen(r) + 2);
+        varas = strcpy(varas,key[i]);
+        varas = strcat(varas, "=");
+        varas = strcat(varas, r);
+        add_var(dict,varas);
+        free(varas);
+    }
+
+    free(key);
+
+    return dict;
 }
 
 char *special(char *key)
@@ -46,12 +69,6 @@ char *special(char *key)
     }
     if (!strcmp(key, "UID"))
         return itoa((int)getuid());
-    if (!strcmp(key, "$") || !strcmp(key, "PWD")|| !strcmp(key, "HOME")
-    || !strcmp(key, "PATH"))
-    {
-        char *r = getenv(key);
-        return strdup(r);
-    }
     return 0;
 }
 
@@ -116,13 +133,6 @@ int add_var(struct dictionnary *dict, char *varas)
     }
     free(to_ex);
     free(expanded);
-    if (is_env(key))
-    {
-        if (setenv(key, val, 1) != 0)
-        {
-            goto ERROR;
-        }
-    }
 
     struct values *new = malloc(sizeof(struct values));
 

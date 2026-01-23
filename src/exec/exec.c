@@ -1,26 +1,13 @@
 #define _POSIX_C_SOURCE 200809L
 #include "exec.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/wait.h>
-#include <unistd.h>
-
-#include "../builtin/echo.h"
-#include "../builtin/exit.h"
-#include "../builtin/cd.h"
-#include "../expand/expand.h"
-#include "../utils/itoa.h"
-#include "redir_exec.h"
-
 static int is_builtin(char **words)
 {
     if (!words || !words[0])
         return 0;
     return !strcmp(words[0], "true") || !strcmp(words[0], "false")
         || !strcmp(words[0], "echo") || !strcmp(words[0], "exit")
-        || !strcmp(words[0], "cd");
+        || !strcmp(words[0], "cd") || !strcmp(words[0],"export");
 }
 
 static int exec_builtin(char **words, int *exit, struct dictionnary *vars)
@@ -36,6 +23,8 @@ static int exec_builtin(char **words, int *exit, struct dictionnary *vars)
         return exit_b(words + 1, exit);
     else if (!strcmp(cmd, "cd"))
         return cd_b(words + 1, vars);
+    else if (!strcmp(cmd, "export"))
+        return export_b(words + 1, vars);
     return -1;
 }
 
