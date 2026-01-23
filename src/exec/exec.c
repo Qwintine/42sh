@@ -82,7 +82,8 @@ static int exec_builtin(char **words, int *exit, struct dictionnary *vars)
  * Arguments:
  *  	words: la ligne de commande a executer
  * Retour:
- *  	0 si succes, 1 sinon
+make clean
+CFLAGS="-fsanitize=address -g" LDFLAGS="-fsanitize=address" ./configure *  	0 si succes, 1 sinon
  * Verbose:
  *  	execute la commande en words[0] via un appelle si builtin, via fork->
  *  	execvp sinon.
@@ -133,7 +134,7 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars, int *exit)
     }
     if(!expanded[1] && ast_cmd->words[1])
     {
-        expanded[1] = strdup(ast_cmd->words[1]); // rajouter check
+        expanded[1] = calloc(1,1); // rajouter check
         expanded = realloc(expanded,3 * sizeof(char*)); // rajouter check
         expanded[2] = NULL;
     }
