@@ -8,8 +8,12 @@ libbuiltin_a_SOURCES =  \
   cd.c \
   cd.h \
   break_continue.c \
-  break_continue.h 
-  
+  break_continue.h \
+  dot.c \
+  dot.h \
+  unset.c \
+  unset.c
+
 libbuiltin_a_CPPFLAGS = -I$(top_srcdir)/src
 
 libbuiltin_a_CFLAGS = -std=c99 -pedantic -Werror -Wall -Wextra -Wvla
