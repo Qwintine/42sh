@@ -187,3 +187,77 @@ int new_op(struct token *tok, int quote, FILE *entry, char val)
         return -1;
     return 0;
 }
+
+static int handle_opening_bracket(struct lex *lex, struct token *tok,
+                           struct quote_status *quote_status)
+{
+    if (!quote_status->double_quote && !quote_status->single_quote)
+    {
+        if (tok->value && tok->value[0])
+        {
+            if (tok->value[0] == '$')
+            {
+                tok->value = concat(tok->value, '{');
+                if (!tok->value)
+                    return 1;
+                tok->token_type = WORD;
+            }
+            else
+            {
+                fseek(lex->entry, -1, SEEK_CUR);
+                return 1;
+            }
+        }
+        else
+        {
+            tok->value = concat(tok->value, '{');
+            if (!tok->value)
+                return 1;
+            tok->token_type = OPENING_BRACKET;
+            return 0;
+        }
+    }
+    else
+    {
+        tok->value = concat(tok->value, '{');
+        if (!tok->value)
+            return 1;
+    }
+    return -1;
+}
+
+static int handle_closing_bracket(struct lex *lex, struct token *tok,
+                           struct quote_status *quote_status)
+{
+    if (!quote_status->double_quote && !quote_status->single_quote)
+    {
+        if (tok->value && tok->value[0])
+        {
+            fseek(lex->entry, -1, SEEK_CUR);
+            return 1;
+        }
+        else
+        {
+            tok->value = concat(tok->value, '}');
+            if (!tok->value)
+                return 1;
+            tok->token_type = CLOSING_BRACKET;
+            return 0;
+        }
+    }
+    else
+    {
+        tok->value = concat(tok->value, '}');
+        if (!tok->value)
+            return 1;
+    }
+    return -1;
+}
+
+int handle_bracket(struct lex *lex, struct token *tok,
+                    struct quote_status *quote_status, char val)
+{
+    if (val == '{')
+        return handle_opening_bracket(lex, tok, quote_status);
+    return handle_closing_bracket(lex, tok, quote_status);
+}

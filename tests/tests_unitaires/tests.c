@@ -579,3 +579,37 @@ Test(Test42sh, lex_comment, .init = cr_redirect_stdout)
 
     free_lex(lx);
 }
+
+Test(Test42sh, lex_comment, .init = cr_redirect_stdout)
+{
+    FILE *f = arg_file(3, (char*[]){"program", "-c", "{ echo a; }"}, NULL, NULL);
+    cr_assert_not_null(f);
+
+    struct lex *lx = init_lex(f);
+    cr_assert_not_null(lx);
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, OPENING_BRACKET));
+    cr_expect(eq(str, lx->current_token->value, "{"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, WORD));
+    cr_expect(eq(str, lx->current_token->value, "echo"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, WORD));
+    cr_expect(eq(str, lx->current_token->value, "a"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, SEMI_COLON));
+    cr_expect(eq(str, lx->current_token->value, ";"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, CLOSING_BRACKET));
+    cr_expect(eq(str, lx->current_token->value, "}"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, END));
+
+    free_lex(lx);
+}
