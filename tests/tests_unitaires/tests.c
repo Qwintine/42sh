@@ -82,11 +82,7 @@ Test(Test42sh, lex_medium_1, .init = cr_redirect_stdout)
 
 Test(Test42sh, lex_medium_2, .init = cr_redirect_stdout)
 {
-<<<<<<< HEAD
-    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo hello; cat"}, NULL, NULL);
-=======
     FILE *f = arg_file(3, (char*[]){"program", "-c", "echo \"hello\\\"world\"  a\\\"b; cat"}, NULL, NULL);
->>>>>>> expand_le_retour
     cr_assert_not_null(f);
 
     struct lex *lx = init_lex(f);

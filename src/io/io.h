@@ -7,10 +7,6 @@
 #include "../utils/itoa.h"
 
 #include <stdio.h>
-<<<<<<< HEAD
-#include "../expand/expand.h"
-=======
->>>>>>> expand_le_retour
 #include <string.h>
 
 FILE *arg_file(int argc, char **argv, int *prettyprint, struct dictionnary *vars);

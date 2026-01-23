@@ -135,15 +135,8 @@ FILE *arg_file(int argc, char **argv, int *prettyprint, struct dictionnary *vars
             }
         }
     }
-<<<<<<< HEAD
-    if(vars != NULL && add_var_arg(vars, "@", argv+2))
-    {
-        return NULL;
-    }
-=======
     arg_num(argc - arg_count, vars);
     add_var_arg(vars, "@", argv+arg_count);
->>>>>>> expand_le_retour
     if (!entry)
     {
         entry = stdin_to_mem();

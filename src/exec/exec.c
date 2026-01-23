@@ -11,10 +11,7 @@
 #include "../builtin/exit.h"
 #include "../builtin/cd.h"
 #include "../expand/expand.h"
-<<<<<<< HEAD
-=======
 #include "../utils/itoa.h"
->>>>>>> expand_le_retour
 #include "redir_exec.h"
 
 static int is_builtin(char **words)
