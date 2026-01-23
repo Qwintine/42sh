@@ -2,8 +2,8 @@
 
 static int is_word(char c)
 {
-    return (c!=' ' && c!='\n' && c!='\t' && c!=';' && c!='&' && c!='|'
-        && c!='\'' && c!=0 && c!='"' && c!='<' && c!='>' );
+    return ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') 
+            || (c >= '0' && c <= '9') || c == '_');
 }
 
 static char *var_expand(struct dictionnary *vars, char *word, size_t *ind)
@@ -29,13 +29,25 @@ static char *var_expand(struct dictionnary *vars, char *word, size_t *ind)
     }
     else
     {
-        while(is_word(word[(*ind)+1]))
+        char next = word[(*ind)+1];
+        if (next == '#' || next == '?' || next == '@' || next == '*' || next == '$' || 
+            next == '!' || next == '-' || (next >= '0' && next <= '9'))
         {
             (*ind)++;
-            key = realloc(key,strlen(key)+2);
-            size_t len = strlen(key);
-            key[len] = word[(*ind)];
-            key[len + 1] = 0;
+            key = realloc(key, 2);
+            key[0] = next;
+            key[1] = 0;
+        }
+        else
+        {
+            while(is_word(word[(*ind)+1]))
+            {
+                (*ind)++;
+                key = realloc(key,strlen(key)+2);
+                size_t len = strlen(key);
+                key[len] = word[(*ind)];
+                key[len + 1] = 0;
+            }
         }
     }
     char **val = get_var(vars, key);
@@ -43,7 +55,9 @@ static char *var_expand(struct dictionnary *vars, char *word, size_t *ind)
     if(!val || !val[0])
     {
         free(val);
-        return NULL;
+        char *empty = malloc(1);
+        empty[0] = 0;
+        return empty;
     }
     char *res = malloc(1);
     res[0] = 0;
@@ -185,14 +199,13 @@ char **expand(struct dictionnary *vars, char **words)
         {
             if(words[i][ibis] == '$')
             {
-                size_t ibis_start = ibis;
                 char *var = var_expand(vars,words[i],&ibis);
                 if(!var)
                 {
                     ibis++;
                     continue;
                 }
-                res[j] = realloc(res[j], strlen(res[j])+(ibis - ibis_start)+strlen(var)+1);
+                res[j] = realloc(res[j], strlen(res[j])+strlen(var)+1);
                 strcat(res[j],var);
                 free(var);
             }

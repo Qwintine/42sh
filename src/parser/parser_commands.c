@@ -77,8 +77,7 @@ struct ast *parser_simple_command(struct lex *lex)
         }
     }
     lex->context = WORD;
-    if (peek(lex)
-        && peek(lex)->token_type == WORD)
+    if (peek(lex) && peek(lex)->token_type == WORD)
     {
         struct token *tok = pop(lex);
         if (!tok)
