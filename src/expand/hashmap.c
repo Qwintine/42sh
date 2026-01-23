@@ -46,7 +46,8 @@ char *special(char *key)
     }
     if (!strcmp(key, "UID"))
         return itoa((int)getuid());
-    if (!strcmp(key, "$") || !strcmp(key, "PWD")|| !strcmp(key, "HOME"))
+    if (!strcmp(key, "$") || !strcmp(key, "PWD")|| !strcmp(key, "HOME")
+    || !strcmp(key, "PATH"))
     {
         char *r = getenv(key);
         return strdup(r);
