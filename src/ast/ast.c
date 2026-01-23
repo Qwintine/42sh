@@ -6,6 +6,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "../builtin/break_continue.h"
 #include "../exec/exec.h"
 #include "../exec/redir_exec.h"
 
@@ -135,13 +136,13 @@ static void ast_free_cmd(struct ast *ast)
 {
     int i = 0;
     struct ast_cmd *ast_cmd = (struct ast_cmd *)ast;
+    free(ast_cmd->types);
     while (ast_cmd->assignment[i])
     {
         free(ast_cmd->assignment[i]);
         i++;
     }
     free(ast_cmd->assignment);
-    free(ast_cmd->types);
     i = 0;
     while (ast_cmd->words[i])
     {
@@ -152,6 +153,8 @@ static void ast_free_cmd(struct ast *ast)
     i = 0;
     while (ast_cmd->redirs[i])
     {
+        if (ast_cmd->redirs[i]->io_num)
+            free(ast_cmd->redirs[i]->io_num);
         free(ast_cmd->redirs[i]->target);
         free(ast_cmd->redirs[i]);
         i++;
@@ -253,93 +256,149 @@ static void ast_free_shell_redir(struct ast *ast)
 //===================== Run ast from specific type =============================
 
 // TODO adapter à redir
-static int ast_run_cmd(struct ast *ast, struct dictionnary *vars)
+static int ast_run_cmd(struct ast *ast, struct dictionnary *vars, int *exit)
 {
     if (!ast)
         return 2;
     struct ast_cmd *ast_cmd = (struct ast_cmd *)ast;
-    int res = exec_cmd(ast_cmd, vars);
+    int res = exec_cmd(ast_cmd, vars, exit);
     return res;
 }
 
-static int ast_run_if(struct ast *ast, struct dictionnary *vars)
+static int ast_run_if(struct ast *ast, struct dictionnary *vars, int *exit)
 {
     struct ast_if *ast_if = (struct ast_if *)ast;
     int res = 0;
-    if (!run_ast(ast_if->condition, vars))
-        res = run_ast(ast_if->then_body, vars);
+    if (!run_ast(ast_if->condition, vars, exit))
+        res = run_ast(ast_if->then_body, vars, exit);
     else if (ast_if->else_body)
-        res = run_ast(ast_if->else_body, vars);
+        res = run_ast(ast_if->else_body, vars, exit);
     return res;
 }
 
-static int ast_run_list(struct ast *ast, struct dictionnary *vars)
+static int ast_run_list(struct ast *ast, struct dictionnary *vars, int *exit)
 {
     struct ast_list *ast_list = (struct ast_list *)ast;
     int res = 0;
     if (ast_list->elt)
-        res = run_ast(ast_list->elt, vars);
+    {
+        res = run_ast(ast_list->elt, vars, exit);
+        if (*exit)
+            return res;
+        if (get_break() > 0 || get_continue() > 0)
+            return res;
+    }
     if (ast_list->next)
-        res = ast_run_list((struct ast *)ast_list->next, vars);
+        res = ast_run_list((struct ast *)ast_list->next, vars, exit);
     return res;
 }
 
-static int ast_run_loop(struct ast *ast, struct dictionnary *vars)
+static int ast_run_loop(struct ast *ast, struct dictionnary *vars, int *exit)
 {
     struct ast_loop *ast_loop = (struct ast_loop *)ast;
     int res = 0;
-    if (run_ast(ast_loop->condition, vars) == ast_loop->truth)
-        res = run_ast(ast_loop->body, vars);
+    int loop_res = 0;
+    while (run_ast(ast_loop->condition, vars, exit) == ast_loop->truth)
+    {
+        if (*exit)
+            return res;
+        
+        res = run_ast(ast_loop->body, vars, exit);
+        if (*exit)
+            return res;
+            
+        if (get_break() > 0)
+        {
+            if (res != 0)
+                loop_res = res;
+            update_break();
+            break;
+        }
+        if (get_continue() > 0)
+        {
+            if (res != 0)
+                loop_res = res;
+            update_continue();
+            continue;
+        }
+    }
+    if (loop_res != 0)
+        return loop_res;
     return res;
 }
 
-static int ast_run_for(struct ast *ast, struct dictionnary *vars)
+static int ast_run_for(struct ast *ast, struct dictionnary *vars, int *exit)
 {
     struct ast_for *ast_for = (struct ast_for *)ast;
     int res = 0;
+    int loop_res = 0;
     if (!ast_for->words[0])
     {
-        // varas = var_assignment, format "<name>=<value>"
-        // in this case, the value is empty
-        /*char *varas = calloc(strlen(ast_for->var) + strlen("=") + 1,1);
-        if (!varas)
-            return 1;
-        strcpy(varas, ast_for->var);
-        strcat(varas, "=");
-        add_var(vars, varas);
-        res = run_ast(ast_for->body, vars);
-        free(varas);*/
         return 0;
     }
     else
     {
-        for (size_t i = 0; ast_for->words[i] != NULL; i++)
+        char **all_vars = expand(vars, ast_for->words);
+        if(all_vars[0] == NULL)
+        {
+            free(all_vars);
+            return 0;
+        }
+        for (size_t i = 0; all_vars[i] != NULL; i++)
         {
             // varas = var_assignment, format "<name>=<value>"
             char *varas = malloc(strlen(ast_for->var) + strlen("=")
-                                 + strlen(ast_for->words[i]) + 1);
+                                 + strlen(all_vars[i]) + 1);
             if (!varas)
                 return 1;
             strcpy(varas, ast_for->var);
             strcat(varas, "=");
-            strcat(varas, ast_for->words[i]);
+            strcat(varas, all_vars[i]);
             add_var(vars, varas);
-            res = run_ast(ast_for->body, vars);
+            res = run_ast(ast_for->body, vars, exit);
             free(varas);
+            free(all_vars[i]);
+            
+            if (*exit)
+            {
+                for (size_t j = i + 1; all_vars[j] != NULL; j++)
+                    free(all_vars[j]);
+                free(all_vars);
+                return res;
+            }
+            
+            if (get_break() > 0)
+            {
+                if (res != 0)
+                    loop_res = res;
+                update_break();
+                for (size_t j = i + 1; all_vars[j] != NULL; j++)
+                    free(all_vars[j]);
+                free(all_vars);
+                if (loop_res != 0)
+                    return loop_res;
+                return res;
+            }
+            if (get_continue() > 0)
+            {
+                if (res != 0)
+                    loop_res = res;
+                update_continue();
+                continue;
+            }
         }
+        free(all_vars);
     }
+    if (loop_res != 0)
+        return loop_res;
     return res;
 }
 
-static int ast_run_pipe(struct ast *ast, struct dictionnary *vars)
+static int ast_run_pipe(struct ast *ast, struct dictionnary *vars, int *exit)
 {
-    if (!ast)
-        return 2;
     struct ast_pipe *ast_pipe = (struct ast_pipe *)ast;
-    if (!ast_pipe->cmd[0])
-        return 2;
     int fd[2] = { 0, 0 };
-    int res = exec_pipe(ast_pipe->cmd, fd, vars);
+    int res = exec_pipe(ast_pipe->cmd, fd, vars, exit);
     if (ast_pipe->negation)
     {
         res = !res;
@@ -347,39 +406,42 @@ static int ast_run_pipe(struct ast *ast, struct dictionnary *vars)
     return res;
 }
 
-static int ast_run_and_or(struct ast *ast, struct dictionnary *vars)
+static int ast_run_and_or(struct ast *ast, struct dictionnary *vars, int *exit)
 {
     struct ast_and_or *ast_and_or = (struct ast_and_or *)ast;
-    int res = run_ast(ast_and_or->left, vars);
+    int res = run_ast(ast_and_or->left, vars, exit);
+
+    if (*exit)
+        return res;
 
     if (ast_and_or->operator== AND)
     {
         if (res == 0)
-            res = run_ast(ast_and_or->right, vars);
+            res = run_ast(ast_and_or->right, vars, exit);
     }
     else if (ast_and_or->operator== OR)
     {
         if (res != 0)
-            res = run_ast(ast_and_or->right, vars);
+            res = run_ast(ast_and_or->right, vars, exit);
     }
 
     return res;
 }
 
-static int ast_run_shell_redir(struct ast *ast, struct dictionnary *vars)
+static int ast_run_shell_redir(struct ast *ast, struct dictionnary *vars, int *exit)
 {
     struct ast_shell_redir *ast_shell = (struct ast_shell_redir *)ast;
     struct redir_saved redir_saved;
     if (redir_apply(ast_shell->redirs, &redir_saved))
         return 1;
-    int res = run_ast(ast_shell->child, vars);
+    int res = run_ast(ast_shell->child, vars, exit);
     restore_redirs(&redir_saved);
     return res;
 }
 
 //=========================== Lookup Tables ===================================
 
-int run_ast(struct ast *ast, struct dictionnary *vars)
+int run_ast(struct ast *ast, struct dictionnary *vars, int *exit)
 {
     static const ast_handler_run functions[] = {
         [AST_LOOP] = &ast_run_loop,
@@ -391,7 +453,7 @@ int run_ast(struct ast *ast, struct dictionnary *vars)
         [AST_SHELL_REDIR] = &ast_run_shell_redir,
         [AST_FOR] = &ast_run_for,
     };
-    return ((*functions[ast->type])(ast, vars));
+    return ((*functions[ast->type])(ast, vars, exit));
 }
 
 void free_ast(struct ast *ast)

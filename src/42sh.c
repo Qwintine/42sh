@@ -28,8 +28,7 @@ int main(int argc, char **argv)
 {
     struct dictionnary *vars = init_dict();
     int prettyprint = 0;
-    char *buff = NULL;
-    FILE *entry = arg_file(argc, argv, &prettyprint, &buff);
+    FILE *entry = arg_file(argc, argv, &prettyprint, vars);//&buff);
     if (!entry)
     {
         fprintf(stderr, "42sh: error file entry\n");
@@ -39,6 +38,8 @@ int main(int argc, char **argv)
 
     int eof = 0;
     int res = 0;
+    int exit= 0;
+
     while (!eof)
     {
         struct ast *ast = parser(entry, &eof);
@@ -46,23 +47,32 @@ int main(int argc, char **argv)
         if (!ast)
         {
             fclose(entry);
-            free(buff);
             free_dict(vars);
             fprintf(stderr, "42sh: grammar/syntax error\n");
+            free_stdin_buffer();
             return 2;
         }
 
         if (prettyprint)
             print_ast(ast);
         else
-            res = run_ast(ast, vars); // derniere valeur de retour
+        {
+            if (ast->type != AST_LIST
+                || ((struct ast_list *)ast)->elt != NULL)
+                res = run_ast(ast, vars, &exit); // derniere valeur de retour
+            if (exit)
+            {
+                free_ast(ast);
+                break;
+            }
+        }
 
         free_ast(ast);
     }
 
     fclose(entry);
-    free(buff);
     free_dict(vars);
+    free_stdin_buffer();
 
     return res;
 }

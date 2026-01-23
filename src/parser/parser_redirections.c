@@ -52,7 +52,7 @@ int parser_element(struct lex *lex, struct ast_cmd *ast_cmd, size_t *w)
 {
     if (peek(lex))
     {
-        if (peek(lex)->token_type == WORD || peek(lex)->token_type == EXPANSION)
+        if (peek(lex)->token_type == WORD)
         {
             struct token *tok = pop(lex);
             if (!tok)

@@ -17,8 +17,8 @@ TestSuite(Test42sh);
 
 Test(Test42sh, lex_simple, .init = cr_redirect_stdout)
 {
-    char *buff;
-    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo hello\n"}, NULL, &buff);
+    struct dictionnary *vars = init_dict();
+    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo hello\n"}, NULL, vars);
     cr_assert_not_null(f);
 
     struct lex *lx = init_lex(f);
@@ -40,12 +40,13 @@ Test(Test42sh, lex_simple, .init = cr_redirect_stdout)
     cr_expect(eq(int, lx->current_token->token_type, END));
 
     free_lex(lx);
+    free_dict(vars);
 }
 
 Test(Test42sh, lex_medium_1, .init = cr_redirect_stdout)
 {
-    char *buff;
-    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo 'W  o'   \n   \\n 'r   ld'     !"}, NULL, &buff);
+    struct dictionnary *vars = init_dict();
+    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo 'W  o'   \n   \\n 'r   ld'     !"}, NULL, vars);
     cr_assert_not_null(f);
 
     struct lex *lx = init_lex(f);
@@ -55,9 +56,10 @@ Test(Test42sh, lex_medium_1, .init = cr_redirect_stdout)
     cr_expect(eq(int, lx->current_token->token_type, WORD));
     cr_expect(eq(str, lx->current_token->value, "echo"));
 
+    lx->context = WORD;
     cr_expect(eq(int, lexer(lx), 0));
     cr_expect(eq(int, lx->current_token->token_type, WORD));
-    cr_expect(eq(str, lx->current_token->value, "W  o"));
+    cr_expect(eq(str, lx->current_token->value, "'W  o'"));
 
     cr_expect(eq(int, lexer(lx), 0));
     cr_expect(eq(int, lx->current_token->token_type, NEWLINE));
@@ -65,11 +67,11 @@ Test(Test42sh, lex_medium_1, .init = cr_redirect_stdout)
 
     cr_expect(eq(int, lexer(lx), 0));
     cr_expect(eq(int, lx->current_token->token_type, WORD));
-    cr_expect(eq(str, lx->current_token->value, "n"));
+    cr_expect(eq(str, lx->current_token->value, "\\n"));
 
     cr_expect(eq(int, lexer(lx), 0));
     cr_expect(eq(int, lx->current_token->token_type, WORD));
-    cr_expect(eq(str, lx->current_token->value, "r   ld"));
+    cr_expect(eq(str, lx->current_token->value, "'r   ld'"));
 
     cr_expect(eq(int, lexer(lx), 0));  
     cr_expect(eq(int, lx->current_token->token_type, WORD));
@@ -79,12 +81,13 @@ Test(Test42sh, lex_medium_1, .init = cr_redirect_stdout)
     cr_expect(eq(int, lx->current_token->token_type, END));
 
     free_lex(lx);
+    free_dict(vars);
 }
 
 Test(Test42sh, lex_medium_2, .init = cr_redirect_stdout)
 {
-    char *buff;
-    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo hello; cat"}, NULL, &buff);
+    struct dictionnary *vars = init_dict();
+    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo \"hello\\\"world\"  a\\\"b; cat"}, NULL, vars);
     cr_assert_not_null(f);
 
     struct lex *lx = init_lex(f);
@@ -96,7 +99,11 @@ Test(Test42sh, lex_medium_2, .init = cr_redirect_stdout)
 
     cr_expect(eq(int, lexer(lx), 0));
     cr_expect(eq(int, lx->current_token->token_type, WORD));
-    cr_expect(eq(str, lx->current_token->value, "hello"));
+    cr_expect(eq(str, lx->current_token->value, "\"hello\\\"world\""));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, WORD));
+    cr_expect(eq(str, lx->current_token->value, "a\\\"b"));
 
     cr_expect(eq(int, lexer(lx), 0));
     cr_expect(eq(int, lx->current_token->token_type, SEMI_COLON));
@@ -110,12 +117,13 @@ Test(Test42sh, lex_medium_2, .init = cr_redirect_stdout)
     cr_expect(eq(int, lx->current_token->token_type, END));
 
     free_lex(lx);
+    free_dict(vars);
 }
 
 Test(Test42sh, lex_medium_operator, .init = cr_redirect_stdout)
 {
-    char *buff;
-    FILE *f = arg_file(3, (char*[]){"program", "-c", "if ! false && false; then echo ok& fi"}, NULL, &buff);
+    struct dictionnary *vars = init_dict();
+    FILE *f = arg_file(3, (char*[]){"program", "-c", "if ! false && false; then echo ok& fi"}, NULL, vars);
     cr_assert_not_null(f);
 
     struct lex *lx = init_lex(f);
@@ -170,12 +178,13 @@ Test(Test42sh, lex_medium_operator, .init = cr_redirect_stdout)
     cr_expect(eq(int, lx->current_token->token_type, END));
 
     free_lex(lx);
+    free_dict(vars);
 }
 
 Test(Test42sh, lex_syntax_error, .init = cr_redirect_stdout)
 {
-    char *buff;
-    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo 'a"}, NULL, &buff);
+    struct dictionnary *vars = init_dict();
+    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo 'a"}, NULL, vars);
     cr_assert_not_null(f);
 
     struct lex *lx = init_lex(f);
@@ -188,12 +197,13 @@ Test(Test42sh, lex_syntax_error, .init = cr_redirect_stdout)
     cr_expect(eq(int, lexer(lx), 1));
 
     free_lex(lx);
+    free_dict(vars);
 }
 
 Test(Test42sh, lex_loop, .init = cr_redirect_stdout)
 {
-    char *buff;
-    FILE *f = arg_file(3, (char*[]){"program", "-c", "while true; do echo a; done"}, NULL, &buff);
+    struct dictionnary *vars = init_dict();
+    FILE *f = arg_file(3, (char*[]){"program", "-c", "while true; do echo a; done"}, NULL, vars);
     cr_assert_not_null(f);
 
     struct lex *lx = init_lex(f);
@@ -236,12 +246,13 @@ Test(Test42sh, lex_loop, .init = cr_redirect_stdout)
     cr_expect(eq(int, lx->current_token->token_type, END));
 
     free_lex(lx);
+    free_dict(vars);
 }
 
 Test(Test42sh, lex_redir, .init = cr_redirect_stdout)
 {
-    char *buff;
-    FILE *f = arg_file(3, (char*[]){"program", "-c", "test > 2 < 4>> ok42>& 1234<&    ok >|  1<>2"}, NULL, &buff);
+    struct dictionnary *vars = init_dict();
+    FILE *f = arg_file(3, (char*[]){"program", "-c", "test > 2 < 4>> ok42>& 1234<&    ok >|  1<>2"}, NULL, vars);
     cr_assert_not_null(f);
 
     struct lex *lx = init_lex(f);
@@ -312,12 +323,13 @@ Test(Test42sh, lex_redir, .init = cr_redirect_stdout)
     cr_expect(eq(int, lx->current_token->token_type, END));
 
     free_lex(lx);
+    free_dict(vars);
 }
 
 Test(Test42sh, lex_expand, .init = cr_redirect_stdout)
 {
-    char *buff;
-    FILE *f = arg_file(3, (char*[]){"program", "-c", "test=ok; echo $test ${test}"}, NULL, &buff);
+    struct dictionnary *vars = init_dict();
+    FILE *f = arg_file(3, (char*[]){"program", "-c", "test=ok; echo $test ${test}"}, NULL, vars);
     cr_assert_not_null(f);
 
     struct lex *lx = init_lex(f);
@@ -336,17 +348,101 @@ Test(Test42sh, lex_expand, .init = cr_redirect_stdout)
     cr_expect(eq(str, lx->current_token->value, "echo"));
 
     cr_expect(eq(int, lexer(lx), 0));
-    cr_expect(eq(int, lx->current_token->token_type, EXPANSION));
-    cr_expect(eq(str, lx->current_token->value, "test"));
+    cr_expect(eq(int, lx->current_token->token_type, WORD));
+    cr_expect(eq(str, lx->current_token->value, "$test"));
 
     cr_expect(eq(int, lexer(lx), 0));
-    cr_expect(eq(int, lx->current_token->token_type, EXPANSION));
-    cr_expect(eq(str, lx->current_token->value, "test"));
+    cr_expect(eq(int, lx->current_token->token_type, WORD));
+    cr_expect(eq(str, lx->current_token->value, "${test}"));
 
     cr_expect(eq(int, lexer(lx), 0));
     cr_expect(eq(int, lx->current_token->token_type, END));
 
     free_lex(lx);
+    free_dict(vars);
+}
+
+Test(Test42sh, lex_quotes, .init = cr_redirect_stdout)
+{
+    struct dictionnary *vars = init_dict();
+    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo 'a b c' \"d $e f\""}, NULL, vars);
+    cr_assert_not_null(f);
+
+    struct lex *lx = init_lex(f);
+    cr_assert_not_null(lx);
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, WORD));
+    cr_expect(eq(str, lx->current_token->value, "echo"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, WORD));
+    cr_expect(eq(str, lx->current_token->value, "'a b c'"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, WORD));
+    cr_expect(eq(str, lx->current_token->value, "\"d $e f\""));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, END));
+
+    free_lex(lx);
+    free_dict(vars);
+}
+
+Test(Test42sh, lex_backslash, .init = cr_redirect_stdout)
+{
+    struct dictionnary *vars = init_dict();
+    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo a\\ b \\n \\\\"}, NULL, vars);
+    cr_assert_not_null(f);
+
+    struct lex *lx = init_lex(f);
+    cr_assert_not_null(lx);
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, WORD));
+    cr_expect(eq(str, lx->current_token->value, "echo"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, WORD));
+    cr_expect(eq(str, lx->current_token->value, "a\\ b"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, WORD));
+    cr_expect(eq(str, lx->current_token->value, "\\n"));
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, WORD));
+    cr_expect(eq(str, lx->current_token->value, "\\\\"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, END));
+
+    free_lex(lx);
+    free_dict(vars);
+}
+
+Test(Test42sh, lex_single_quotes, .init = cr_redirect_stdout)
+{
+    struct dictionnary *vars = init_dict();
+    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo a'b'c"}, NULL, vars);
+    cr_assert_not_null(f);
+
+    struct lex *lx = init_lex(f);
+    cr_assert_not_null(lx);
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, WORD));
+    cr_expect(eq(str, lx->current_token->value, "echo"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, WORD));
+    cr_expect(eq(str, lx->current_token->value, "a'b'c"));
+    
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, END));
+
+    free_lex(lx);
+    free_dict(vars);
 }
 
 Test(Test42sh, expand_dictionnary, .init = cr_redirect_stdout)
@@ -366,7 +462,7 @@ Test(Test42sh, expand_dictionnary, .init = cr_redirect_stdout)
     cr_expect(eq(str, val[0], "world"));
 
     val = get_var(dict, "notexist");
-    cr_expect(eq(ptr, val, NULL));
+    cr_expect(eq(ptr, val[0], NULL));
 
     free_dict(dict);
 }
@@ -433,8 +529,8 @@ Test(Test42sh, token_concat, .init = cr_redirect_stdout)
 
 Test(Test42sh, lex_pipe_operator, .init = cr_redirect_stdout)
 {
-    char *buff;
-    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo a | cat"}, NULL, &buff);
+    struct dictionnary *vars = init_dict();
+    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo a | cat"}, NULL, vars);
     cr_assert_not_null(f);
 
     struct lex *lx = init_lex(f);
@@ -460,12 +556,13 @@ Test(Test42sh, lex_pipe_operator, .init = cr_redirect_stdout)
     cr_expect(eq(int, lx->current_token->token_type, END));
 
     free_lex(lx);
+    free_dict(vars);
 }
 
 Test(Test42sh, lex_or_operator, .init = cr_redirect_stdout)
 {
-    char *buff;
-    FILE *f = arg_file(3, (char*[]){"program", "-c", "false || true"}, NULL, &buff);
+    struct dictionnary *vars = init_dict();
+    FILE *f = arg_file(3, (char*[]){"program", "-c", "false || true"}, NULL, vars);
     cr_assert_not_null(f);
 
     struct lex *lx = init_lex(f);
@@ -487,12 +584,13 @@ Test(Test42sh, lex_or_operator, .init = cr_redirect_stdout)
     cr_expect(eq(int, lx->current_token->token_type, END));
 
     free_lex(lx);
+    free_dict(vars);
 }
 
 Test(Test42sh, lex_comment, .init = cr_redirect_stdout)
 {
-    char *buff;
-    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo test # this is a comment"}, NULL, &buff);
+    struct dictionnary *vars = init_dict();
+    FILE *f = arg_file(3, (char*[]){"program", "-c", "echo test # this is a comment"}, NULL, vars);
     cr_assert_not_null(f);
 
     struct lex *lx = init_lex(f);
@@ -510,4 +608,41 @@ Test(Test42sh, lex_comment, .init = cr_redirect_stdout)
     cr_expect(eq(int, lx->current_token->token_type, END));
 
     free_lex(lx);
+    free_dict(vars);
+}
+
+Test(Test42sh, lex_brackets, .init = cr_redirect_stdout)
+{
+    struct dictionnary *vars = init_dict();
+    FILE *f = arg_file(3, (char*[]){"program", "-c", "{ echo a; }"}, NULL, vars);
+    cr_assert_not_null(f);
+
+    struct lex *lx = init_lex(f);
+    cr_assert_not_null(lx);
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, OPENING_BRACKET));
+    cr_expect(eq(str, lx->current_token->value, "{"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, WORD));
+    cr_expect(eq(str, lx->current_token->value, "echo"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, WORD));
+    cr_expect(eq(str, lx->current_token->value, "a"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, SEMI_COLON));
+    cr_expect(eq(str, lx->current_token->value, ";"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, CLOSING_BRACKET));
+    cr_expect(eq(str, lx->current_token->value, "}"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, END));
+
+    free_lex(lx);
+    free_dict(vars);
 }

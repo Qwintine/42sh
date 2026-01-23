@@ -4,8 +4,14 @@ libexec_a_SOURCES =  \
   exec.c \
   exec.h \
   redir_exec.c \
-  rredir_exec.h \
-  ../builtin/echo.c 
+  ../builtin/echo.c \
+  ../builtin/exit.c \
+  ../builtin/cd.c  \
+  ../utils/itoa.c \
+  ../builtin/break_continue.c \
+  ../builtin/dot.c \
+  ../builtin/unset.c \
+  ../builtin/export.c
 
 libexec_a_CPPFLAGS = -I$(top_srcdir)/src
 

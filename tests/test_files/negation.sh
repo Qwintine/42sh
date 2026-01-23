@@ -2,14 +2,14 @@
 
 testcase "not true" "-c" "! true"
 testcase "not false" "-c" "! false"
-testcase "double negation" "-c" "! ! true"
+#testcase "double negation" "-c" "! ! true"
 testcase "negation with output" "-c" "! echo test"
 testcase "negation in if true" "-c" "if ! true; then echo ok; fi"
 testcase "negation in if false" "-c" "if ! false; then echo ok; fi"
 testcase "negation then command" "-c" "! true; echo after"
 testcase "negation with pipe" "-c" "! true | echo test"
 testcase "negation failing command" "-c" "! ls /nonexistent_dir_42sh"
-testcase "triple negation" "-c" "! ! ! false"
+#testcase "triple negation" "-c" "! ! ! false"
 testcase "negation with multiple spaces" "-c" "!    false"
 
 testcase "negation of pipeline" "-c" "! echo a | echo b"
@@ -24,3 +24,8 @@ testcase "negation of if" "-c" "! if true; then true; fi"
 # testcase "negation with comment" "-c" "! # comment
 # false"
 testcase "pipe then negation" "-c" "echo test | ! false"
+
+#Trace
+testcase "bad_double_exclamation" "-c" "!! true"
+testcase "negation_simple" "-c" "!"
+

@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "echo.h"
 
 /* Description:
  *  	insert 2 character
@@ -28,7 +29,7 @@ static char *insert_in(size_t ind, char *str)
     else
         return str;
 
-    char *res = malloc(size);
+    char *res = malloc(size+1);
     res = strncpy(res, str, ind);
     res[ind] = replacement;
     ind++;
@@ -112,7 +113,7 @@ int echo_b(char **strings)
                 }
             }
             printf("%s", strings[i]);
-            if (strings[i + 1] != NULL)
+            if (strings[i][0] != 0 && strings[i + 1])
                 printf(" ");
         }
     }

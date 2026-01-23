@@ -35,5 +35,3 @@ testcase "mixed text and expansion" "-c" "pre=before; echo start \$pre end"
 testcase "assignment in command" "-c" "quick=fast; echo \$quick test"
 
 testcase "expansion with echo arguments" "-c" "arg=value; echo \$arg arg2 \$arg"
-
-
