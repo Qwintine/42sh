@@ -10,6 +10,7 @@
 #include "../builtin/echo.h"
 #include "../builtin/exit.h"
 #include "../builtin/cd.h"
+#include "../builtin/break_continue.h"
 #include "../expand/expand.h"
 #include "redir_exec.h"
 
@@ -19,12 +20,14 @@ static int is_builtin(char **words)
         return 0;
     return !strcmp(words[0], "true") || !strcmp(words[0], "false")
         || !strcmp(words[0], "echo") || !strcmp(words[0], "exit")
-        || !strcmp(words[0], "cd");
+        || !strcmp(words[0], "cd") || !strcmp(words[0], "break")
+        || !strcmp(words[0], "continue");
 }
 
 static int exec_builtin(char **words, int *exit, struct dictionnary *vars)
 {
     char *cmd = words[0];
+    int res;
     if (!strcmp(cmd, "true"))
         return 0;
     else if (!strcmp(cmd, "false"))
@@ -35,6 +38,26 @@ static int exec_builtin(char **words, int *exit, struct dictionnary *vars)
         return exit_b(words + 1, exit);
     else if (!strcmp(cmd, "cd"))
         return cd_b(words + 1, vars);
+    else if (!strcmp(cmd, "break"))
+    {
+        res = break_b(words + 1);
+        if (res == 128)
+        {
+            *exit = 1;
+            fprintf(stderr, "Break error\n");
+        }
+        return res;
+    }
+    else if (!strcmp(cmd, "continue"))
+    {
+        res = continue_b(words + 1);
+        if (res == 128)
+        {
+            *exit = 1;
+            fprintf(stderr, "Continue error\n");
+        }
+        return res;
+    }
     return -1;
 }
 

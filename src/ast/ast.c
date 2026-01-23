@@ -6,6 +6,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "../builtin/break_continue.h"
 #include "../exec/exec.h"
 #include "../exec/redir_exec.h"
 
@@ -284,6 +285,8 @@ static int ast_run_list(struct ast *ast, struct dictionnary *vars, int *exit)
         res = run_ast(ast_list->elt, vars, exit);
         if (*exit)
             return res;
+        if (get_break() > 0 || get_continue() > 0)
+            return res;
     }
     if (ast_list->next)
         res = ast_run_list((struct ast *)ast_list->next, vars, exit);
@@ -294,14 +297,33 @@ static int ast_run_loop(struct ast *ast, struct dictionnary *vars, int *exit)
 {
     struct ast_loop *ast_loop = (struct ast_loop *)ast;
     int res = 0;
+    int loop_res = 0;
     while (run_ast(ast_loop->condition, vars, exit) == ast_loop->truth)
     {
         if (*exit)
             return res;
+        
         res = run_ast(ast_loop->body, vars, exit);
         if (*exit)
             return res;
+            
+        if (get_break() > 0)
+        {
+            if (res != 0)
+                loop_res = res;
+            update_break();
+            break;
+        }
+        if (get_continue() > 0)
+        {
+            if (res != 0)
+                loop_res = res;
+            update_continue();
+            continue;
+        }
     }
+    if (loop_res != 0)
+        return loop_res;
     return res;
 }
 
