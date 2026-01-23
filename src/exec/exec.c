@@ -11,6 +11,10 @@
 #include "../builtin/exit.h"
 #include "../builtin/cd.h"
 #include "../expand/expand.h"
+<<<<<<< HEAD
+=======
+#include "../utils/itoa.h"
+>>>>>>> expand_le_retour
 #include "redir_exec.h"
 
 static int is_builtin(char **words)
@@ -38,209 +42,6 @@ static int exec_builtin(char **words, int *exit, struct dictionnary *vars)
     return -1;
 }
 
-static char **var_expand(struct dictionnary *vars, char *key, char **res,
-    size_t *i)
-{
-    size_t ind = 0;
-    while(res[ind])
-    {
-        ind++;
-    }
-    char **val = get_var(vars, key+1);
-    size_t j = 0;
-    while(val[j]!=NULL)
-    {
-        res[ind] = strdup(val[j]);
-        res[ind][strlen(val[j])] = 0;
-        free(val[j]);
-        ind++;
-        j++;
-        res = realloc(res,(ind+1)*sizeof(char*));
-        res[ind] = NULL;
-    }
-    *i+=j;
-    free(val);
-    return res;
-}
-
-static int is_word(char c)
-{
-    return (c!=' ' && c!='\n' && c!='\t' && c!=';' && c!='&' && c!='|' && c!='\'' && c!=0);
-}
-
-/* Description:
- *  	insert all vals value in between prefix and tail
- * Arguments:
- *  	TODO
- */
-static void glue(char *prefix, char **vals, char *tail)
-{
-    size_t i = 0;
-    char *res = malloc(1);
-    *res = 0;
-    while(vals[i])
-    {
-        size_t len = strlen(res) + strlen(vals[i]) + 1;
-        res = realloc(res, len);
-        strcat(res, " ");
-        strcat(res, vals[i]);
-        i++;
-    }
-    size_t len = strlen(prefix) + strlen(res) + strlen(tail) + 1;
-    prefix = realloc(prefix, len);
-    strcat(prefix, res);
-    strcat(prefix, tail);
-    free(res);
-    free(tail);
-}
-
-static char **double_quotes_expand(struct dictionnary *vars, char *word, char **res)
-{
-    size_t ind = 0;
-    while(res[ind])
-    {
-        ind++;
-    }
-    size_t j = 0;
-    while(word[j] != 0)
-    {
-        j++;
-    }
-    if(j>2)
-    {
-        res[ind] = malloc((j-1));
-        j = 1;
-        size_t indbis = 0;
-        size_t len = strlen(word);
-        while(j < len - 1)
-        {
-            res[ind][indbis] = word[j];
-            indbis++;
-            j++;
-        }
-        res[ind][indbis] = 0;
-        ind++;
-        res = realloc(res, (ind+1)*sizeof(char*));
-        res[ind] = NULL;
-    }
-    else
-    {
-        res[j] = calloc(1,1);
-        j++;
-        res = realloc(res, (j+1)*sizeof(char*));   
-        res[j] = NULL;
-        return res;
-    }
-    ind--;
-    size_t i = 0;
-    while(res[ind][i]!=0)
-    {
-        if(res[ind][i] == '$')
-        {
-            res[ind][i] = 0;
-            i++;
-            char *var = (res[ind])+i;
-            while(is_word(res[ind][i]))
-            {
-                i++;
-            }
-            res[ind][i] = 0;
-            char **val = get_var(vars,var);
-            char *tail = strdup((res[ind])+i+1);
-            glue(res[ind],val, tail);
-        }
-        else
-            i++;
-    }
-    return res;
-}
-
-static void free_ex(char **ex)
-{
-    size_t i = 0;
-    while (ex[i])
-    {
-        free(ex[i]);
-        i++;
-    }
-    free(ex);
-}
-
-static char **expand(struct dictionnary *vars, char **words)
-{
-    char **res = malloc(sizeof(char *));
-    if (!res)
-        return NULL;
-    res[0] = NULL;
-    size_t i = 0;
-    size_t j = 0;
-    while (words[i]!=NULL)
-    {
-        if(words[i][0] == '$')
-        {
-            res = var_expand(vars,(words[i]),res,&j);
-        }
-        else if(words[i][0] == '\'')
-        {
-            size_t ind = 0;
-            while(words[i][ind] != 0)
-            {
-                ind++;
-            }
-            if(ind>2)
-            {
-                res[j] = malloc((ind-1));
-                ind = 0;
-                size_t indbis = 0;
-                while(words[i][ind] != 0)
-                {
-                    if(words[i][ind] != '\'')
-                    {
-                        res[j][indbis] = words[i][ind];
-                        indbis++;
-                    }
-                    ind++;
-                }
-                res[j][indbis] = 0;
-                j++;
-                res = realloc(res, (j+1)*sizeof(char*));
-                res[j] = NULL;
-            }
-            else
-            {
-                res[j] = calloc(1,1);
-                j++;
-                res = realloc(res, (j+1)*sizeof(char*));
-                if(!res)
-                {
-                    free_ex(res);
-                    return NULL;
-                }   
-                res[j] = NULL;
-            }
-        }
-        else if(words[i][0] == '"')
-        {
-            res = double_quotes_expand(vars,words[i],res);
-            j++;
-        }
-        else
-        {
-            res[j] = strdup(words[i]);
-            j++;
-            res = realloc(res, (j+1)*sizeof(char*));
-            if(!res)
-            {
-                free_ex(res);
-                return NULL;
-            }   
-            res[j] = NULL;
-        }
-        i++;
-    }
-    return res;
-}
-
 /* Description:
  *  	execute les commandes avec les args donnes
  * Arguments:
@@ -260,16 +61,6 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars, int *exit)
         || (!ast_cmd->words[0] && !ast_cmd->redirs && !ast_cmd->assignment[0]))
         return 2;
 
-    size_t i = 0;
-    while (ast_cmd->assignment[i])
-    {
-        if (add_var(vars, ast_cmd->assignment[i]))
-        {
-            return 1;
-        }
-        i++;
-    }
-
     if (!ast_cmd->words || !ast_cmd->words[0])
     {
         if (ast_cmd->redirs)
@@ -279,12 +70,32 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars, int *exit)
                 return 1;
             restore_redirs(&redir_saved);
         }
+        size_t i = 0;
+        while (ast_cmd->assignment[i])
+        {
+            if (add_var(vars, ast_cmd->assignment[i]))
+            {
+                return 1;
+            }
+            i++;
+        }
+        char *wexit = itoa(0);
+        char *assignment = malloc(strlen("?=") + strlen(wexit) + 1);
+        assignment = strcpy(assignment, "?=");
+        assignment = strcat(assignment, wexit);
+        add_var(vars, assignment);
+        free(wexit);
+        free(assignment);
         return 0;
     }
 
     char **expanded = expand(vars, ast_cmd->words);
-    if (!expanded)
-        return 1;
+    if (!expanded || !expanded[0])
+    {
+        free_ex(expanded);
+        fprintf(stderr, "Command not found\n");
+        return 127;
+    }
 
     if (is_builtin(expanded))
     {
@@ -297,6 +108,13 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars, int *exit)
         int r = exec_builtin(expanded, exit, vars);
         free_ex(expanded);
         restore_redirs(&redir_saved);
+        char *wexit = itoa(r);
+        char *assignment = malloc(strlen("?=") + strlen(wexit) + 1);
+        assignment = strcpy(assignment, "?=");
+        assignment = strcat(assignment, wexit);
+        add_var(vars, assignment);
+        free(wexit);
+        free(assignment);
         return r;
     }
 
@@ -313,13 +131,36 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars, int *exit)
         _exit(127);
     }
 
+    size_t i = 0;
+    while (ast_cmd->assignment[i])
+    {
+        if (add_var(vars, ast_cmd->assignment[i]))
+        {
+            return 1;
+        }
+        i++;
+    }
     free_ex(expanded);
     int status;
     waitpid(pid, &status, 0);
     if (WIFEXITED(status))
     {
+        char *wexit = itoa((int)WEXITSTATUS(status));
+        char *assignment = malloc(strlen("?=") + strlen(wexit) + 1);
+        assignment = strcpy(assignment, "?=");
+        assignment = strcat(assignment, wexit);
+        add_var(vars, assignment);
+        free(wexit);
+        free(assignment);
         return WEXITSTATUS(status);
     }
+    char *wexit = itoa(127);
+    char *assignment = malloc(strlen("?=") + strlen(wexit) + 1);
+    assignment = strcpy(assignment, "?=");
+    assignment = strcat(assignment, wexit);
+    add_var(vars, assignment);
+    free(wexit);
+    free(assignment);
     return 127;
 }
 

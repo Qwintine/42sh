@@ -41,7 +41,7 @@ int handle_com(int in_quotes, struct lex *lex, struct token *tok, char *buf)
     return 0;
 }
 
-int handle_backslash(char **value, FILE *entry, int in_double_quote)
+int handle_backslash(char **value, FILE *entry)
 {
     char buf[1];
     if (!fread(buf, 1, 1, entry))
@@ -52,32 +52,22 @@ int handle_backslash(char **value, FILE *entry, int in_double_quote)
         return 0;
     }
 
-    if (in_double_quote)
+    if (buf[0] == '$' || buf[0] == '`' || buf[0] == '"' || buf[0] == '\\'
+        || buf[0] == '\n')
     {
-        if (buf[0] == '$' || buf[0] == '`' || buf[0] == '"' || buf[0] == '\\'
-            || buf[0] == '\n')
+        *value = concat(*value, '\\');
+        if (buf[0] != '\n')
         {
-            if (buf[0] != '\n')
-            {
-                *value = concat(*value, buf[0]);
-                if (!*value)
-                    return 1;
-            }
-        }
-        else
-        {
-            *value = concat(*value, '\\');
-            if (!*value)
-                return 1;
             *value = concat(*value, buf[0]);
             if (!*value)
                 return 1;
         }
-        return 0;
     }
-
-    if (buf[0] != '\n')
+    else
     {
+        *value = concat(*value, '\\');
+        if (!*value)
+            return 1;
         *value = concat(*value, buf[0]);
         if (!*value)
             return 1;

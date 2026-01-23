@@ -311,34 +311,32 @@ static int ast_run_for(struct ast *ast, struct dictionnary *vars, int *exit)
     int res = 0;
     if (!ast_for->words[0])
     {
-        // varas = var_assignment, format "<name>=<value>"
-        // in this case, the value is empty
-        /*char *varas = calloc(strlen(ast_for->var) + strlen("=") + 1,1);
-        if (!varas)
-            return 1;
-        strcpy(varas, ast_for->var);
-        strcat(varas, "=");
-        add_var(vars, varas);
-        res = run_ast(ast_for->body, vars);
-        free(varas);*/
         return 0;
     }
     else
     {
-        for (size_t i = 0; ast_for->words[i] != NULL; i++)
+        char **all_vars = expand(vars, ast_for->words);
+        if(all_vars[0] == NULL)
+        {
+            free(all_vars);
+            return 0;
+        }
+        for (size_t i = 0; all_vars[i] != NULL; i++)
         {
             // varas = var_assignment, format "<name>=<value>"
             char *varas = malloc(strlen(ast_for->var) + strlen("=")
-                                 + strlen(ast_for->words[i]) + 1);
+                                 + strlen(all_vars[i]) + 1);
             if (!varas)
                 return 1;
             strcpy(varas, ast_for->var);
             strcat(varas, "=");
-            strcat(varas, ast_for->words[i]);
+            strcat(varas, all_vars[i]);
             add_var(vars, varas);
             res = run_ast(ast_for->body, vars, exit);
             free(varas);
+            free(all_vars[i]);
         }
+        free(all_vars);
     }
     return res;
 }

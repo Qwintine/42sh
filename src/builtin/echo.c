@@ -113,7 +113,7 @@ int echo_b(char **strings)
                 }
             }
             printf("%s", strings[i]);
-            if (strings[i + 1] != NULL)
+            if (strings[i][0] != 0 && strings[i + 1])
                 printf(" ");
         }
     }
