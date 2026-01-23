@@ -56,7 +56,7 @@ int dot_b(char **words, struct dictionnary *vars, int *exit)
 		char *path = get_var(vars, "PATH")[0];
 		if(!path)
 			path =""; // empty paf -> search in current dir
-		while(!entry)
+		while(!entry && *path)
 		{
 			char *semi_colon = strchr(path, ':');
 			size_t size_path;
@@ -104,6 +104,7 @@ int dot_b(char **words, struct dictionnary *vars, int *exit)
 	if(!entry)
 	{
 		fprintf(stderr, "42sh: dot: error fopen\n");
+		*exit =1;
 		return 1;
 	}
 
@@ -124,7 +125,7 @@ int dot_b(char **words, struct dictionnary *vars, int *exit)
 		{
 			if (ast->type != AST_LIST
 					|| ((struct ast_list *)ast)->elt != NULL)
-				res = run_ast(ast, vars, exit); // derniere valeur de retour
+			res = run_ast(ast, vars, exit); // derniere valeur de retour
 			if (*exit)
 			{
 				free_ast(ast);
