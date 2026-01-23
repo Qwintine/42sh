@@ -1,7 +1,8 @@
 #ifndef EXEC_H
 #define EXEC_H
+
 #include "../ast/ast.h"
-#include "../utils/redir.h"
+#include "../expand/expand.h"
 
 int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars, int *exit);
 

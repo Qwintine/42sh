@@ -82,7 +82,9 @@ run_criterion() {
     src/io/io.c \
     src/utils/token.c \
     src/utils/redir.c \
+    src/utils/itoa.c \
     src/expand/expand.c \
+    src/expand/hashmap.c \
     src/lexer/lexer.c \
     src/lexer/lexer_handlers.c \
     src/lexer/lexer_operators.c \
@@ -184,12 +186,19 @@ echo "============================ Backslash ================================\n"
 
 echo "=========================== Variables ==================================\n"
 . tests/test_files/variables.sh
+
 #================================== Step 3 ====================================
 echo "================================= Builtin exit =================================\n"
 . tests/test_files/exit.sh
 
 echo "============================= Builtin cd ==============================\n"
 . tests/test_files/cd.sh
+
+echo "=========================== Builtin break/continue ===========================\n"
+. tests/test_files/break_continue.sh
+
+echo "=========================== Command blocks ===========================\n"
+. tests/test_files/command_blocks.sh
 
 printf "Fonctionel => Total: %d | Passed: %d | Failed: %d\n\n" "$TOTAL" "$PASS" "$((TOTAL - PASS))"
 

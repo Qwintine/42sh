@@ -6,6 +6,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "../builtin/break_continue.h"
 #include "../exec/exec.h"
 #include "../exec/redir_exec.h"
 
@@ -284,6 +285,8 @@ static int ast_run_list(struct ast *ast, struct dictionnary *vars, int *exit)
         res = run_ast(ast_list->elt, vars, exit);
         if (*exit)
             return res;
+        if (get_break() > 0 || get_continue() > 0)
+            return res;
     }
     if (ast_list->next)
         res = ast_run_list((struct ast *)ast_list->next, vars, exit);
@@ -294,14 +297,33 @@ static int ast_run_loop(struct ast *ast, struct dictionnary *vars, int *exit)
 {
     struct ast_loop *ast_loop = (struct ast_loop *)ast;
     int res = 0;
+    int loop_res = 0;
     while (run_ast(ast_loop->condition, vars, exit) == ast_loop->truth)
     {
         if (*exit)
             return res;
+        
         res = run_ast(ast_loop->body, vars, exit);
         if (*exit)
             return res;
+            
+        if (get_break() > 0)
+        {
+            if (res != 0)
+                loop_res = res;
+            update_break();
+            break;
+        }
+        if (get_continue() > 0)
+        {
+            if (res != 0)
+                loop_res = res;
+            update_continue();
+            continue;
+        }
     }
+    if (loop_res != 0)
+        return loop_res;
     return res;
 }
 
@@ -309,37 +331,66 @@ static int ast_run_for(struct ast *ast, struct dictionnary *vars, int *exit)
 {
     struct ast_for *ast_for = (struct ast_for *)ast;
     int res = 0;
+    int loop_res = 0;
     if (!ast_for->words[0])
     {
-        // varas = var_assignment, format "<name>=<value>"
-        // in this case, the value is empty
-        /*char *varas = calloc(strlen(ast_for->var) + strlen("=") + 1,1);
-        if (!varas)
-            return 1;
-        strcpy(varas, ast_for->var);
-        strcat(varas, "=");
-        add_var(vars, varas);
-        res = run_ast(ast_for->body, vars);
-        free(varas);*/
         return 0;
     }
     else
     {
-        for (size_t i = 0; ast_for->words[i] != NULL; i++)
+        char **all_vars = expand(vars, ast_for->words);
+        if(all_vars[0] == NULL)
+        {
+            free(all_vars);
+            return 0;
+        }
+        for (size_t i = 0; all_vars[i] != NULL; i++)
         {
             // varas = var_assignment, format "<name>=<value>"
             char *varas = malloc(strlen(ast_for->var) + strlen("=")
-                                 + strlen(ast_for->words[i]) + 1);
+                                 + strlen(all_vars[i]) + 1);
             if (!varas)
                 return 1;
             strcpy(varas, ast_for->var);
             strcat(varas, "=");
-            strcat(varas, ast_for->words[i]);
+            strcat(varas, all_vars[i]);
             add_var(vars, varas);
             res = run_ast(ast_for->body, vars, exit);
             free(varas);
+            free(all_vars[i]);
+            
+            if (*exit)
+            {
+                for (size_t j = i + 1; all_vars[j] != NULL; j++)
+                    free(all_vars[j]);
+                free(all_vars);
+                return res;
+            }
+            
+            if (get_break() > 0)
+            {
+                if (res != 0)
+                    loop_res = res;
+                update_break();
+                for (size_t j = i + 1; all_vars[j] != NULL; j++)
+                    free(all_vars[j]);
+                free(all_vars);
+                if (loop_res != 0)
+                    return loop_res;
+                return res;
+            }
+            if (get_continue() > 0)
+            {
+                if (res != 0)
+                    loop_res = res;
+                update_continue();
+                continue;
+            }
         }
+        free(all_vars);
     }
+    if (loop_res != 0)
+        return loop_res;
     return res;
 }
 

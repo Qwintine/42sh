@@ -41,7 +41,7 @@ int handle_com(int in_quotes, struct lex *lex, struct token *tok, char *buf)
     return 0;
 }
 
-int handle_backslash(char **value, FILE *entry, int in_double_quote)
+int handle_backslash(char **value, FILE *entry)
 {
     char buf[1];
     if (!fread(buf, 1, 1, entry))
@@ -52,32 +52,22 @@ int handle_backslash(char **value, FILE *entry, int in_double_quote)
         return 0;
     }
 
-    if (in_double_quote)
+    if (buf[0] == '$' || buf[0] == '`' || buf[0] == '"' || buf[0] == '\\'
+        || buf[0] == '\n')
     {
-        if (buf[0] == '$' || buf[0] == '`' || buf[0] == '"' || buf[0] == '\\'
-            || buf[0] == '\n')
+        *value = concat(*value, '\\');
+        if (buf[0] != '\n')
         {
-            if (buf[0] != '\n')
-            {
-                *value = concat(*value, buf[0]);
-                if (!*value)
-                    return 1;
-            }
-        }
-        else
-        {
-            *value = concat(*value, '\\');
-            if (!*value)
-                return 1;
             *value = concat(*value, buf[0]);
             if (!*value)
                 return 1;
         }
-        return 0;
     }
-
-    if (buf[0] != '\n')
+    else
     {
+        *value = concat(*value, '\\');
+        if (!*value)
+            return 1;
         *value = concat(*value, buf[0]);
         if (!*value)
             return 1;
@@ -201,20 +191,29 @@ static int handle_opening_bracket(struct lex *lex, struct token *tok,
                 if (!tok->value)
                     return 1;
                 tok->token_type = WORD;
+                quote_status->bracket_open = 1;
+                return -1;
             }
             else
             {
-                fseek(lex->entry, -1, SEEK_CUR);
                 return 1;
             }
+        }
+        else if (lex->context == KEYWORD)
+        {
+            tok->value = concat(tok->value, '{');
+            if (!tok->value)
+                return 1;
+            tok->token_type = OPENING_BRACKET;
+            lex->current_token = tok;
+            return 0;
         }
         else
         {
             tok->value = concat(tok->value, '{');
             if (!tok->value)
                 return 1;
-            tok->token_type = OPENING_BRACKET;
-            return 0;
+            tok->token_type = WORD;
         }
     }
     else
@@ -231,18 +230,34 @@ static int handle_closing_bracket(struct lex *lex, struct token *tok,
 {
     if (!quote_status->double_quote && !quote_status->single_quote)
     {
-        if (tok->value && tok->value[0])
+        if (quote_status->bracket_open)
         {
-            fseek(lex->entry, -1, SEEK_CUR);
+            tok->value = concat(tok->value, '}');
+            if (!tok->value)
+                return 1;
+            tok->token_type = WORD;
+            quote_status->bracket_open = 0;
+            return -1;
+        }
+        else if (tok->value && tok->value[0])
+        {
             return 1;
+        }
+        else if (lex->context == KEYWORD)
+        {
+            tok->value = concat(tok->value, '}');
+            if (!tok->value)
+                return 1;
+            tok->token_type = CLOSING_BRACKET;
+            lex->current_token = tok;
+            return 0;
         }
         else
         {
             tok->value = concat(tok->value, '}');
             if (!tok->value)
                 return 1;
-            tok->token_type = CLOSING_BRACKET;
-            return 0;
+            tok->token_type = WORD;
         }
     }
     else

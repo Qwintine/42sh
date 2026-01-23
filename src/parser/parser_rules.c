@@ -317,7 +317,8 @@ struct ast *parser_rule_command_block(struct lex *lex)
 
     if(!peek(lex) || !(peek(lex)->token_type == CLOSING_BRACKET))
     {
-        free_ast(ast);
+        if (ast)
+            free_ast(ast);
         return NULL;
     }
     discard_token(pop(lex));

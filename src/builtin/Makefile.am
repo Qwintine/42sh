@@ -6,7 +6,15 @@ libbuiltin_a_SOURCES =  \
   exit.c \
   exit.h \
   cd.c \
-  cd.h
+  cd.h \
+  break_continue.c \
+  break_continue.h \
+  dot.c \
+  dot.h \
+  unset.c \
+  unset.c \
+  export.c \
+  export.h
   
 libbuiltin_a_CPPFLAGS = -I$(top_srcdir)/src
 

@@ -44,8 +44,7 @@ static int sub_switch_delim(struct lex *lex, struct token *tok, char *buf,
     switch (buf[0])
     {
     case '\\': // cas 4
-        if (handle_backslash(&tok->value, lex->entry,
-                             quote_status->double_quote))
+        if (handle_backslash(&tok->value, lex->entry))
             return 1;
         break;
     case ';':
@@ -150,7 +149,7 @@ static int sub_switch(struct lex *lex, struct token *tok, char *buf,
  */
 int lexer(struct lex *lex)
 {
-    struct quote_status quote_status = { 0, 0 };
+    struct quote_status quote_status = { 0, 0, 0 };
     char buf[1];
     struct token *tok = init_token(lex->context);
     if (!tok)
@@ -182,7 +181,7 @@ int lexer(struct lex *lex)
     }
     lex->current_token = end_token(tok, lex); // cas 1
     if (!lex->current_token || verif_token(lex->current_token, lex->context)
-        || quote_status.double_quote || quote_status.single_quote)
+        || quote_status.double_quote || quote_status.single_quote || quote_status.bracket_open)
         goto ERROR;
     if (lex->current_token->token_type == KEYWORD && lex->context == KEYWORD)
         lex->current_token->token_type = check_type(lex->current_token->value);
