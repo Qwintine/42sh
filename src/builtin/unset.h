@@ -1,7 +1,6 @@
 #ifndef UNSET_H
 #define UNSET_H
-#include "../expand/expand.h"
-//#include "../expand/hash_map.h"
+#include "../expand/hashmap.h"
 
 int unset(struct dictionnary *to_unset, char **name);
 

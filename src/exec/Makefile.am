@@ -8,7 +8,7 @@ libexec_a_SOURCES =  \
   ../builtin/exit.c \
   ../builtin/cd.c \
   ../builtin/dot.c \
-  ../builtin/unset.c
+  ../builtin/unset.c \
   ../utils/itoa.c
 
 libexec_a_CPPFLAGS = -I$(top_srcdir)/src

@@ -9,7 +9,6 @@
 #include <unistd.h>
 
 #include "../utils/itoa.h"
-#include "expand.h"
 
 struct values
 {
@@ -23,8 +22,7 @@ struct dictionnary
     struct values *values[20];
 };
 
-typedef int (*hashing_func)(int);
-
+int hash(char *str);
 struct dictionnary *init_dict(void);
 int is_env(char *key);
 int add_var(struct dictionnary *dict, char *varas);

@@ -1,6 +1,18 @@
-#include "../expand/expand.h"
 #include "unset.h"
 #include <string.h>
+
+static void free_node(struct values *val)
+{
+	if(val)
+	{
+		free(val->key);
+		for(size_t i =0; val->elt[i] ; i++)
+			free(val->elt[i]);
+		free(val->elt);
+		free(val);
+	}
+}
+
 int unset(struct dictionnary *to_unset, char **names)
 {
 	int cant_del = 0; // useless right now but later for readonly vars
@@ -8,20 +20,21 @@ int unset(struct dictionnary *to_unset, char **names)
 	{
 		for(size_t i =0; names[i]; i++) // maybe use better algo ?
 		{
-			struct values *val = to_unset->values[hash(names[i])];//use hash fonc]
+			int ind = hash(names[i]);
+			struct values *val = to_unset->values[ind];//use hash fonc]
 			if(val)
 			{
 				if(!strcmp(val->key, names[i]))
 				{
 					if(!val->next)
 					{
-						free(val);
+						to_unset->values[ind] = NULL;
+						free_node(val);
 					}
 					else
 					{
-						struct values *temp = val->next;
-						val->next = temp->next;
-						free(temp);
+						to_unset->values[ind] = val->next;
+						free_node(val);
 					}
 				}
 				else
@@ -34,7 +47,7 @@ int unset(struct dictionnary *to_unset, char **names)
 					{
 						struct values *temp = val->next;
 						val->next = temp->next;
-						free(temp);
+						free_node(temp);
 					}
 				}
 			}
