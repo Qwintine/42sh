@@ -6,8 +6,12 @@ libbuiltin_a_SOURCES =  \
   exit.c \
   exit.h \
   cd.c \
-  cd.h
-  
+  cd.h \
+  dot.c \
+  dot.h \
+  unset.c \
+  unset.c
+
 libbuiltin_a_CPPFLAGS = -I$(top_srcdir)/src
 
 libbuiltin_a_CFLAGS = -std=c99 -pedantic -Werror -Wall -Wextra -Wvla

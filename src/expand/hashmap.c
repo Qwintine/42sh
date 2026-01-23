@@ -1,7 +1,7 @@
 #define _POSIX_C_SOURCE 200809L
 #include "expand.h"
 
-static int hash(char *str)
+int hash(char *str)
 {
     size_t res = 0;
     for (size_t i = 0; str[i] != 0; i++)
