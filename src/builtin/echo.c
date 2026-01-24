@@ -45,6 +45,16 @@ static char *insert_in(size_t ind, char *str)
     return res;
 }
 
+/*
+ * Description:
+ *   Parse -n, -e, and -E options
+ * Arguments:
+ *   string: option string to parse
+ *   an: pointer to int for -n option
+ *   ae: pointer to int for -e and -E options
+ * Return:
+ *   0 success, 1 invalid option
+ */
 static int args_echo(char *string, int *an, int *ae)
 {
     size_t i = 1;

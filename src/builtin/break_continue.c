@@ -43,8 +43,7 @@ static int is_nb(char *str)
     return 1;
 }
 
-/* 
- * Description:
+/* Description:
  * 	Implements the break builtin
  * Arguments:
  * 	args -> arguments passed to the builtin
@@ -81,14 +80,13 @@ int break_b(char **args)
     return res;
 }
 
-/*
-* Description:
-* 	Implements the continue builtin
-* Arguments:
-* 	args -> arguments passed to the builtin
-* Return:
-* 	0 on success, 1 too many args, 128 invalid arg
-*/
+/* Description:
+ * 	Implements the continue builtin
+ * Arguments:
+ * 	args -> arguments passed to the builtin
+ * Return:
+ * 	0 on success, 1 too many args, 128 invalid arg
+ */
 int continue_b(char **args)
 {
     if (args[0] != NULL && args[1] != NULL)
