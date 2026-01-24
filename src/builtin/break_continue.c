@@ -6,7 +6,7 @@
 static int break_n = 0; // racist 
 static int continue_n = 0; // racist
 
-/* Helper style object oriented programming */
+/* Helpers style object oriented programming */
 
 int get_break(void)
 {

@@ -7,6 +7,14 @@
 #include <string.h>
 #include <unistd.h>
 
+/*
+* Description:
+* 	Update PWD and OLDPWD vars after cd
+* Arguments:
+* 	struct dictionnary *vars -> dictionnary of vars
+* Return:
+* 	int -> 0 success, 1 failure
+*/
 static int update_pwd(struct dictionnary *vars)
 {
     char **pwd = get_var(vars, "PWD");
@@ -57,12 +65,24 @@ static int update_pwd(struct dictionnary *vars)
     return 0;
 }
 
+
+// Structure to hold cd path result
 struct cd_result 
 {
     char *path;
     char **var;
 };
 
+/*
+* Description:
+* 	Find the target path for cd command
+* Arguments:
+* 	char **args -> args passed to cd
+* 	struct dictionnary *vars -> dictionnary of vars
+* 	int *print_path -> flag indicate path should be printed
+* Return:
+* 	struct cd_result -> contains path + var to free
+*/
 static struct cd_result find_path(char **args, struct dictionnary *vars,
     int *print_path)
 {
@@ -102,6 +122,15 @@ static struct cd_result find_path(char **args, struct dictionnary *vars,
     return result;
 }
 
+/*
+* Description:
+* 	Execute the cd builtin cmd
+* Arguments:
+* 	char **args -> args passed to cd
+* 	struct dictionnary *vars -> dictionnary of vars
+* Return:
+* 	int -> Exit status of cd cmd
+*/
 int cd_b(char **args, struct dictionnary *vars)
 {
     int print_path = 0;
