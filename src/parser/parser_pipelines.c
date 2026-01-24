@@ -3,9 +3,15 @@
 #include "../ast/ast_aux.h"
 #include "parser_aux.h"
 
-// Parse a pipeline of commands separated by pipes
-// Return NULL on error
-// Return ast_pipe on success
+/*
+ * Description:
+ * 	Parse and_or blocks separated by '|' (pipes)
+ * Return:
+ * 	*ast -> ast containing pipeline blocks
+ * Verbose:
+ * 	Grammar:
+ * 		pipeline = [ '!' ] command { '|' {'\n'} command } ;
+ */
 struct ast *parser_pipeline(struct lex *lex, struct dictionnary *dict)
 {
     struct ast_pipe *ast_pipe = (struct ast_pipe *)init_ast_pipe();

@@ -126,6 +126,14 @@ ERROR:
     return NULL;
 }
 
+/*
+ * Description:
+ * 	Handle a function definition and add it to the dictionnary
+ * Return:
+ * 	*ast -> ast containing an empty list
+ * Grammar:
+ * 	   WORD '(' ')' {'\n'} shell_command
+ */
 struct ast *parser_fundef(struct lex *lex, struct dictionnary *dict)
 {
     if (!peek(lex) || !(peek(lex)->token_type == FUNCTION))
@@ -143,6 +151,17 @@ struct ast *parser_fundef(struct lex *lex, struct dictionnary *dict)
     return (struct ast *)empty;
 }
 
+/*
+ * Description:
+ * 	Parse a command which can be either a simple command or a shell command
+ * Return:
+ * 	*ast -> ast containing either a simple command or a shell command
+ * Verbose:
+ * 	Grammar:
+ * 	   simple_command
+ * 	   | shell_command
+ *     | function_definition
+ */
 struct ast *parser_command(struct lex *lex, struct dictionnary *dict)
 {
     if (peek(lex)

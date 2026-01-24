@@ -3,6 +3,12 @@
 #include "../utils/redir.h"
 #include "parser_aux.h"
 
+/*
+ * Description:
+ * 	Parse a redirection
+ * Return:
+ * 	0 on success, 1 on error
+ */
 int parser_redir(struct lex *lex, struct ast_cmd *ast_cmd)
 {
     struct redir *redir = init_redir();
@@ -50,6 +56,12 @@ int parser_redir(struct lex *lex, struct ast_cmd *ast_cmd)
     return 1;
 }
 
+/*
+ * Description:
+ * 	Parse a redirection in a shell command context
+ * Return:
+ * 	0 on success, 1 on error
+ */
 int parser_redir_shell(struct lex *lex, struct ast_shell_redir *shell)
 {
     struct redir *redir = init_redir();
@@ -97,6 +109,15 @@ int parser_redir_shell(struct lex *lex, struct ast_shell_redir *shell)
     return 1;
 }
 
+/*
+ * Description:
+ * 	Handle an element in a command: either a word or a redirection
+ * Return:
+ * 	0 on success, 1 on error
+ * Grammar:
+ * 	        word 
+ *          | redirection ;
+ */
 int parser_element(struct lex *lex, struct ast_cmd *ast_cmd, size_t *w)
 {
     if (peek(lex))
@@ -126,6 +147,15 @@ int parser_element(struct lex *lex, struct ast_cmd *ast_cmd, size_t *w)
     return 1;
 }
 
+/*
+ * Description:
+ * 	Handle a prefix in a command: either an assignment or a redirection
+ * Return:
+ * 	0 on success, 1 on error
+ * Grammar:
+ * 	        assignment
+ *          | redirection ;
+ */
 int parser_prefix(struct lex *lex, struct ast_cmd *ast_cmd)
 {
     if (peek(lex) && peek(lex)->token_type == ASSIGNMENT)

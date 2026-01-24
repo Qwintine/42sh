@@ -104,6 +104,14 @@ static int handle_dup_redir(struct redir *redirect, int target)
     return 0;
 }
 
+/* Description:
+ * 	Apply redirs
+  * Arguments:
+ * 	struct redir **redirs -> redir to apply
+ * 	struct redir_saved *redir_saved -> struct save fd
+ * Return:
+ * 	int -> 0 success, 1 failure
+ */
 int redir_apply(struct redir **redirs, struct redir_saved *redir_saved)
 {
     redir_saved->saved = NULL;
@@ -144,6 +152,11 @@ int redir_apply(struct redir **redirs, struct redir_saved *redir_saved)
     return 0;
 }
 
+/* Description:
+ * 	Restore saved fds
+ * Arguments:
+ * 	struct redir_saved *redir_saved -> struct with saved fds
+ */
 void restore_redirs(struct redir_saved *redir_saved)
 {
     for (size_t i = redir_saved->size; i > 0;
