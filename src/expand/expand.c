@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../ast/ast.h"
+
 static int is_word(char c)
 {
     return ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') 
@@ -195,67 +197,75 @@ char **expand(struct dictionnary *vars, char **words)
     size_t j = 0;
     while (words[i]!=NULL)
     {
-        res[j] = malloc(1);
-        res[j][0] = 0;
-        size_t ibis = 0;
-        while(words[i][ibis] != 0)
+        struct ast *f = get_func(vars, words[i]);
+        if(f)
         {
-            if(words[i][ibis] == '$')
-            {
-                char *var = var_expand(vars,words[i],&ibis);
-                if(!var)
-                {
-                    ibis++;
-                    continue;
-                }
-                res[j] = realloc(res[j], strlen(res[j])+strlen(var)+1);
-                strcat(res[j],var);
-                free(var);
-            }
-            else if(words[i][ibis] == '\'')
-            {
-                char *var = single_quote_expand(words[i], &ibis);
-                res[j] = realloc(res[j], strlen(res[j]) + strlen(var) + 1);
-                strcat(res[j], var);
-                free(var);
-            }
-            else if(words[i][ibis] == '"')
-            {
-                char *var = double_quotes_expand(vars,words[i], &ibis);
-                res[j] = realloc(res[j], strlen(res[j]) + strlen(var) + 1);
-                strcat(res[j], var);
-                free(var);
-            }
-            else if (words[i][ibis] == '\\')
-            {
-                ibis++;
-                res[j] = realloc(res[j], strlen(res[j]) + 2);
-                size_t len = strlen(res[j]);
-                res[j][len] = words[i][ibis];
-                res[j][len + 1] = 0;
-            }
-            else
-            {
-                res[j] = realloc(res[j], strlen(res[j]) + 2);
-                size_t len = strlen(res[j]);
-                res[j][len] = words[i][ibis];
-                res[j][len + 1] = 0;
-            }
-            if (words[i][ibis] != 0)
-                ibis++;
-        }
-        i++;
-        j++;
-        if(!res[j-1][0] == 0)
-        {
-            res = realloc(res, (j + 1) * sizeof(char *));
-            res[j] = NULL;
+            run_ast(f, vars, NULL);
         }
         else
         {
-            j--;
-            free(res[j]);
-            res[j] = NULL;
+            res[j] = malloc(1);
+            res[j][0] = 0;
+            size_t ibis = 0;
+            while(words[i][ibis] != 0)
+            {
+                if(words[i][ibis] == '$')
+                {
+                    char *var = var_expand(vars,words[i],&ibis);
+                    if(!var)
+                    {
+                        ibis++;
+                        continue;
+                    }
+                    res[j] = realloc(res[j], strlen(res[j])+strlen(var)+1);
+                    strcat(res[j],var);
+                    free(var);
+                }
+                else if(words[i][ibis] == '\'')
+                {
+                    char *var = single_quote_expand(words[i], &ibis);
+                    res[j] = realloc(res[j], strlen(res[j]) + strlen(var) + 1);
+                    strcat(res[j], var);
+                    free(var);
+                }
+                else if(words[i][ibis] == '"')
+                {
+                    char *var = double_quotes_expand(vars,words[i], &ibis);
+                    res[j] = realloc(res[j], strlen(res[j]) + strlen(var) + 1);
+                    strcat(res[j], var);
+                    free(var);
+                }
+                else if (words[i][ibis] == '\\')
+                {
+                    ibis++;
+                    res[j] = realloc(res[j], strlen(res[j]) + 2);
+                    size_t len = strlen(res[j]);
+                    res[j][len] = words[i][ibis];
+                    res[j][len + 1] = 0;
+                }
+                else
+                {
+                    res[j] = realloc(res[j], strlen(res[j]) + 2);
+                    size_t len = strlen(res[j]);
+                    res[j][len] = words[i][ibis];
+                    res[j][len + 1] = 0;
+                }
+                if (words[i][ibis] != 0)
+                    ibis++;
+            }
+            i++;
+            j++;
+            if(!res[j-1][0] == 0)
+            {
+                res = realloc(res, (j + 1) * sizeof(char *));
+                res[j] = NULL;
+            }
+            else
+            {
+                j--;
+                free(res[j]);
+                res[j] = NULL;
+            }
         }
     }
     if(res[0] == NULL)
