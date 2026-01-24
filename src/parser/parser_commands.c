@@ -123,12 +123,7 @@ ERROR:
 
 struct ast *parser_fundef(struct lex *lex, struct dictionnary *dict)
 {
-    /*lex->context = KEYWORD;
-    if(!peek(lex) || !(peek(lex)->token_type == OPENING_PARENTHESIS))
-        return NULL;
-    discard_token(pop(lex));
-
-    if(!peek(lex) || !(peek(lex)->token_type == CLOSING_PARENTHESIS))
+    if(!peek(lex) || !(peek(lex)->token_type == FUNCTION))
         return NULL;
     discard_token(pop(lex));
 
@@ -137,12 +132,7 @@ struct ast *parser_fundef(struct lex *lex, struct dictionnary *dict)
 
     add_func(dict,cmd,parser_shell_command(lex,dict));
 
-    if(!peek(lex) || !(peek(lex)->token_type == CLOSING_PARENTHESIS))
-        return NULL;
-    discard_token(pop(lex));
-
-    return get_func(dict,cmd);*/
-    return NULL;
+    return get_func(dict,cmd);
 }
 
 // prochaine step -> ajouter gestion  { redirections } après shell_command
