@@ -42,6 +42,46 @@ static char *concat(char *path, char *string)
 	return res;
 }
 
+int main_loop(FILE *entry, struct dictionnary *vars, int *exit)
+{
+	if(!entry)
+	{
+		fprintf(stderr, "42sh: dot: error fopen\n");
+		*exit =1;
+		return 1;
+	}
+	int eof = 0;
+	int res = 0;
+
+	while (!eof)
+	{
+		struct ast *ast = parser(entry, &eof);
+
+		if (!ast)
+		{
+			fclose(entry);
+			fprintf(stderr, "42sh: dot: grammar/syntax error\n");
+			return 2;
+		}
+		else
+		{
+			if (ast->type != AST_LIST
+					|| ((struct ast_list *)ast)->elt != NULL)
+			res = run_ast(ast, vars, exit); // derniere valeur de retour
+			if (*exit)
+			{
+				free_ast(ast);
+				break;
+			}
+		}
+
+		free_ast(ast);
+	}
+
+	fclose(entry);
+	return res;
+}
+
 int dot_b(char **words, struct dictionnary *vars, int *exit)
 {
 	if(*exit)
@@ -57,8 +97,8 @@ int dot_b(char **words, struct dictionnary *vars, int *exit)
 	FILE *entry = NULL;
 	
 	if(strchr(words[0], '/'))
-		entry = fopen(words[0], "r"); // / in file path
-	else // search trough PATH pafs values
+		entry = fopen(words[0], "r"); // / in path
+	else // search trough pafs values
 	{
 		char *path = get_var(vars, "PATH")[0];
 		if(!path)
@@ -93,54 +133,16 @@ int dot_b(char **words, struct dictionnary *vars, int *exit)
 			free(string);
 
 			if (!full) 
-			{
 				break;
-			}
 
 			entry = fopen(full, "r");
 			free(full);
 
 			if (!semi_colon)
 				break;
-
 			path = semi_colon + 1;
 		}
 	}
-	if(!entry)
-	{
-		fprintf(stderr, "42sh: dot: error fopen\n");
-		*exit =1;
-		return 1;
-	}
 
-	int eof = 0;
-	int res = 0;
-
-	while (!eof)
-	{
-		struct ast *ast = parser(entry, &eof);
-
-		if (!ast)
-		{
-			fclose(entry);
-			fprintf(stderr, "42sh: dot: grammar/syntax error\n");
-			return 2;
-		}
-		else
-		{
-			if (ast->type != AST_LIST
-					|| ((struct ast_list *)ast)->elt != NULL)
-			res = run_ast(ast, vars, exit); // derniere valeur de retour
-			if (*exit)
-			{
-				free_ast(ast);
-				break;
-			}
-		}
-
-		free_ast(ast);
-	}
-
-	fclose(entry);
-	return res;
+	return main_loop(entry, vars, exit);
 }
