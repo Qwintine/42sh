@@ -83,6 +83,7 @@ static int exec_func(struct ast *func, struct ast_cmd *ast_cmd,
     char **expanded = expand(vars, ast_cmd->words);
     char **old_params[10] = {NULL};
     char key[2] = "0";
+    int max_param = 0;
     
     for (int i = 1; expanded && expanded[i] && i < 10; i++)
     {
@@ -92,21 +93,34 @@ static int exec_func(struct ast *func, struct ast_cmd *ast_cmd,
         val[0] = expanded[i];
         val[1] = NULL;
         add_var_arg(vars, key, val);
+        free(val);
+        max_param = i;
     }
     
     int func_exit = 0;
     int res = run_ast(func, vars, &func_exit);
     
-    for (int i = 1; i < 10 && old_params[i]; i++)
+    for (int i = 1; i <= max_param; i++)
     {
         key[0] = '0' + i;
-        if (old_params[i][0])
+        char **current = get_var(vars, key);
+        if (current)
+        {
+            free(current[0]);
+            free(current);
+        }
+        
+        if (old_params[i] && old_params[i][0])
             add_var_arg(vars, key, old_params[i]);
-        else
+        else if (old_params[i])
             free(old_params[i]);
     }
-    
-    free(expanded);
+    if (expanded)
+    {
+        for (int i = 0; expanded[i]; i++)
+            free(expanded[i]);
+        free(expanded);
+    }
     return res;
 }
 

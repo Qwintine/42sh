@@ -264,11 +264,15 @@ int add_func(struct dictionnary *dict, char *key, struct ast *cmd_block)
             return 0;
         }
         if (!target->next)
+        {
+            target->next = new;
+            return 0;
+        }
+        if (!target->next)
             break;
         target = target->next;
     }
-    target->next = new;
-    return 0;
+    return 1;
 }
 
 /*Description:
