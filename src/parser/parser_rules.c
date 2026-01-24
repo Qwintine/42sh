@@ -192,7 +192,7 @@ ERROR:
  * 	Grammar:
  * 		'until' compound_list 'do' compound_list 'done' ;
  */
-struct ast *parser_rule_until(struct lex *lex)
+struct ast *parser_rule_until(struct lex *lex, struct dictionnary *dict)
 {
     if (!peek(lex) || peek(lex)->token_type != UNTIL)
         return NULL;
@@ -234,7 +234,7 @@ ERROR:
     return NULL;
 }
 
-static int parser_rule_for_aux(struct lex *lex, struct ast_for *ast_for, struct dictionnary *dict)
+static int parser_rule_for_aux(struct lex *lex, struct ast_for *ast_for)
 {
     if (peek(lex)
         && (peek(lex)->token_type == IN || peek(lex)->token_type == NEWLINE))
@@ -284,7 +284,7 @@ struct ast *parser_rule_for(struct lex *lex, struct dictionnary *dict)
     ast_for->var = tok->value;
     free(tok);
 
-    if (parser_rule_for_aux(lex, ast_for, dict))
+    if (parser_rule_for_aux(lex, ast_for))
         goto ERROR;
 
     if (peek(lex) && peek(lex)->token_type == SEMI_COLON)
@@ -310,13 +310,13 @@ ERROR:
     return NULL;
 }
 
-struct ast *parser_rule_command_block(struct lex *lex)
+struct ast *parser_rule_command_block(struct lex *lex, struct dictionnary *dict)
 {
     if(!peek(lex) || !(peek(lex)->token_type == OPENING_BRACKET))
         return NULL;
     discard_token(pop(lex));
 
-    struct ast *ast = parser_compound_list(lex);
+    struct ast *ast = parser_compound_list(lex, dict);
 
     if(!peek(lex) || !(peek(lex)->token_type == CLOSING_BRACKET))
     {

@@ -1,6 +1,7 @@
 #include <stdlib.h>
 
 #include "parser_aux.h"
+#include "../expand/hashmap.h"
 
 /*
  * Description:
@@ -23,7 +24,7 @@ struct ast *parser_shell_command(struct lex *lex, struct dictionnary *dict)
     else if (peek(lex) && peek(lex)->token_type == FOR)
         ast = parser_rule_for(lex, dict);
     else
-        ast = parser_rule_command_block(lex);
+        ast = parser_rule_command_block(lex, dict);
 
     if (peek(lex)
         && (peek(lex)->token_type == IO_NUMBER
@@ -95,11 +96,6 @@ struct ast *parser_simple_command(struct lex *lex, char *cmd )
             free(tok);
         }
         ast_cmd->words[w] = val;
-        ast_cmd->types = realloc(ast_cmd->types, (w + 1) * sizeof(enum type));
-        if (!ast_cmd->types)
-        {
-            goto ERROR;
-        }
         w++;
         ast_cmd->words = realloc(ast_cmd->words, (w + 1) * sizeof(char *));
         if (!ast_cmd->words)
@@ -134,11 +130,11 @@ ERROR:
 
 struct ast *parser_fundef(struct lex *lex, char *cmd, struct dictionnary *dict)
 {
-    if(!peek(lex) || !peek(lex)->token_type == OPENING_PARENTHESIS)
+    if(!peek(lex) || !(peek(lex)->token_type == OPENING_PARENTHESIS))
         return NULL;
     discard_token(pop(lex));
 
-    if(!peek(lex) || !peek(lex)->token_type == CLOSING_PARENTHESIS)
+    if(!peek(lex) || !(peek(lex)->token_type == CLOSING_PARENTHESIS))
         return NULL;
     discard_token(pop(lex));
 
@@ -147,9 +143,11 @@ struct ast *parser_fundef(struct lex *lex, char *cmd, struct dictionnary *dict)
 
     add_func(dict,cmd,parser_shell_command(lex,dict));
 
-    if(!peek(lex) || !peek(lex)->token_type == CLOSING_PARENTHESIS)
+    if(!peek(lex) || !(peek(lex)->token_type == CLOSING_PARENTHESIS))
         return NULL;
     discard_token(pop(lex));
+
+    return get_func(dict,cmd);
 }
 
 // prochaine step -> ajouter gestion  { redirections } après shell_command
@@ -165,10 +163,10 @@ struct ast *parser_command(struct lex *lex, struct dictionnary *dict)
     char *cmd = NULL;
     if(peek(lex) && peek(lex)->token_type == WORD)
     {
-        struct token *tok = peek(lex)
+        struct token *tok = pop(lex);
         cmd = tok->value;
         free(tok);
-        if(peek(lex)->token_type = OPENING_PARENTHESIS)
+        if(peek(lex)->token_type == OPENING_PARENTHESIS)
             return parser_fundef(lex,cmd,dict);
     }
     return parser_simple_command(lex,cmd);

@@ -47,7 +47,6 @@ struct ast *init_ast_cmd(void)
         free(node);
         return NULL;
     }
-    node->types = NULL;
     node->words = calloc(1, sizeof(char *));
     if (!node->words)
     {
