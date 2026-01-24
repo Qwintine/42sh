@@ -67,7 +67,7 @@ static int exec_builtin(char **words, int *exit, struct dictionnary *vars)
 	    return dot_b(words + 1, vars, exit);
     else if(!strcmp(cmd, "unset"))
     {
-	    if(!strcmp(words[1], "-v"))
+	    if(words[1] && !strcmp(words[1], "-v"))
 		    return unset(vars, words + 2);
 	    else
 		    return unset(vars, words + 1);

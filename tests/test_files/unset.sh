@@ -1,0 +1,18 @@
+#!/bin/sh
+
+testcase "unset no args" "-c" "unset; echo ok"
+testcase "unset basic" "-c" "var=ok; echo \$var; unset var; echo not ok"
+testcase "unset -v" "-c" "var=ok; unset -v var; echo not ok"
+# testcase "unset -f function" "-c" "f() { echo ok; }; f; unset -f f; f 2>/dev/null || echo not ok"
+testcase "unset nonexistent" "-c" "unset nonexist; echo ok"
+testcase "unset multiple" "-c" "a=ok b=ok c=ok; unset a b c; echo not ok"
+testcase "unset after export" "-c" "export var=ok; sh -c 'echo \$var'; unset var; sh -c 'echo not ok'"
+testcase "unset empty" "-c" "empty=; unset empty; echo ok"
+testcase "unset then reset" "-c" "var=not_ok; unset var; var=ok; echo \$var"
+testcase "unset -v multiple" "-c" "x=a y=b z=c; unset -v x y z; echo ok"
+testcase "unset mixed" "-c" "exist=ok; unset exist nonexist; echo ok"
+testcase "unset without option" "-c" "var=ok; unset var; echo not ok"
+# testcase "unset function" "-c" "func() { echo ok; }; func; unset -f func; func 2>/dev/null || echo not ok"
+testcase "unset exported removes from env" "-c" "export var=ok; unset var; sh -c 'echo not ok'"
+testcase "unset then export" "-c" "var=ok; unset var; export var=ok; sh -c 'echo \$var'"
+testcase "unset in if" "-c" "var=ok; if true; then unset var; fi; echo not ok"

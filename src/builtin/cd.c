@@ -10,11 +10,16 @@
 static int update_pwd(struct dictionnary *vars)
 {
     char **pwd = get_var(vars, "PWD");
-    if (pwd == NULL || pwd[0] == NULL)
+    if (pwd == NULL)
         return 1;
+    if (pwd[0] == NULL)
+    {
+        free(pwd);
+        return 1;
+    }
     
     char *saved_pwd = strdup(pwd[0]);
-    free(pwd);
+    free_ex(pwd);  // Free both elements and array
     if (saved_pwd == NULL)
         return 1;
     

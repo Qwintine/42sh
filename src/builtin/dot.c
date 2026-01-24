@@ -44,8 +44,14 @@ static char *concat(char *path, char *string)
 
 int dot_b(char **words, struct dictionnary *vars, int *exit)
 {
-	if(*exit || !words || !words[0])
+	if(*exit)
 		return 1;
+	
+	if (!words || !words[0])
+	{
+		fprintf(stderr, "42sh: dot: filename argument required\n");
+		return 2;
+	}
 
 	FILE *entry = NULL;
 	

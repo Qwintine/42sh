@@ -1,0 +1,15 @@
+#!/bin/sh
+
+testcase "dot no args error" "-c" ". 2>/dev/null"
+testcase "dot basic" "-c" ". tests/test_files/dot_test_helper1.sh; echo \$a"
+# testcase "dot with function" "-c" ". tests/test_files/dot_test_helper2.sh; test_func"
+testcase "dot exit status" "-c" ". tests/test_files/dot_test_helper3.sh; echo \$?"
+testcase "dot modifies variable" "-c" "var=not_ok; . tests/test_files/dot_test_helper4.sh; echo \$var"
+testcase "dot nested" "-c" ". tests/test_files/dot_test_helper5.sh"
+testcase "dot nonexistent file" "-c" ". ./nonexistent.sh 2>/dev/null; echo \$?"
+testcase "dot variables persist" "-c" ". tests/test_files/dot_test_helper1.sh; echo \$a \$b"
+testcase "dot multiple" "-c" ". tests/test_files/dot_test_helper1.sh; . tests/test_files/dot_test_helper2.sh; echo \$a \$c"
+testcase "dot preserves state" "-c" "before=ok; . tests/test_files/dot_test_helper1.sh; echo \$before"
+testcase "dot empty file" "-c" "touch /tmp/dot_empty.sh; . /tmp/dot_empty.sh; echo ok; rm -f /tmp/dot_empty.sh"
+testcase "dot in if" "-c" "if true; then . tests/test_files/dot_test_helper1.sh; fi; echo \$a"
+testcase "dot in while" "-c" "while false; do . tests/test_files/dot_test_helper1.sh; done; echo ok"

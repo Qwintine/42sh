@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 200112L
 #include "unset.h"
 #include <stdlib.h>
 #include <string.h>
@@ -17,16 +18,17 @@ static void free_node(struct values *val)
 int unset(struct dictionnary *to_unset, char **names)
 {
 	int cant_del = 0; // useless right now but later for readonly vars
-	if(to_unset && names)
+	if(to_unset && names && names[0])
 	{
 		for(size_t i =0; names[i]; i++) // maybe use better algo ?
 		{
 			int ind = hash(names[i]);
-			struct values *val = to_unset->values[ind];//use hash fonc]
+			struct values *val = to_unset->values[ind];
 			if(val)
 			{
 				if(!strcmp(val->key, names[i]))
 				{
+					unsetenv(names[i]);
 					if(!val->next)
 					{
 						to_unset->values[ind] = NULL;
@@ -47,6 +49,7 @@ int unset(struct dictionnary *to_unset, char **names)
 					if(val && val->next) // possible to add a check for readonly once implem
 					{
 						struct values *temp = val->next;
+						unsetenv(names[i]);
 						val->next = temp->next;
 						free_node(temp);
 					}

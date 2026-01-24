@@ -87,7 +87,9 @@ static int update_or_append_var(struct values *bucket, struct values *new,
             target->elt[0] = val;
             free(key);
             free(new->elt);
-            free(new); 
+            free(new);
+            if (getenv(target->key) != NULL)
+                setenv(target->key, val, 1);
             return 0;
         }
         if (!target->next)
@@ -159,10 +161,17 @@ int add_var(struct dictionnary *dict, char *varas)
     if (!dict->values[ind])
     {
         dict->values[ind] = new;
+        char *env_val = getenv(key);
+        if (env_val != NULL)
+            setenv(key, val, 1);
         return 0;
     }
 
-    return update_or_append_var(dict->values[ind], new, key, val);
+    int ret = update_or_append_var(dict->values[ind], new, key, val);
+    // Note: if ret == 0, key has been freed by update_or_append_var
+    // In that case, the variable already exists and was updated
+    // getenv/setenv are already handled in update_or_append_var
+    return ret;
 
 ERROR:
     free(key);
