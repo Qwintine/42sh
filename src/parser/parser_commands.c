@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../ast/ast_aux.h"
 #include "../expand/hashmap.h"
 #include "parser_aux.h"
 
