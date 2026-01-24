@@ -74,20 +74,18 @@ int dot_b(char **words, struct dictionnary *vars, int *exit)
 			char *string = NULL;
 
 			if (size_path == 0) // empty path -> current dir
+			{
 				string = strdup("."); 
+				if (!string)
+					break;
+			}
 			else 
 			{
 				string = malloc(size_path + 1);
-				if (string) 
-				{
-					memcpy(string, path, size_path);
-					string[size_path] = '\0';
-				}
-			}
-
-			if (!string) 
-			{
-				break;
+				if (!string) 
+					break;
+				memcpy(string, path, size_path);
+				string[size_path] = '\0';
 			}
 
 			char *full = concat(string, words[0]);

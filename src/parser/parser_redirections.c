@@ -40,6 +40,7 @@ int parser_redir(struct lex *lex, struct ast_cmd *ast_cmd)
 
         if (!new_redirs)
         {
+            free_redir(redir);
             return 1;
         }
         ast_cmd->redirs = new_redirs;
@@ -86,6 +87,7 @@ int parser_redir_shell(struct lex *lex, struct ast_shell_redir *shell)
 
         if (!new_redirs)
         {
+            free_redir(redir);
             return 1;
         }
         shell->redirs = new_redirs;
@@ -105,16 +107,21 @@ int parser_element(struct lex *lex, struct ast_cmd *ast_cmd, size_t *w)
             if (!tok)
                 return 1;
             ast_cmd->words[*w] = tok->value;
-            ast_cmd->types =
+            enum type *new_types =
                 realloc(ast_cmd->types, (*w + 1) * sizeof(enum type));
             if (!ast_cmd->types)
+            {
+                free(tok);
                 return 1;
+            }
+            ast_cmd->types = new_types;
             ast_cmd->types[*w] = tok->token_type;
             free(tok);
             (*w)++;
-            ast_cmd->words = realloc(ast_cmd->words, (*w + 1) * sizeof(char *));
-            if (!ast_cmd->words)
+            char **new_words = realloc(ast_cmd->words, (*w + 1) * sizeof(char *));
+            if (!new_words)
                 return 1;
+            ast_cmd->words = new_words;
             ast_cmd->words[*w] = NULL;
         }
         else if (peek(lex)->token_type == IO_NUMBER
@@ -140,8 +147,11 @@ int parser_prefix(struct lex *lex, struct ast_cmd *ast_cmd)
         ast_cmd->assignment[i] = tok->value;
         i++;
         free(tok);
-        ast_cmd->assignment =
+        char **new_assignment =
             realloc(ast_cmd->assignment, (i + 1) * sizeof(char *));
+        if (!new_assignment)
+            return 1;
+        ast_cmd->assignment = new_assignment;
         ast_cmd->assignment[i] = NULL;
         return 0;
     }

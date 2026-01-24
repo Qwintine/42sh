@@ -31,11 +31,21 @@ static int update_pwd(struct dictionnary *vars)
     }
     
     char *oldpwd_var = malloc(strlen(saved_pwd) + 8);
+    if (!oldpwd_var)
+    {
+        free(saved_pwd);
+        return 1;
+    }
     strcpy(oldpwd_var, "OLDPWD=");
     strcat(oldpwd_var, saved_pwd);
     free(saved_pwd);
     
     char *pwd_var = malloc(strlen(new_pwd) + 5);
+    if (!pwd_var)
+    {
+        free(oldpwd_var);
+        return 1;
+    }
     strcpy(pwd_var, "PWD=");
     strcat(pwd_var, new_pwd);
     
@@ -89,6 +99,12 @@ int cd_b(char **args, struct dictionnary *vars)
     if (print_path)
     {
         path_to_print = strdup(path);
+        if (!path_to_print)
+        {
+            if (home) free_ex(home);
+            if (oldpwd) free_ex(oldpwd);
+            return 1;
+        }
     }
     
     int result = update_pwd(vars);

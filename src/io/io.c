@@ -60,10 +60,17 @@ static void arg_num(int num, struct dictionnary *vars)
     else
     {
         char *a_n = malloc(20);
+        if (!a_n)
+            return;
         a_n[0] = '#';
         a_n[1] = '=';
         a_n[2] = 0;
         char *inum = itoa(num);
+        if (!inum)
+        {
+            free(a_n);
+            return;
+        }
         a_n = strcat(a_n, inum);
         free(inum);
         add_var(vars, a_n);
@@ -101,6 +108,10 @@ FILE *arg_file(int argc, char **argv, int *prettyprint, struct dictionnary *vars
                 return NULL;
             }
             entry = fmemopen(argv[i], strlen(argv[i]), "r");
+            if (!entry)
+            {
+                return NULL;
+            }
         }
         else if (strcmp(argv[i], "--prettyprint") == 0)
         {
@@ -112,13 +123,24 @@ FILE *arg_file(int argc, char **argv, int *prettyprint, struct dictionnary *vars
         {
             arg_count = 2;
             entry = fopen(argv[i], "r");
+            if (!entry)
+            {
+                return NULL;
+            }
         }
         else
         {
             if(i>1 && vars != NULL)
             {
                 char *arg_name = malloc(20);
+                if (!arg_name)
+                    continue;
                 char *inum = itoa(i-arg_count);
+                if (!inum)
+                {
+                    free(arg_name);
+                    continue;
+                }
                 arg_name = strcpy(arg_name, inum);
                 free(inum);
                 arg_name = strcat(arg_name, "=");

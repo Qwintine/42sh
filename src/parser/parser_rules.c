@@ -255,10 +255,14 @@ static int parser_rule_for_aux(struct lex *lex, struct ast_for *ast_for)
 
             ast_for->words[w] = tok->value;
             w++;
-            ast_for->words = realloc(ast_for->words, (w + 1) * sizeof(char *));
-            ast_for->words[w] = NULL;
-            if (!ast_for->words)
+            char **new_words = realloc(ast_for->words, (w + 1) * sizeof(char *));
+            if (!new_words)
+            {
+                free(tok);
                 return 1;
+            }
+            ast_for->words = new_words;
+            ast_for->words[w] = NULL;
             free(tok);
         }
     }

@@ -85,19 +85,22 @@ struct ast *parser_simple_command(struct lex *lex)
         if (!tok)
             goto ERROR;
         ast_cmd->words[w] = tok->value;
-        ast_cmd->types = realloc(ast_cmd->types, (w + 1) * sizeof(enum type));
-        if (!ast_cmd->types)
+        enum type *new_types = realloc(ast_cmd->types, (w + 1) * sizeof(enum type));
+        if (!new_types)
         {
+            free(tok);
             goto ERROR;
         }
+        ast_cmd->types = new_types;
         ast_cmd->types[w] = tok->token_type;
         free(tok);
         w++;
-        ast_cmd->words = realloc(ast_cmd->words, (w + 1) * sizeof(char *));
-        if (!ast_cmd->words)
+        char **new_words = realloc(ast_cmd->words, (w + 1) * sizeof(char *));
+        if (!new_words)
         {
             goto ERROR;
         }
+        ast_cmd->words = new_words;
         ast_cmd->words[w] = NULL;
 
         while (peek(lex) != NULL

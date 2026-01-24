@@ -26,6 +26,11 @@ int hash(char *str)
 static void add_special(struct dictionnary *dict, char *key, char *val)
 {
     char *varas = malloc(strlen(key) + strlen(val) + 2);
+    if (!varas)
+    {
+        free(val);
+        return;
+    }
     varas = strcpy(varas,key);
     varas = strcat(varas, "=");
     varas = strcat(varas, val);
@@ -42,24 +47,51 @@ static void add_special(struct dictionnary *dict, char *key, char *val)
 struct dictionnary *init_dict(void)
 {
     struct dictionnary *dict = malloc(sizeof(struct dictionnary));
+    if (!dict)
+        return NULL;
 
     for (size_t i = 0; i < 20; i++)
     {
         dict->values[i] = NULL;
     }
 
-    add_special(dict, "$", itoa(getpid()));
+    char *pid_str = itoa(getpid());
+    if (pid_str)
+        add_special(dict, "$", pid_str);
+    
     struct passwd *pw = getpwuid(getuid());
-    add_special(dict, "UID", itoa((int)getuid()));
+    char *uid_str = itoa((int)getuid());
+    if (uid_str)
+        add_special(dict, "UID", uid_str);
+    
     if (pw && pw->pw_dir)
-        add_special(dict, "HOME", strdup(pw->pw_dir));
+    {
+        char *home = strdup(pw->pw_dir);
+        if (home)
+            add_special(dict, "HOME", home);
+    }
     else
-        add_special(dict, "HOME", strdup("/"));
+    {
+        char *home = strdup("/");
+        if (home)
+            add_special(dict, "HOME", home);
+    }
+    
     char* cwd = malloc(2048);
-    cwd = getcwd(cwd, 2048);
-    add_special(dict, "PWD", strdup(cwd));
-    free(cwd);
-    add_special(dict, "IFS", strdup(" \t\n"));
+    if (cwd)
+    {
+        if (getcwd(cwd, 2048))
+        {
+            char *pwd = strdup(cwd);
+            if (pwd)
+                add_special(dict, "PWD", pwd);
+        }
+        free(cwd);
+    }
+    
+    char *ifs = strdup(" \t\n");
+    if (ifs)
+        add_special(dict, "IFS", ifs);
     //key[2] = "PATH";
 
     return dict;
@@ -192,18 +224,33 @@ int add_var_arg(struct dictionnary *dict, char *key, char **val)
     }
 
     new->key = strdup(key);
+    if (!new->key)
+    {
+        free(new);
+        goto ERROR;
+    }
     size_t i = 0;
     while (val[i])
         i++;
     new->elt = malloc((i + 1) * sizeof(char *));
     if (!new->elt)
     {
+        free(new->key);
         free(new);
         goto ERROR;
     }
     for (size_t j = 0; j < i; j++)
     {
         new->elt[j] = strdup(val[j]);
+        if (!new->elt[j])
+        {
+            for (size_t k = 0; k < j; k++)
+                free(new->elt[k]);
+            free(new->elt);
+            free(new->key);
+            free(new);
+            goto ERROR;
+        }
     }
     new->elt[i] = NULL;
     new->next = NULL;
@@ -251,6 +298,11 @@ char **get_var(struct dictionnary *dict, char *key)
     if (g)
     {
         char **res = malloc(2 * sizeof(char *));
+        if (!res)
+        {
+            free(g);
+            return NULL;
+        }
         res[0] = g;
         res[1] = NULL;
         return res;
@@ -266,6 +318,8 @@ char **get_var(struct dictionnary *dict, char *key)
     if (!target)
     {
         char **res = malloc(sizeof(char *));
+        if (!res)
+            return NULL;
         res[0] = NULL;
         if(!strcmp(key, "OLDPWD"))
         {
@@ -280,10 +334,19 @@ char **get_var(struct dictionnary *dict, char *key)
         i++;
     }
     char **res = malloc((i+1) * sizeof(char *));
+    if (!res)
+        return NULL;
     size_t j = 0;
     while(j < i)
     {
         res[j] = strdup(target->elt[j]);
+        if (!res[j])
+        {
+            for (size_t k = 0; k < j; k++)
+                free(res[k]);
+            free(res);
+            return NULL;
+        }
         j++;
     }
     res[j] = NULL;

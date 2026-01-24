@@ -34,8 +34,14 @@ struct ast *parser_pipeline(struct lex *lex)
     {
         ast_pipe->cmd[ind] = ast_cmd;
         ind++;
-        ast_pipe->cmd =
+        struct ast_cmd **new_cmd =
             realloc(ast_pipe->cmd, (ind + 1) * sizeof(struct ast_cmd *));
+        if (!new_cmd)
+        {
+            free_ast((struct ast *)ast_pipe);
+            return NULL;
+        }
+        ast_pipe->cmd = new_cmd;
         ast_pipe->cmd[ind] = NULL;
         pipe = (peek(lex) && peek(lex)->token_type == PIPE);
         if (pipe)
