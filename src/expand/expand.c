@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../ast/ast.h"
+
 static int is_word(char c)
 {
     return ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') 
@@ -298,93 +300,51 @@ char **expand(struct dictionnary *vars, char **words)
                 strcat(res[j],var);
                 free(var);
             }
-            else if(words[i][ibis] == '\'')
-            {
-                char *var = single_quote_expand(words[i], &ibis);
-                if (!var)
+                else if(words[i][ibis] == '\'')
                 {
-                    free_ex(res);
-                    return NULL;
-                }
-                char *tmp = realloc(res[j], strlen(res[j]) + strlen(var) + 1);
-                if (!tmp)
-                {
+                    char *var = single_quote_expand(words[i], &ibis);
+                    res[j] = realloc(res[j], strlen(res[j]) + strlen(var) + 1);
+                    strcat(res[j], var);
                     free(var);
-                    free_ex(res);
-                    return NULL;
                 }
-                res[j] = tmp;
-                strcat(res[j], var);
-                free(var);
-            }
-            else if(words[i][ibis] == '"')
-            {
-                char *var = double_quotes_expand(vars,words[i], &ibis);
-                if (!var)
+                else if(words[i][ibis] == '"')
                 {
-                    free_ex(res);
-                    return NULL;
-                }
-                char *tmp = realloc(res[j], strlen(res[j]) + strlen(var) + 1);
-                if (!tmp)
-                {
+                    char *var = double_quotes_expand(vars,words[i], &ibis);
+                    res[j] = realloc(res[j], strlen(res[j]) + strlen(var) + 1);
+                    strcat(res[j], var);
                     free(var);
-                    free_ex(res);
-                    return NULL;
                 }
-                res[j] = tmp;
-                strcat(res[j], var);
-                free(var);
-            }
-            else if (words[i][ibis] == '\\')
-            {
-                ibis++;
-                char *tmp = realloc(res[j], strlen(res[j]) + 2);
-                if (!tmp)
+                else if (words[i][ibis] == '\\')
                 {
-                    free_ex(res);
-                    return NULL;
+                    ibis++;
+                    res[j] = realloc(res[j], strlen(res[j]) + 2);
+                    size_t len = strlen(res[j]);
+                    res[j][len] = words[i][ibis];
+                    res[j][len + 1] = 0;
                 }
-                res[j] = tmp;
-                size_t len = strlen(res[j]);
-                res[j][len] = words[i][ibis];
-                res[j][len + 1] = 0;
+                else
+                {
+                    res[j] = realloc(res[j], strlen(res[j]) + 2);
+                    size_t len = strlen(res[j]);
+                    res[j][len] = words[i][ibis];
+                    res[j][len + 1] = 0;
+                }
+                if (words[i][ibis] != 0)
+                    ibis++;
+            }
+            i++;
+            j++;
+            if(!res[j-1][0] == 0)
+            {
+                res = realloc(res, (j + 1) * sizeof(char *));
+                res[j] = NULL;
             }
             else
             {
-                char *tmp = realloc(res[j], strlen(res[j]) + 2);
-                if (!tmp)
-                {
-                    free_ex(res);
-                    return NULL;
-                }
-                res[j] = tmp;
-                size_t len = strlen(res[j]);
-                res[j][len] = words[i][ibis];
-                res[j][len + 1] = 0;
+                j--;
+                free(res[j]);
+                res[j] = NULL;
             }
-            if (words[i][ibis] != 0)
-                ibis++;
-        }
-        i++;
-        j++;
-        if(!res[j-1][0] == 0)
-        {
-            char **tmp = realloc(res, (j + 1) * sizeof(char *));
-            if (!tmp)
-            {
-                free_ex(res);
-                return NULL;
-            }
-            res = tmp;
-            res[j] = NULL;
-        }
-        else
-        {
-            j--;
-            free(res[j]);
-            res[j] = NULL;
-        }
     }
     if(res[0] == NULL)
     {

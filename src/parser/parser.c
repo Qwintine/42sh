@@ -21,7 +21,7 @@
  * 	      ;
  * 	TODO
  */
-struct ast *parser(FILE *entry, int *eof)
+struct ast *parser(FILE *entry, int *eof, struct dictionnary *dict)
 {
     struct lex *lex = init_lex(entry);
     lex->context = KEYWORD;
@@ -51,7 +51,7 @@ struct ast *parser(FILE *entry, int *eof)
         return NULL;
     }
     struct ast *ast =
-        parser_list(lex); // récursion sur ast type list ( cf. parser_list )
+        parser_list(lex, dict); // récursion sur ast type list ( cf. parser_list )
 
     if (!ast) // remontée erreur syntax / grammaire
     {

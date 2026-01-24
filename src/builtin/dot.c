@@ -55,7 +55,7 @@ int main_loop(FILE *entry, struct dictionnary *vars, int *exit)
 
 	while (!eof)
 	{
-		struct ast *ast = parser(entry, &eof);
+		struct ast *ast = parser(entry, &eof, vars);
 
 		if (!ast)
 		{

@@ -276,3 +276,59 @@ int handle_bracket(struct lex *lex, struct token *tok,
         return handle_opening_bracket(lex, tok, quote_status);
     return handle_closing_bracket(lex, tok, quote_status);
 }
+
+int handle_parenthesis(struct lex *lex, struct token *tok,
+                    struct quote_status *quote_status, char val)
+{
+    if (!quote_status->double_quote && !quote_status->single_quote)
+    {
+        char buf[1];
+        if (strlen(tok->value) > 0)
+        {
+            if (tok->value[strlen(tok->value) - 1] != '$' && fread(buf, 1, 1, lex->entry))
+            {
+                if (buf[0] == ')')
+                {
+                    tok->value = concat(tok->value, val);
+                    if (!tok->value)
+                        return 1;
+                    tok->value = concat(tok->value, buf[0]);
+                    if (!tok->value)
+                        return 1;
+                    tok->token_type = FUNCTION;
+                    return -1;
+                }
+                else
+                {
+                    fseek(lex->entry, -2, SEEK_CUR);
+                    return 1;
+                }
+            }
+        }
+        tok->value = concat(tok->value, val);
+        if (!tok->value)
+            return 1;
+        tok->token_type = WORD;
+        while (fread(buf, 1, 1, lex->entry))
+        {
+            if (buf[0] == ')')
+            {
+                tok->value = concat(tok->value, buf[0]);
+                if (!tok->value)
+                    return 1;
+                return -1;
+            }
+            else
+            {
+                tok->value = concat(tok->value, buf[0]);
+                if (!tok->value)
+                    return 1;
+            }
+        }
+        return 1;
+    }
+    tok->value = concat(tok->value, val);
+    if (!tok->value)
+        return 1;
+    return -1;
+}

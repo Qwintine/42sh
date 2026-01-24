@@ -11,7 +11,7 @@
  * 	Grammar:
  * 		{'\n'} and_or { ( ';' | '\n' ) {'\n'} and_or } [';'] {'\n'} ;
  */
-struct ast *parser_compound_list(struct lex *lex)
+struct ast *parser_compound_list(struct lex *lex, struct dictionnary *dict)
 {
     if (!peek(lex) || peek(lex)->token_type == END)
     {
@@ -35,7 +35,7 @@ struct ast *parser_compound_list(struct lex *lex)
     struct ast_list *head = (struct ast_list *)init_ast_list();
     struct ast_list *current = head;
 
-    current->elt = parser_and_or(lex);
+    current->elt = parser_and_or(lex, dict);
     if (!current->elt)
     {
         free_ast((struct ast *)current);
@@ -69,7 +69,7 @@ struct ast *parser_compound_list(struct lex *lex)
         }
 
         struct ast_list *new_node = (struct ast_list *)init_ast_list();
-        new_node->elt = parser_and_or(lex);
+        new_node->elt = parser_and_or(lex, dict);
         if (!new_node->elt)
         {
             free_ast((struct ast *)new_node);
@@ -98,7 +98,7 @@ struct ast *parser_compound_list(struct lex *lex)
  *		list = and_or { ';' and_or } [ ';' ]
  *	TODO
  */
-struct ast *parser_list(struct lex *lex)
+struct ast *parser_list(struct lex *lex, struct dictionnary *dict)
 {
     if (!peek(lex)
         || peek(lex)->token_type == END) // can't start with EOF -> Error
@@ -109,8 +109,8 @@ struct ast *parser_list(struct lex *lex)
     struct ast_list *head = (struct ast_list *)init_ast_list();
     struct ast_list *current = head;
 
-    current->elt = parser_and_or(
-        lex); // récursion sur ast type and_or ( cf. parser_and_or )
+    // récursion sur ast type and_or ( cf. parser_and_or )
+    current->elt = parser_and_or(lex, dict); 
     if (!current->elt)
     {
         free(head);
@@ -132,7 +132,7 @@ struct ast *parser_list(struct lex *lex)
 
         struct ast_list *new_node = (struct ast_list *)
             init_ast_list(); // éléments liste de block de and_or
-        new_node->elt = parser_and_or(lex); // récursion sur ast type and_or
+        new_node->elt = parser_and_or(lex, dict); // récursion sur ast type and_or
         if (!new_node->elt)
         {
             free(new_node);

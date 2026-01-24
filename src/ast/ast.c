@@ -47,7 +47,6 @@ struct ast *init_ast_cmd(void)
         free(node);
         return NULL;
     }
-    node->types = NULL;
     node->words = calloc(1, sizeof(char *));
     if (!node->words)
     {
@@ -146,7 +145,6 @@ static void ast_free_cmd(struct ast *ast)
 {
     int i = 0;
     struct ast_cmd *ast_cmd = (struct ast_cmd *)ast;
-    free(ast_cmd->types);
     while (ast_cmd->assignment[i])
     {
         free(ast_cmd->assignment[i]);

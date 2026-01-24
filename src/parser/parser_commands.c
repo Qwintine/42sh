@@ -1,6 +1,10 @@
+#define _XOPEN_SOURCE 500
+
 #include <stdlib.h>
+#include <string.h>
 
 #include "parser_aux.h"
+#include "../expand/hashmap.h"
 
 /*
  * Description:
@@ -11,19 +15,19 @@
  * 	Grammar:
  * 		either an if, while or until block
  */
-struct ast *parser_shell_command(struct lex *lex)
+struct ast *parser_shell_command(struct lex *lex, struct dictionnary *dict)
 {
     struct ast *ast = NULL;
     if (peek(lex) && peek(lex)->token_type == IF)
-        ast = parser_rule_if(lex);
+        ast = parser_rule_if(lex, dict);
     else if (peek(lex) && peek(lex)->token_type == WHILE)
-        ast = parser_rule_while(lex);
+        ast = parser_rule_while(lex, dict);
     else if (peek(lex) && peek(lex)->token_type == UNTIL)
-        ast = parser_rule_until(lex);
+        ast = parser_rule_until(lex, dict);
     else if (peek(lex) && peek(lex)->token_type == FOR)
-        ast = parser_rule_for(lex);
+        ast = parser_rule_for(lex, dict);
     else
-        ast = parser_rule_command_block(lex);
+        ast = parser_rule_command_block(lex, dict);
 
     if (peek(lex)
         && (peek(lex)->token_type == IO_NUMBER
@@ -69,9 +73,9 @@ struct ast *parser_simple_command(struct lex *lex)
     struct ast_cmd *ast_cmd = (struct ast_cmd *)init_ast_cmd();
     size_t w = 0;
     while (peek(lex)
-           && (peek(lex)->token_type == IO_NUMBER
-               || is_redir(peek(lex)->token_type)
-               || peek(lex)->token_type == ASSIGNMENT))
+        && (peek(lex)->token_type == IO_NUMBER
+            || is_redir(peek(lex)->token_type)
+            || peek(lex)->token_type == ASSIGNMENT))
     {
         if (parser_prefix(lex, ast_cmd))
         {
@@ -81,19 +85,13 @@ struct ast *parser_simple_command(struct lex *lex)
     lex->context = WORD;
     if (peek(lex) && peek(lex)->token_type == WORD)
     {
+        char *val = NULL;
         struct token *tok = pop(lex);
         if (!tok)
             goto ERROR;
-        ast_cmd->words[w] = tok->value;
-        enum type *new_types = realloc(ast_cmd->types, (w + 1) * sizeof(enum type));
-        if (!new_types)
-        {
-            free(tok);
-            goto ERROR;
-        }
-        ast_cmd->types = new_types;
-        ast_cmd->types[w] = tok->token_type;
+        val = tok->value;
         free(tok);
+        ast_cmd->words[w] = val;
         w++;
         char **new_words = realloc(ast_cmd->words, (w + 1) * sizeof(char *));
         if (!new_words)
@@ -127,15 +125,36 @@ ERROR:
     return NULL;
 }
 
+struct ast *parser_fundef(struct lex *lex, struct dictionnary *dict)
+{
+    if(!peek(lex) || !(peek(lex)->token_type == FUNCTION))
+        return NULL;
+    char *cmd = strdup(peek(lex)->value);
+    discard_token(pop(lex));
+    cmd[strlen(cmd)-2] = 0; // remove () at the end
+
+    while(peek(lex) && peek(lex)->token_type == NEWLINE)
+        discard_token(pop(lex));
+
+    add_func(dict,cmd,parser_shell_command(lex,dict));
+    
+    struct ast_list *empty = (struct ast_list *)init_ast_list();
+    return (struct ast *)empty;
+}
+
 // prochaine step -> ajouter gestion  { redirections } après shell_command
-struct ast *parser_command(struct lex *lex)
+struct ast *parser_command(struct lex *lex, struct dictionnary *dict)
 {
     if (peek(lex)
         && (peek(lex)->token_type == IF || peek(lex)->token_type == WHILE
             || peek(lex)->token_type == UNTIL || peek(lex)->token_type == FOR
             || peek(lex)->token_type == OPENING_BRACKET))
     {
-        return parser_shell_command(lex);
+        return parser_shell_command(lex, dict);
+    }
+    if(peek(lex) && peek(lex)->token_type == FUNCTION)
+    {
+        return parser_fundef(lex,dict);
     }
     return parser_simple_command(lex);
 }
