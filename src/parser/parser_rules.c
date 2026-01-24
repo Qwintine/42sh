@@ -10,7 +10,7 @@
  * 	Grammar:
  * 		elif' compound_list 'then' compound_list [else_clause]
  */
-struct ast *parser_elif(struct lex *lex)
+struct ast *parser_elif(struct lex *lex, struct dictionnary *dict)
 {
     if (!peek(lex) || peek(lex)->token_type != ELIF)
         return NULL;
@@ -18,7 +18,7 @@ struct ast *parser_elif(struct lex *lex)
 
     struct ast_if *ast_if = (struct ast_if *)init_ast_if();
 
-    ast_if->condition = parser_compound_list(lex);
+    ast_if->condition = parser_compound_list(lex,dict);
 
     if (!peek(lex) || peek(lex)->token_type != THEN || !ast_if->condition)
     {
@@ -26,7 +26,7 @@ struct ast *parser_elif(struct lex *lex)
     }
     discard_token(pop(lex));
 
-    ast_if->then_body = parser_compound_list(lex);
+    ast_if->then_body = parser_compound_list(lex,dict);
     if (!ast_if->then_body)
     {
         goto ERROR;
@@ -35,7 +35,7 @@ struct ast *parser_elif(struct lex *lex)
     if (peek(lex)
         && (peek(lex)->token_type == ELSE || peek(lex)->token_type == ELIF))
     {
-        ast_if->else_body = parser_else_clause(lex);
+        ast_if->else_body = parser_else_clause(lex,dict);
         if (!ast_if->else_body)
         {
             goto ERROR;
@@ -58,20 +58,20 @@ ERROR:
  * 		      | 'elif' compound_list 'then' compound_list [else_clause]
  * 		      ;
  */
-struct ast *parser_else_clause(struct lex *lex)
+struct ast *parser_else_clause(struct lex *lex, struct dictionnary *dict)
 {
     if (!peek(lex) || peek(lex)->token_type == END)
         return NULL;
 
     if (peek(lex)->token_type == ELIF)
     {
-        return parser_elif(lex);
+        return parser_elif(lex, dict);
     }
 
     if (peek(lex)->token_type == ELSE)
     {
         discard_token(pop(lex));
-        return parser_compound_list(lex);
+        return parser_compound_list(lex,dict);
     }
 
     return NULL;
@@ -86,7 +86,7 @@ struct ast *parser_else_clause(struct lex *lex)
  * 	Grammar:
  * 		'if' compound_list 'then' compound_list [else_clause] 'fi' ;
  */
-struct ast *parser_rule_if(struct lex *lex)
+struct ast *parser_rule_if(struct lex *lex, struct dictionnary *dict)
 {
     if (!peek(lex) || peek(lex)->token_type != IF) // si autre keyword
         return NULL;
@@ -94,7 +94,7 @@ struct ast *parser_rule_if(struct lex *lex)
 
     struct ast_if *ast_if = (struct ast_if *)init_ast_if();
 
-    ast_if->condition = parser_compound_list(lex);
+    ast_if->condition = parser_compound_list(lex,dict);
     if (!ast_if->condition)
     {
         goto ERROR;
@@ -106,7 +106,7 @@ struct ast *parser_rule_if(struct lex *lex)
     }
     discard_token(pop(lex));
 
-    ast_if->then_body = parser_compound_list(lex);
+    ast_if->then_body = parser_compound_list(lex,dict);
     if (!ast_if->then_body)
     {
         goto ERROR;
@@ -115,7 +115,7 @@ struct ast *parser_rule_if(struct lex *lex)
     if (peek(lex)
         && (peek(lex)->token_type == ELSE || peek(lex)->token_type == ELIF))
     {
-        ast_if->else_body = parser_else_clause(lex);
+        ast_if->else_body = parser_else_clause(lex,dict);
         if (!ast_if->else_body)
         {
             goto ERROR;
@@ -144,7 +144,7 @@ ERROR:
  * 	Grammar:
  * 		'while' compound_list 'do' compound_list 'done' ;
  */
-struct ast *parser_rule_while(struct lex *lex)
+struct ast *parser_rule_while(struct lex *lex, struct dictionnary *dict)
 {
     if (!peek(lex) || peek(lex)->token_type != WHILE)
         return NULL;
@@ -152,7 +152,7 @@ struct ast *parser_rule_while(struct lex *lex)
 
     struct ast_loop *ast_loop = (struct ast_loop *)init_ast_loop();
 
-    ast_loop->condition = parser_compound_list(lex);
+    ast_loop->condition = parser_compound_list(lex, dict);
     if (!ast_loop->condition)
     {
         goto ERROR;
@@ -164,7 +164,7 @@ struct ast *parser_rule_while(struct lex *lex)
     }
     discard_token(pop(lex));
 
-    ast_loop->body = parser_compound_list(lex);
+    ast_loop->body = parser_compound_list(lex, dict);
     if (!ast_loop->body)
     {
         goto ERROR;
@@ -192,7 +192,7 @@ ERROR:
  * 	Grammar:
  * 		'until' compound_list 'do' compound_list 'done' ;
  */
-struct ast *parser_rule_until(struct lex *lex)
+struct ast *parser_rule_until(struct lex *lex, struct dictionnary *dict)
 {
     if (!peek(lex) || peek(lex)->token_type != UNTIL)
         return NULL;
@@ -203,7 +203,7 @@ struct ast *parser_rule_until(struct lex *lex)
     // inverse la condition
     ast_loop->truth = 1;
 
-    ast_loop->condition = parser_compound_list(lex);
+    ast_loop->condition = parser_compound_list(lex, dict);
     if (!ast_loop->condition)
     {
         goto ERROR;
@@ -215,7 +215,7 @@ struct ast *parser_rule_until(struct lex *lex)
     }
     discard_token(pop(lex));
 
-    ast_loop->body = parser_compound_list(lex);
+    ast_loop->body = parser_compound_list(lex, dict);
     if (!ast_loop->body)
     {
         goto ERROR;
@@ -269,7 +269,7 @@ static int parser_rule_for_aux(struct lex *lex, struct ast_for *ast_for)
     return 0;
 }
 
-struct ast *parser_rule_for(struct lex *lex)
+struct ast *parser_rule_for(struct lex *lex, struct dictionnary *dict)
 {
     if (!peek(lex) || peek(lex)->token_type != FOR)
         return NULL;
@@ -301,7 +301,7 @@ struct ast *parser_rule_for(struct lex *lex)
         goto ERROR;
     discard_token(pop(lex));
 
-    ast_for->body = parser_compound_list(lex);
+    ast_for->body = parser_compound_list(lex, dict);
 
     if (!peek(lex) || peek(lex)->token_type != DONE)
         goto ERROR;
@@ -314,13 +314,13 @@ ERROR:
     return NULL;
 }
 
-struct ast *parser_rule_command_block(struct lex *lex)
+struct ast *parser_rule_command_block(struct lex *lex, struct dictionnary *dict)
 {
     if(!peek(lex) || !(peek(lex)->token_type == OPENING_BRACKET))
         return NULL;
     discard_token(pop(lex));
 
-    struct ast *ast = parser_compound_list(lex);
+    struct ast *ast = parser_compound_list(lex, dict);
 
     if(!peek(lex) || !(peek(lex)->token_type == CLOSING_BRACKET))
     {

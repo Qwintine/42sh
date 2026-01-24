@@ -9,6 +9,7 @@
 
 #include "../utils/itoa.h"
 #include <pwd.h>
+#include "../ast/ast.h"
 
 int hash(char *str)
 {
@@ -52,7 +53,12 @@ struct dictionnary *init_dict(void)
 
     for (size_t i = 0; i < 20; i++)
     {
-        dict->values[i] = NULL;
+        dict->variables[i] = NULL;
+    }
+
+    for (size_t i = 0; i < 20; i++)
+    {
+        dict->function[i] = NULL;
     }
 
     char *pid_str = itoa(getpid());
@@ -110,10 +116,10 @@ char *special(char *key)
     return 0;
 }
 
-static int update_or_append_var(struct values *bucket, struct values *new,
+static int update_or_append_var(struct variables *bucket, struct variables *new,
                                 char *key, char *val)
 {
-    struct values *target = bucket;
+    struct variables *target = bucket;
     while (target)
     {
         if (strcmp(target->key, key) == 0)
@@ -174,7 +180,7 @@ int add_var(struct dictionnary *dict, char *varas)
     free(to_ex);
     free(expanded);
 
-    struct values *new = malloc(sizeof(struct values));
+    struct variables *new = malloc(sizeof(struct variables));
 
     if (!new)
     {
@@ -193,19 +199,16 @@ int add_var(struct dictionnary *dict, char *varas)
     new->next = NULL;
 
     int ind = hash(key);
-    if (!dict->values[ind])
+    if (!dict->variables[ind])
     {
-        dict->values[ind] = new;
+        dict->variables[ind] = new;
         char *env_val = getenv(key);
         if (env_val != NULL)
             setenv(key, val, 1);
         return 0;
     }
 
-    int ret = update_or_append_var(dict->values[ind], new, key, val);
-    // Note: if ret == 0, key has been freed by update_or_append_var
-    // In that case, the variable already exists and was updated
-    // getenv/setenv are already handled in update_or_append_var
+    int ret = update_or_append_var(dict->variables[ind], new, key, val);
     return ret;
 
 ERROR:
@@ -216,7 +219,7 @@ ERROR:
 
 int add_var_arg(struct dictionnary *dict, char *key, char **val)
 {
-    struct values *new = malloc(sizeof(struct values));
+    struct variables *new = malloc(sizeof(struct variables));
 
     if (!new)
     {
@@ -261,18 +264,18 @@ int add_var_arg(struct dictionnary *dict, char *key, char **val)
     }
 
     int ind = hash(key);
-    if (!dict->values[ind])
+    if (!dict->variables[ind])
     {
-        dict->values[ind] = new;
+        dict->variables[ind] = new;
         return 0;
     }
 
-    struct values *target = dict->values[ind];
+    struct variables *target = dict->variables[ind];
     while (target->next)
     {
         if (strcmp(target->key, key) == 0)
         {
-            free_val(new);
+            free_var(new);
             target->elt = val;
             return 0;
         }
@@ -284,6 +287,44 @@ int add_var_arg(struct dictionnary *dict, char *key, char **val)
 ERROR:
     free(key);
     free(val);
+    return 1;
+}
+
+int add_func(struct dictionnary *dict, char *key, struct ast *cmd_block)
+{
+    struct function *new = malloc(sizeof(struct function));
+    new->key = key;
+    new->ast = cmd_block;
+    new->next = NULL;
+
+    int ind = hash(key);
+
+    if(!dict->function[ind])
+    {
+        dict->function[ind] = new;
+        return 0;
+    }
+
+    struct function *target = dict->function[ind];
+    while (target)
+    {
+        if (strcmp(target->key, key) == 0)
+        {
+            free_ast(target->ast);
+            target->ast = cmd_block;
+            free(new->key);
+            free(new);
+            return 0;
+        }
+        if (!target->next)
+        {
+            target->next = new;
+            return 0;
+        }
+        if (!target->next)
+            break;
+        target = target->next;
+    }
     return 1;
 }
 
@@ -310,7 +351,7 @@ char **get_var(struct dictionnary *dict, char *key)
 
     int ind = hash(key);
 
-    struct values *target = dict->values[ind];
+    struct variables *target = dict->variables[ind];
     while (target && strcmp(target->key, key) != 0)
     {
         target = target->next;
@@ -353,12 +394,28 @@ char **get_var(struct dictionnary *dict, char *key)
     return res;
 }
 
-void free_val(struct values *val)
+struct ast *get_func(struct dictionnary *dict, char *key)
 {
-    while (val)
+    int ind = hash(key);
+
+    struct function *target = dict->function[ind];
+    while (target && strcmp(target->key, key) != 0)
     {
-        struct values *last = val;
-        val = val->next;
+        target = target->next;
+    }
+    if (!target)
+    {
+        return NULL;
+    }
+    return target->ast;
+}
+
+void free_var(struct variables *var)
+{
+    while (var)
+    {
+        struct variables *last = var;
+        var = var->next;
         free(last->key);
         size_t i = 0;
         while (last->elt[i])
@@ -371,11 +428,24 @@ void free_val(struct values *val)
     }
 }
 
+void free_func(struct function *function)
+{
+    while (function)
+    {
+        struct function *last = function;
+        function = function->next;
+        free(last->key);
+        free_ast(last->ast);
+        free(last);
+    }
+}
+
 void free_dict(struct dictionnary *dict)
 {
     for (size_t i = 0; i < 20; i++)
     {
-        free_val(dict->values[i]);
+        free_var(dict->variables[i]);
+        free_func(dict->function[i]);
     }
     free(dict);
 }

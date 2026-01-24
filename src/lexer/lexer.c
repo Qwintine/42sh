@@ -78,6 +78,15 @@ static int sub_switch_delim(struct lex *lex, struct token *tok, char *buf,
             return 0;
         break;
     }
+    case '(':
+    {
+        int res = handle_parenthesis(lex, tok, quote_status, buf[0]);
+        if (res == 1)
+            return 1;
+        if (res == 0)
+            return 0;
+        break;
+    }
     default: // cas 9 et 11
         return sub_switch_op(lex, tok, buf, quote_status);
     }

@@ -118,7 +118,7 @@ int dot_b(char **words, struct dictionnary *vars, int *exit)
 
 	while (!eof)
 	{
-		struct ast *ast = parser(entry, &eof);
+		struct ast *ast = parser(entry, &eof,vars);
 
 		if (!ast)
 		{
