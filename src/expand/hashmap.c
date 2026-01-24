@@ -51,7 +51,10 @@ struct dictionnary *init_dict(void)
     add_special(dict, "$", itoa(getpid()));
     struct passwd *pw = getpwuid(getuid());
     add_special(dict, "UID", itoa((int)getuid()));
-    add_special(dict, "HOME", strdup(pw->pw_dir));
+    if (pw && pw->pw_dir)
+        add_special(dict, "HOME", strdup(pw->pw_dir));
+    else
+        add_special(dict, "HOME", strdup("/"));
     char* cwd = malloc(2048);
     cwd = getcwd(cwd, 2048);
     add_special(dict, "PWD", strdup(cwd));
