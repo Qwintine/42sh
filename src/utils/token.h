@@ -16,6 +16,8 @@ enum type
     DO,
     DONE,
     IN,
+    OPENING_BRACKET,
+    CLOSING_BRACKET,
     REDIR_OUT, // >
     REDIR_IN, // <
     REDIR_APPEND, // >>

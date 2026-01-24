@@ -33,7 +33,7 @@ echo 3
 testcase "test_files: test_multiple_echo.sh" "" "tests/test_files/from_files/test_multiple_echo.sh"
 testcase "test_files: test_multiple_echo.sh" "<" "tests/test_files/from_files/test_multiple_echo.sh"
 
-testcase "pwd command" "-c" "pwd"
+testcase "PWD" "-c" "echo \$PWD"
 testcase "echo only" "-c" "echo"
 testcase "echo with -n" "-c" "echo -n test"
 testcase "true command" "-c" "true"

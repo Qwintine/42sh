@@ -1,4 +1,5 @@
 #include "unset.h"
+#include <stdlib.h>
 #include <string.h>
 
 static void free_node(struct values *val)

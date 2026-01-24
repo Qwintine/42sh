@@ -177,3 +177,102 @@ int new_op(struct token *tok, int quote, FILE *entry, char val)
         return -1;
     return 0;
 }
+
+static int handle_opening_bracket(struct lex *lex, struct token *tok,
+                           struct quote_status *quote_status)
+{
+    if (!quote_status->double_quote && !quote_status->single_quote)
+    {
+        if (tok->value && tok->value[0])
+        {
+            if (tok->value[0] == '$')
+            {
+                tok->value = concat(tok->value, '{');
+                if (!tok->value)
+                    return 1;
+                tok->token_type = WORD;
+                quote_status->bracket_open = 1;
+                return -1;
+            }
+            else
+            {
+                return 1;
+            }
+        }
+        else if (lex->context == KEYWORD)
+        {
+            tok->value = concat(tok->value, '{');
+            if (!tok->value)
+                return 1;
+            tok->token_type = OPENING_BRACKET;
+            lex->current_token = tok;
+            return 0;
+        }
+        else
+        {
+            tok->value = concat(tok->value, '{');
+            if (!tok->value)
+                return 1;
+            tok->token_type = WORD;
+        }
+    }
+    else
+    {
+        tok->value = concat(tok->value, '{');
+        if (!tok->value)
+            return 1;
+    }
+    return -1;
+}
+
+static int handle_closing_bracket(struct lex *lex, struct token *tok,
+                           struct quote_status *quote_status)
+{
+    if (!quote_status->double_quote && !quote_status->single_quote)
+    {
+        if (quote_status->bracket_open)
+        {
+            tok->value = concat(tok->value, '}');
+            if (!tok->value)
+                return 1;
+            tok->token_type = WORD;
+            quote_status->bracket_open = 0;
+            return -1;
+        }
+        else if (tok->value && tok->value[0])
+        {
+            return 1;
+        }
+        else if (lex->context == KEYWORD)
+        {
+            tok->value = concat(tok->value, '}');
+            if (!tok->value)
+                return 1;
+            tok->token_type = CLOSING_BRACKET;
+            lex->current_token = tok;
+            return 0;
+        }
+        else
+        {
+            tok->value = concat(tok->value, '}');
+            if (!tok->value)
+                return 1;
+            tok->token_type = WORD;
+        }
+    }
+    else
+    {
+        tok->value = concat(tok->value, '}');
+        if (!tok->value)
+            return 1;
+    }
+    return -1;
+}
+
+int handle_bracket(struct lex *lex, struct token *tok,
+                    struct quote_status *quote_status, char val)
+{
+    if (val == '{')
+        return handle_opening_bracket(lex, tok, quote_status);
+    return handle_closing_bracket(lex, tok, quote_status);
+}
