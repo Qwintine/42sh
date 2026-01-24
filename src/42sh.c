@@ -10,7 +10,7 @@
 /* Description:
  * 	Get file entry from args or stdin
  * Arguments:
- * 	int argc, char **argv -> args
+ * 	int argc, char **argv -> binary's args
  * 	int *prettyprint -> prettyprint flag
  * 	struct dictionnary *vars -> dictionnary of vars
  * Return:

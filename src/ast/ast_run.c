@@ -123,7 +123,7 @@ int ast_run_for(struct ast *ast, struct dictionnary *vars, int *exit)
         }
         for (size_t i = 0; all_vars[i] != NULL; i++)
         {
-            // varas = var_assignment, format "<name>=<value>"
+            // varas = "name=value"
             char *varas = malloc(strlen(ast_for->var) + strlen("=")
                                  + strlen(all_vars[i]) + 1);
             if (!varas)

@@ -168,7 +168,7 @@ static char *expand_value(struct dictionnary *dict, char *val)
 /*Description:
  *  Add a variable to the dictionnary
  *Arguments:
- *  varas: the variable as a string "<KEY>=<VALUE>"
+ *  varas: the variable as a string "KEY=VALUE"
  */
 int add_var(struct dictionnary *dict, char *varas)
 {
