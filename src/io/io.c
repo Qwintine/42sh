@@ -56,7 +56,7 @@ static FILE *stdin_to_mem(void)
  * Arguments:
  * 	int num -> num of args
  *  struct dictionnary *vars -> dictionnary of var
- */ 
+ */
 static void arg_num(int num, struct dictionnary *vars)
 {
     if (vars == NULL)
