@@ -126,7 +126,6 @@ int parser_element(struct lex *lex, struct ast_cmd *ast_cmd, size_t *w)
     return 1;
 }
 
-/* TODO */
 int parser_prefix(struct lex *lex, struct ast_cmd *ast_cmd)
 {
     if (peek(lex) && peek(lex)->token_type == ASSIGNMENT)

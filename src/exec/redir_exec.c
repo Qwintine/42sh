@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-/* TODO */
 static int read_io(char *string, int defaul)
 {
     if (!string || !string[0])
@@ -24,7 +23,6 @@ static int read_io(char *string, int defaul)
     return res;
 }
 
-/* TODO */
 static int fd_save(struct redir_saved *redir_saved, int fd)
 {
     if (fcntl(fd, F_GETFD) < 0) // no fd open

@@ -96,7 +96,6 @@ struct ast *parser_compound_list(struct lex *lex, struct dictionnary *dict)
  * Verbose:
  * 	Grammar:
  *		list = and_or { ';' and_or } [ ';' ]
- *	TODO
  */
 struct ast *parser_list(struct lex *lex, struct dictionnary *dict)
 {

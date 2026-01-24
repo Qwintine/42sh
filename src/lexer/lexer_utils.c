@@ -26,6 +26,7 @@ char *concat(char *val, char c)
     return new_val;
 }
 
+// Vérifie si str est composée uniquement de chiffres
 int all_digit(char *str)
 {
     for (size_t i = 0; i < strlen(str); i++)
@@ -36,6 +37,7 @@ int all_digit(char *str)
     return 1;
 }
 
+// Vérifie si il s'agit d'un io valide
 int valid_io(char *str)
 {
     if (!all_digit(str))
