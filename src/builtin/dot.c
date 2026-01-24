@@ -9,6 +9,14 @@
 #include "../lexer/lexer.h"
 #include "../parser/parser.h"
 
+/* Description:
+ * 	Concat path and string with '/' between
+ * Arguments:
+ * 	char *path -> path
+ * 	char *string ->string to concat
+ * Return:
+ * 	char * -> concat string
+ */
 static char *concat(char *path, char *string)
 {
     char *res = strdup(path);
@@ -44,6 +52,15 @@ static char *concat(char *path, char *string)
     return res;
 }
 
+/* Description:
+ * 	Main loop of dot builtin
+ * Arguments:
+ * 	FILE *entry -> file to read
+ * 	struct dictionnary *vars -> dictionnary of vars
+ * 	int *exit -> pointer to exit status
+ * Return:
+ * 	int -> Exit status of dot builtin
+ */
 int main_loop(FILE *entry, struct dictionnary *vars, int *exit)
 {
     if (!entry)
@@ -83,6 +100,15 @@ int main_loop(FILE *entry, struct dictionnary *vars, int *exit)
     return res;
 }
 
+/* Description:
+ * 	Execute the dot builtin cmd	
+ * Arguments:
+ * 	char **words -> args passed to dot
+ * 	struct dictionnary *vars -> dictionnary of vars
+ * 	int *exit -> pointer to exit status
+ * Return:
+ * 	int -> Exit status of dot cmd
+ */
 int dot_b(char **words, struct dictionnary *vars, int *exit)
 {
     if (*exit)

@@ -7,8 +7,7 @@
 #include <string.h>
 #include <unistd.h>
 
-/*
- * Description:
+/* Description:
  * 	Update PWD and OLDPWD vars after cd
  * Arguments:
  * 	struct dictionnary *vars -> dictionnary of vars
@@ -72,8 +71,7 @@ struct cd_result
     char **var;
 };
 
-/*
- * Description:
+/* Description:
  * 	Find the target path for cd command
  * Arguments:
  * 	char **args -> args passed to cd
@@ -121,8 +119,7 @@ static struct cd_result find_path(char **args, struct dictionnary *vars,
     return result;
 }
 
-/*
- * Description:
+/* Description:
  * 	Execute the cd builtin cmd
  * Arguments:
  * 	char **args -> args passed to cd

@@ -3,7 +3,14 @@
 
 #include <ctype.h>
 
-static int is_valid_name(const char *name)
+/* Description:
+ * 	Check if valid var name
+ * Arguments:
+ * 	char *name -> variable name
+ * Return:
+ * 	int -> 1 if valid, 0 otherwise
+ */
+static int is_valid_name(char *name)
 {
     if (!name || !*name || isdigit(*name))
         return 0;
@@ -15,6 +22,14 @@ static int is_valid_name(const char *name)
     return 1;
 }
 
+/* Description:
+ * 	Execute export builtin cmd
+ * Arguments:
+ * 	char **args -> args passed to export
+ * 	struct dictionnary *dict -> dictionnary of vars
+ * Return:
+ * 	int -> Exit status of export cmd
+ */
 int export_b(char **args, struct dictionnary *dict)
 {
     int ret = 0;

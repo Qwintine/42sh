@@ -4,6 +4,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+/* Description:
+ * 	Free a var node
+ * Arguments:
+ * 	struct variables *val -> node to free
+ */
 static void free_node(struct variables *val)
 {
     if (val)
@@ -16,6 +21,14 @@ static void free_node(struct variables *val)
     }
 }
 
+/* Description:
+ * 	Execute unset builtin cmd
+ * Arguments:
+ * 	struct dictionnary *to_unset -> dictionnary of vars
+ * 	char **names -> names to unset
+ * Return:
+ * 	int -> number of vars that couldn't be deleted
+ */
 int unset(struct dictionnary *to_unset, char **names)
 {
     int cant_del = 0; // useless right now but later for readonly vars
