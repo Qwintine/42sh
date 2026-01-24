@@ -14,6 +14,7 @@ int is_redir(enum type type);
 
 // parser_redirections.c
 int parser_redir(struct lex *lex, struct ast_cmd *ast_cmd);
+int parser_redir_shell(struct lex *lex, struct ast_shell_redir *shell);
 int parser_element(struct lex *lex, struct ast_cmd *ast_cmd, size_t *w);
 int parser_prefix(struct lex *lex, struct ast_cmd *ast_cmd);
 

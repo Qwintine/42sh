@@ -35,14 +35,61 @@ int parser_redir(struct lex *lex, struct ast_cmd *ast_cmd)
             ind++;
         }
         ast_cmd->redirs[ind++] = redir;
-        ast_cmd->redirs =
+        struct redir **new_redirs =
             realloc(ast_cmd->redirs, (ind + 1) * sizeof(struct redir *));
 
-        if (!ast_cmd->redirs)
+        if (!new_redirs)
         {
             return 1;
         }
+        ast_cmd->redirs = new_redirs;
         ast_cmd->redirs[ind] = NULL;
+        return 0;
+    }
+    return 1;
+}
+
+int parser_redir_shell(struct lex *lex, struct ast_shell_redir *shell)
+{
+    struct redir *redir = init_redir();
+    if (redir)
+    {
+        if (peek(lex) && peek(lex)->token_type == IO_NUMBER)
+        {
+            redir->io_num = peek(lex)->value;
+            free(pop(lex));
+        }
+
+        if (!peek(lex) || !is_redir(peek(lex)->token_type))
+        {
+            free_redir(redir);
+            return 1;
+        }
+        redir->type = peek(lex)->token_type;
+        discard_token(pop(lex));
+        lex->context = WORD;
+        if (!peek(lex) || peek(lex)->token_type != WORD)
+        {
+            free_redir(redir);
+            return 1;
+        }
+        redir->target = peek(lex)->value;
+        free(pop(lex));
+        size_t ind = 0;
+        while (shell->redirs[ind])
+        {
+            ind++;
+        }
+        shell->redirs[ind++] = redir;
+        struct redir **new_redirs =
+            realloc(shell->redirs, (ind + 1) * sizeof(struct redir *));
+
+        if (!new_redirs)
+        {
+            return 1;
+        }
+        shell->redirs = new_redirs;
+        shell->redirs[ind] = NULL;
         return 0;
     }
     return 1;

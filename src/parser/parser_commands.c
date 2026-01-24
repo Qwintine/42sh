@@ -41,7 +41,7 @@ struct ast *parser_shell_command(struct lex *lex)
                && (peek(lex)->token_type == IO_NUMBER
                    || is_redir(peek(lex)->token_type)))
         {
-            int error = parser_redir(lex, (struct ast_cmd *)wrapper);
+            int error = parser_redir_shell(lex, wrapper);
             if (error)
             {
                 free_ast((struct ast *)wrapper);
