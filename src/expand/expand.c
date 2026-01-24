@@ -200,7 +200,10 @@ char **expand(struct dictionnary *vars, char **words)
         struct ast *f = get_func(vars, words[i]);
         if(f)
         {
-            run_ast(f, vars, NULL);
+            printf("Expanding function: %s\n", words[i]);
+            int exit = 0;
+            run_ast(f, vars, &exit);
+            i++;
         }
         else
         {

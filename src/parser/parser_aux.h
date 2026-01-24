@@ -28,7 +28,7 @@ struct ast *parser_rule_command_block(struct lex *lex, struct dictionnary *dict)
 
 // parser_commands.c
 struct ast *parser_shell_command(struct lex *lex, struct dictionnary *dict);
-struct ast *parser_simple_command(struct lex *lex, char *cmd);
+struct ast *parser_simple_command(struct lex *lex);
 struct ast *parser_command(struct lex *lex, struct dictionnary *dict);
 
 // parser_pipelines.c

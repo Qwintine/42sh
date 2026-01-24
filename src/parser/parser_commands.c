@@ -1,4 +1,7 @@
+#define _XOPEN_SOURCE 500
+
 #include <stdlib.h>
+#include <string.h>
 
 #include "parser_aux.h"
 #include "../expand/hashmap.h"
@@ -123,9 +126,12 @@ ERROR:
 
 struct ast *parser_fundef(struct lex *lex, struct dictionnary *dict)
 {
+    printf("Parsing function definition\n");
     if(!peek(lex) || !(peek(lex)->token_type == FUNCTION))
         return NULL;
+    char *cmd = strdup(peek(lex)->value);
     discard_token(pop(lex));
+    cmd[strlen(cmd)-2] = 0; // remove () at the end
 
     while(peek(lex) && peek(lex)->token_type == NEWLINE)
         discard_token(pop(lex));
