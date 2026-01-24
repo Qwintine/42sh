@@ -17,19 +17,19 @@ static int update_pwd(struct dictionnary *vars)
         free(pwd);
         return 1;
     }
-    
+
     char *saved_pwd = pwd[0];
     free(pwd);
     if (saved_pwd == NULL)
         return 1;
-    
+
     char new_pwd[1024];
     if (!getcwd(new_pwd, sizeof(new_pwd)))
     {
         free(saved_pwd);
         return 1;
     }
-    
+
     char *oldpwd_var = malloc(strlen(saved_pwd) + 8);
     if (!oldpwd_var)
     {
@@ -39,7 +39,7 @@ static int update_pwd(struct dictionnary *vars)
     strcpy(oldpwd_var, "OLDPWD=");
     strcat(oldpwd_var, saved_pwd);
     free(saved_pwd);
-    
+
     char *pwd_var = malloc(strlen(new_pwd) + 5);
     if (!pwd_var)
     {
@@ -48,12 +48,12 @@ static int update_pwd(struct dictionnary *vars)
     }
     strcpy(pwd_var, "PWD=");
     strcat(pwd_var, new_pwd);
-    
+
     add_var(vars, oldpwd_var);
     add_var(vars, pwd_var);
     free(oldpwd_var);
     free(pwd_var);
-    
+
     return 0;
 }
 
@@ -63,7 +63,7 @@ int cd_b(char **args, struct dictionnary *vars)
     char **home = NULL;
     char **oldpwd = NULL;
     int print_path = 0;
-    
+
     if (args[0] == NULL)
     {
         home = get_var(vars, "HOME");
@@ -88,41 +88,43 @@ int cd_b(char **args, struct dictionnary *vars)
     {
         path = strdup(args[0]);
     }
-    
+
     if (chdir(path) != 0)
     {
         fprintf(stderr, "cd: wrong path: %s\n", path);
         free(path);
         return 1;
     }
-    
+
     char *path_to_print = NULL;
     if (print_path)
     {
         path_to_print = strdup(path);
         if (!path_to_print)
         {
-            if (home) free_ex(home);
-            if (oldpwd) free_ex(oldpwd);
+            if (home)
+                free_ex(home);
+            if (oldpwd)
+                free_ex(oldpwd);
             return 1;
         }
     }
-    
+
     int result = update_pwd(vars);
-    
+
     if (path_to_print != NULL)
     {
         printf("%s\n", path_to_print);
         fflush(stdout);
         free(path_to_print);
     }
-    
-    if(path != NULL)
+
+    if (path != NULL)
         free(path);
     if (home != NULL)
         free(home);
     if (oldpwd != NULL)
         free(oldpwd);
-    
+
     return result;
 }

@@ -1,8 +1,9 @@
+#include "echo.h"
+
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "echo.h"
 
 /* Description:
  *  	insert 2 character
@@ -29,7 +30,7 @@ static char *insert_in(size_t ind, char *str)
     else
         return str;
 
-    char *res = malloc(size+1);
+    char *res = malloc(size + 1);
     if (!res)
         return str;
     res = strncpy(res, str, ind);

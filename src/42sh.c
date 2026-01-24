@@ -28,7 +28,7 @@ int main(int argc, char **argv)
 {
     struct dictionnary *vars = init_dict();
     int prettyprint = 0;
-    FILE *entry = arg_file(argc, argv, &prettyprint, vars);//&buff);
+    FILE *entry = arg_file(argc, argv, &prettyprint, vars); //&buff);
     if (!entry)
     {
         fprintf(stderr, "42sh: error file entry\n");
@@ -38,7 +38,7 @@ int main(int argc, char **argv)
 
     int eof = 0;
     int res = 0;
-    int exit= 0;
+    int exit = 0;
 
     while (!eof)
     {
@@ -57,8 +57,7 @@ int main(int argc, char **argv)
             print_ast(ast);
         else
         {
-            if (ast->type != AST_LIST
-                || ((struct ast_list *)ast)->elt != NULL)
+            if (ast->type != AST_LIST || ((struct ast_list *)ast)->elt != NULL)
                 res = run_ast(ast, vars, &exit); // derniere valeur de retour
             if (exit)
             {

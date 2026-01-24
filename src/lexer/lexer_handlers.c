@@ -179,7 +179,7 @@ int new_op(struct token *tok, int quote, FILE *entry, char val)
 }
 
 static int handle_opening_bracket(struct lex *lex, struct token *tok,
-                           struct quote_status *quote_status)
+                                  struct quote_status *quote_status)
 {
     if (!quote_status->double_quote && !quote_status->single_quote)
     {
@@ -226,7 +226,7 @@ static int handle_opening_bracket(struct lex *lex, struct token *tok,
 }
 
 static int handle_closing_bracket(struct lex *lex, struct token *tok,
-                           struct quote_status *quote_status)
+                                  struct quote_status *quote_status)
 {
     if (!quote_status->double_quote && !quote_status->single_quote)
     {
@@ -270,7 +270,7 @@ static int handle_closing_bracket(struct lex *lex, struct token *tok,
 }
 
 int handle_bracket(struct lex *lex, struct token *tok,
-                    struct quote_status *quote_status, char val)
+                   struct quote_status *quote_status, char val)
 {
     if (val == '{')
         return handle_opening_bracket(lex, tok, quote_status);
@@ -278,14 +278,15 @@ int handle_bracket(struct lex *lex, struct token *tok,
 }
 
 int handle_parenthesis(struct lex *lex, struct token *tok,
-                    struct quote_status *quote_status, char val)
+                       struct quote_status *quote_status, char val)
 {
     if (!quote_status->double_quote && !quote_status->single_quote)
     {
         char buf[1];
         if (strlen(tok->value) > 0)
         {
-            if (tok->value[strlen(tok->value) - 1] != '$' && fread(buf, 1, 1, lex->entry))
+            if (tok->value[strlen(tok->value) - 1] != '$'
+                && fread(buf, 1, 1, lex->entry))
             {
                 if (buf[0] == ')')
                 {

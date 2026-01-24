@@ -1,7 +1,7 @@
-#include "parser_aux.h"
-
 #include <stdlib.h>
 #include <string.h>
+
+#include "parser_aux.h"
 
 /*
  * Description:
@@ -18,7 +18,7 @@ struct ast *parser_elif(struct lex *lex, struct dictionnary *dict)
 
     struct ast_if *ast_if = (struct ast_if *)init_ast_if();
 
-    ast_if->condition = parser_compound_list(lex,dict);
+    ast_if->condition = parser_compound_list(lex, dict);
 
     if (!peek(lex) || peek(lex)->token_type != THEN || !ast_if->condition)
     {
@@ -26,7 +26,7 @@ struct ast *parser_elif(struct lex *lex, struct dictionnary *dict)
     }
     discard_token(pop(lex));
 
-    ast_if->then_body = parser_compound_list(lex,dict);
+    ast_if->then_body = parser_compound_list(lex, dict);
     if (!ast_if->then_body)
     {
         goto ERROR;
@@ -35,7 +35,7 @@ struct ast *parser_elif(struct lex *lex, struct dictionnary *dict)
     if (peek(lex)
         && (peek(lex)->token_type == ELSE || peek(lex)->token_type == ELIF))
     {
-        ast_if->else_body = parser_else_clause(lex,dict);
+        ast_if->else_body = parser_else_clause(lex, dict);
         if (!ast_if->else_body)
         {
             goto ERROR;
@@ -71,7 +71,7 @@ struct ast *parser_else_clause(struct lex *lex, struct dictionnary *dict)
     if (peek(lex)->token_type == ELSE)
     {
         discard_token(pop(lex));
-        return parser_compound_list(lex,dict);
+        return parser_compound_list(lex, dict);
     }
 
     return NULL;
@@ -94,7 +94,7 @@ struct ast *parser_rule_if(struct lex *lex, struct dictionnary *dict)
 
     struct ast_if *ast_if = (struct ast_if *)init_ast_if();
 
-    ast_if->condition = parser_compound_list(lex,dict);
+    ast_if->condition = parser_compound_list(lex, dict);
     if (!ast_if->condition)
     {
         goto ERROR;
@@ -106,7 +106,7 @@ struct ast *parser_rule_if(struct lex *lex, struct dictionnary *dict)
     }
     discard_token(pop(lex));
 
-    ast_if->then_body = parser_compound_list(lex,dict);
+    ast_if->then_body = parser_compound_list(lex, dict);
     if (!ast_if->then_body)
     {
         goto ERROR;
@@ -115,7 +115,7 @@ struct ast *parser_rule_if(struct lex *lex, struct dictionnary *dict)
     if (peek(lex)
         && (peek(lex)->token_type == ELSE || peek(lex)->token_type == ELIF))
     {
-        ast_if->else_body = parser_else_clause(lex,dict);
+        ast_if->else_body = parser_else_clause(lex, dict);
         if (!ast_if->else_body)
         {
             goto ERROR;
@@ -246,8 +246,7 @@ static int parser_rule_for_aux(struct lex *lex, struct ast_for *ast_for)
         discard_token(pop(lex));
 
         size_t w = 0;
-        while (peek(lex)
-               && (peek(lex)->token_type == WORD))
+        while (peek(lex) && (peek(lex)->token_type == WORD))
         {
             struct token *tok = pop(lex);
             if (!tok)
@@ -255,7 +254,8 @@ static int parser_rule_for_aux(struct lex *lex, struct ast_for *ast_for)
 
             ast_for->words[w] = tok->value;
             w++;
-            char **new_words = realloc(ast_for->words, (w + 1) * sizeof(char *));
+            char **new_words =
+                realloc(ast_for->words, (w + 1) * sizeof(char *));
             if (!new_words)
             {
                 free(tok);
@@ -277,8 +277,7 @@ struct ast *parser_rule_for(struct lex *lex, struct dictionnary *dict)
 
     struct ast_for *ast_for = (struct ast_for *)init_ast_for();
 
-    if (!peek(lex)
-        || (peek(lex)->token_type != WORD))
+    if (!peek(lex) || (peek(lex)->token_type != WORD))
         goto ERROR;
 
     struct token *tok = pop(lex);
@@ -316,13 +315,13 @@ ERROR:
 
 struct ast *parser_rule_command_block(struct lex *lex, struct dictionnary *dict)
 {
-    if(!peek(lex) || !(peek(lex)->token_type == OPENING_BRACKET))
+    if (!peek(lex) || !(peek(lex)->token_type == OPENING_BRACKET))
         return NULL;
     discard_token(pop(lex));
 
     struct ast *ast = parser_compound_list(lex, dict);
 
-    if(!peek(lex) || !(peek(lex)->token_type == CLOSING_BRACKET))
+    if (!peek(lex) || !(peek(lex)->token_type == CLOSING_BRACKET))
     {
         if (ast)
             free_ast(ast);

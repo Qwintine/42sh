@@ -109,7 +109,8 @@ int parser_element(struct lex *lex, struct ast_cmd *ast_cmd, size_t *w)
             ast_cmd->words[*w] = tok->value;
             free(tok);
             (*w)++;
-            char **new_words = realloc(ast_cmd->words, (*w + 1) * sizeof(char *));
+            char **new_words =
+                realloc(ast_cmd->words, (*w + 1) * sizeof(char *));
             if (!new_words)
                 return 1;
             ast_cmd->words = new_words;

@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "parser_aux.h"
 #include "../expand/hashmap.h"
+#include "parser_aux.h"
 
 /*
  * Description:
@@ -73,9 +73,9 @@ struct ast *parser_simple_command(struct lex *lex)
     struct ast_cmd *ast_cmd = (struct ast_cmd *)init_ast_cmd();
     size_t w = 0;
     while (peek(lex)
-        && (peek(lex)->token_type == IO_NUMBER
-            || is_redir(peek(lex)->token_type)
-            || peek(lex)->token_type == ASSIGNMENT))
+           && (peek(lex)->token_type == IO_NUMBER
+               || is_redir(peek(lex)->token_type)
+               || peek(lex)->token_type == ASSIGNMENT))
     {
         if (parser_prefix(lex, ast_cmd))
         {
@@ -127,17 +127,17 @@ ERROR:
 
 struct ast *parser_fundef(struct lex *lex, struct dictionnary *dict)
 {
-    if(!peek(lex) || !(peek(lex)->token_type == FUNCTION))
+    if (!peek(lex) || !(peek(lex)->token_type == FUNCTION))
         return NULL;
     char *cmd = strdup(peek(lex)->value);
     discard_token(pop(lex));
-    cmd[strlen(cmd)-2] = 0; // remove () at the end
+    cmd[strlen(cmd) - 2] = 0; // remove () at the end
 
-    while(peek(lex) && peek(lex)->token_type == NEWLINE)
+    while (peek(lex) && peek(lex)->token_type == NEWLINE)
         discard_token(pop(lex));
 
-    add_func(dict,cmd,parser_shell_command(lex,dict));
-    
+    add_func(dict, cmd, parser_shell_command(lex, dict));
+
     struct ast_list *empty = (struct ast_list *)init_ast_list();
     return (struct ast *)empty;
 }
@@ -152,9 +152,9 @@ struct ast *parser_command(struct lex *lex, struct dictionnary *dict)
     {
         return parser_shell_command(lex, dict);
     }
-    if(peek(lex) && peek(lex)->token_type == FUNCTION)
+    if (peek(lex) && peek(lex)->token_type == FUNCTION)
     {
-        return parser_fundef(lex,dict);
+        return parser_fundef(lex, dict);
     }
     return parser_simple_command(lex);
 }

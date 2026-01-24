@@ -21,9 +21,9 @@ struct token *end_token(struct token *tok, struct lex *lex)
             else if (tok->value[0] == '|')
                 tok->token_type = PIPE;
             else if (tok->value[0] == '<')
-                return NULL; 
+                return NULL;
             else if (tok->value[0] == '>')
-                return NULL; 
+                return NULL;
         }
         return tok;
     }

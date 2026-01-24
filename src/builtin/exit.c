@@ -1,5 +1,6 @@
 
 #include "exit.h"
+
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,14 +21,14 @@ int is_valid_nb(char *str)
 }
 
 int exit_b(char **codes, int *exit)
-{   
+{
     if (codes[0] != NULL && codes[1] != NULL) // too much args
     {
         fprintf(stderr, "42sh: exit: too many args\n");
         *exit = 1;
         return 1;
     }
-    
+
     if (codes[0] != NULL && !is_valid_nb(codes[0])) // arg not number
     {
         fprintf(stderr, "42sh: exit: arg not num\n");
@@ -40,12 +41,12 @@ int exit_b(char **codes, int *exit)
     {
         exit_code = atoi(codes[0]);
     }
-    if(exit_code < 0 || exit_code > 255) 
+    if (exit_code < 0 || exit_code > 255)
     {
-        if(exit_code < 0)
+        if (exit_code < 0)
             exit_code = 256 + (exit_code % 256);
         else
-        exit_code = exit_code % 256;
+            exit_code = exit_code % 256;
     }
     *exit = 1;
     return exit_code;

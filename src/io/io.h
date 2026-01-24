@@ -3,13 +3,14 @@
 
 #define _POSIX_C_SOURCE 200809L
 
-#include "../expand/expand.h"
-#include "../utils/itoa.h"
-
 #include <stdio.h>
 #include <string.h>
 
-FILE *arg_file(int argc, char **argv, int *prettyprint, struct dictionnary *vars);
+#include "../expand/expand.h"
+#include "../utils/itoa.h"
+
+FILE *arg_file(int argc, char **argv, int *prettyprint,
+               struct dictionnary *vars);
 void free_stdin_buffer(void);
 char *itoa(int num);
 

@@ -50,8 +50,8 @@ struct ast *parser(FILE *entry, int *eof, struct dictionnary *dict)
         free_lex(lex);
         return NULL;
     }
-    struct ast *ast =
-        parser_list(lex, dict); // récursion sur ast type list ( cf. parser_list )
+    struct ast *ast = parser_list(
+        lex, dict); // récursion sur ast type list ( cf. parser_list )
 
     if (!ast) // remontée erreur syntax / grammaire
     {

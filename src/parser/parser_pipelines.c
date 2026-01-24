@@ -19,7 +19,7 @@ struct ast *parser_pipeline(struct lex *lex, struct dictionnary *dict)
         free_ast((struct ast *)ast_pipe);
         return NULL;
     }
-    if(peek(lex) && peek(lex)->token_type == END && ast_pipe->negation)
+    if (peek(lex) && peek(lex)->token_type == END && ast_pipe->negation)
         return (struct ast *)ast_pipe;
     size_t ind = 0;
     int pipe = 1;

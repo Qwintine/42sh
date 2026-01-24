@@ -1,15 +1,15 @@
 #define _POSIX_C_SOURCE 200809L
-#include "expand.h"
+#include <pwd.h>
 #include <stddef.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
 
-#include "../utils/itoa.h"
-#include <pwd.h>
 #include "../ast/ast.h"
+#include "../utils/itoa.h"
+#include "expand.h"
 
 int hash(char *str)
 {
@@ -32,10 +32,10 @@ static void add_special(struct dictionnary *dict, char *key, char *val)
         free(val);
         return;
     }
-    varas = strcpy(varas,key);
+    varas = strcpy(varas, key);
     varas = strcat(varas, "=");
     varas = strcat(varas, val);
-    add_var(dict,varas);
+    add_var(dict, varas);
     free(varas);
     free(val);
 }
@@ -64,12 +64,12 @@ struct dictionnary *init_dict(void)
     char *pid_str = itoa(getpid());
     if (pid_str)
         add_special(dict, "$", pid_str);
-    
+
     struct passwd *pw = getpwuid(getuid());
     char *uid_str = itoa((int)getuid());
     if (uid_str)
         add_special(dict, "UID", uid_str);
-    
+
     if (pw && pw->pw_dir)
     {
         char *home = strdup(pw->pw_dir);
@@ -82,8 +82,8 @@ struct dictionnary *init_dict(void)
         if (home)
             add_special(dict, "HOME", home);
     }
-    
-    char* cwd = malloc(2048);
+
+    char *cwd = malloc(2048);
     if (cwd)
     {
         if (getcwd(cwd, 2048))
@@ -94,11 +94,11 @@ struct dictionnary *init_dict(void)
         }
         free(cwd);
     }
-    
+
     char *ifs = strdup(" \t\n");
     if (ifs)
         add_special(dict, "IFS", ifs);
-    //key[2] = "PATH";
+    // key[2] = "PATH";
 
     return dict;
 }
@@ -172,7 +172,7 @@ int add_var(struct dictionnary *dict, char *varas)
     to_ex[0] = val;
     to_ex[1] = NULL;
     char **expanded = expand(dict, to_ex);
-    if(expanded && expanded[0])
+    if (expanded && expanded[0])
     {
         free(val);
         val = expanded[0];
@@ -299,7 +299,7 @@ int add_func(struct dictionnary *dict, char *key, struct ast *cmd_block)
 
     int ind = hash(key);
 
-    if(!dict->function[ind])
+    if (!dict->function[ind])
     {
         dict->function[ind] = new;
         return 0;
@@ -362,11 +362,11 @@ char **get_var(struct dictionnary *dict, char *key)
         if (!res)
             return NULL;
         res[0] = NULL;
-        if(!strcmp(key, "OLDPWD"))
+        if (!strcmp(key, "OLDPWD"))
         {
             free(res);
             return get_var(dict, "PWD");
-        }        
+        }
         return res;
     }
     size_t i = 0;
@@ -374,11 +374,11 @@ char **get_var(struct dictionnary *dict, char *key)
     {
         i++;
     }
-    char **res = malloc((i+1) * sizeof(char *));
+    char **res = malloc((i + 1) * sizeof(char *));
     if (!res)
         return NULL;
     size_t j = 0;
-    while(j < i)
+    while (j < i)
     {
         res[j] = strdup(target->elt[j]);
         if (!res[j])

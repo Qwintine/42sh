@@ -7,16 +7,16 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include "../builtin/break_continue.h"
+#include "../builtin/cd.h"
+#include "../builtin/dot.h"
 #include "../builtin/echo.h"
 #include "../builtin/exit.h"
-#include "../builtin/cd.h"
 #include "../builtin/export.h"
-#include "../builtin/dot.h"
 #include "../builtin/unset.h"
-#include "../builtin/break_continue.h"
 #include "../utils/itoa.h"
-#include "redir_exec.h"
 #include "../utils/redir.h"
+#include "redir_exec.h"
 
 static int is_builtin(char **words)
 {
@@ -26,7 +26,7 @@ static int is_builtin(char **words)
         || !strcmp(words[0], "echo") || !strcmp(words[0], "exit")
         || !strcmp(words[0], "cd") || !strcmp(words[0], "break")
         || !strcmp(words[0], "continue") || !strcmp(words[0], ".")
-		|| !strcmp(words[0], "unset") || !strcmp(words[0],"export");
+        || !strcmp(words[0], "unset") || !strcmp(words[0], "export");
 }
 
 static int exec_builtin(char **words, int *exit, struct dictionnary *vars)
@@ -64,27 +64,27 @@ static int exec_builtin(char **words, int *exit, struct dictionnary *vars)
         return res;
     }
     else if (!strcmp(cmd, "."))
-	    return dot_b(words + 1, vars, exit);
-    else if(!strcmp(cmd, "unset"))
+        return dot_b(words + 1, vars, exit);
+    else if (!strcmp(cmd, "unset"))
     {
-	    if(words[1] && !strcmp(words[1], "-v"))
-		    return unset(vars, words + 2);
-	    else
-		    return unset(vars, words + 1);
+        if (words[1] && !strcmp(words[1], "-v"))
+            return unset(vars, words + 2);
+        else
+            return unset(vars, words + 1);
     }
     else if (!strcmp(cmd, "export"))
         return export_b(words + 1, vars);
     return -1;
 }
 
-static int exec_func(struct ast *func, struct ast_cmd *ast_cmd, 
-                         struct dictionnary *vars)
+static int exec_func(struct ast *func, struct ast_cmd *ast_cmd,
+                     struct dictionnary *vars)
 {
     char **expanded = expand(vars, ast_cmd->words);
-    char **old_params[10] = {NULL};
+    char **old_params[10] = { NULL };
     char key[2] = "0";
     int max_param = 0;
-    
+
     for (int i = 1; expanded && expanded[i] && i < 10; i++)
     {
         key[0] = '0' + i;
@@ -96,10 +96,10 @@ static int exec_func(struct ast *func, struct ast_cmd *ast_cmd,
         free(val);
         max_param = i;
     }
-    
+
     int func_exit = 0;
     int res = run_ast(func, vars, &func_exit);
-    
+
     for (int i = 1; i <= max_param; i++)
     {
         key[0] = '0' + i;
@@ -109,7 +109,7 @@ static int exec_func(struct ast *func, struct ast_cmd *ast_cmd,
             free(current[0]);
             free(current);
         }
-        
+
         if (old_params[i] && old_params[i][0])
             add_var_arg(vars, key, old_params[i]);
         else if (old_params[i])
@@ -130,7 +130,8 @@ static int exec_func(struct ast *func, struct ast_cmd *ast_cmd,
  *  	words: la ligne de commande a executer
  * Retour:
 make clean
-CFLAGS="-fsanitize=address -g" LDFLAGS="-fsanitize=address" ./configure *  	0 si succes, 1 sinon
+CFLAGS="-fsanitize=address -g" LDFLAGS="-fsanitize=address" ./configure *  	0 si
+succes, 1 sinon
  * Verbose:
  *  	execute la commande en words[0] via un appelle si builtin, via fork->
  *  	execvp sinon.
@@ -193,15 +194,15 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars, int *exit)
         fprintf(stderr, "Command not found\n");
         return 127;
     }
-    if(!expanded[1] && ast_cmd->words[1])
+    if (!expanded[1] && ast_cmd->words[1])
     {
-        expanded[1] = calloc(1,1);
+        expanded[1] = calloc(1, 1);
         if (!expanded[1])
         {
             free_ex(expanded);
             return 127;
         }
-        char **new_expanded = realloc(expanded,3 * sizeof(char*));
+        char **new_expanded = realloc(expanded, 3 * sizeof(char *));
         if (!new_expanded)
         {
             free_ex(expanded);
@@ -296,7 +297,8 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars, int *exit)
     return 127;
 }
 
-int exec_pipe(struct ast_cmd **cmd, int fd[2], struct dictionnary *vars, int *exit)
+int exec_pipe(struct ast_cmd **cmd, int fd[2], struct dictionnary *vars,
+              int *exit)
 {
     if (cmd[0] == NULL)
         return 0;

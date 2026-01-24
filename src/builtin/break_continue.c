@@ -45,10 +45,10 @@ int break_b(char **args)
 {
     if (args[0] != NULL && args[1] != NULL)
         return 1;
-    
+
     int n = 1;
     int res = 0;
-    
+
     if (args[0] != NULL)
     {
         if (!is_nb(args[0]))
@@ -66,7 +66,7 @@ int break_b(char **args)
             }
         }
     }
-    
+
     break_n = n;
     return res;
 }
@@ -75,10 +75,10 @@ int continue_b(char **args)
 {
     if (args[0] != NULL && args[1] != NULL)
         return 1;
-    
+
     int n = 1;
     int res = 0;
-    
+
     if (args[0] != NULL)
     {
         if (!is_nb(args[0]))
@@ -96,7 +96,7 @@ int continue_b(char **args)
             }
         }
     }
-    
+
     continue_n = n;
     return res;
 }

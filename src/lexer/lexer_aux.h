@@ -21,9 +21,9 @@ int handle_blank(struct token *tok, char c, int quote);
 int handle_delimiter(struct token *tok, char c, int quote, FILE *entry);
 int new_op(struct token *tok, int quote, FILE *entry, char val);
 int handle_bracket(struct lex *lex, struct token *tok,
-                           struct quote_status *quote_status, char val);
+                   struct quote_status *quote_status, char val);
 int handle_parenthesis(struct lex *lex, struct token *tok,
-                           struct quote_status *quote_status, char val);
+                       struct quote_status *quote_status, char val);
 
 // lexer_tokens.c
 struct token *end_token(struct token *tok, struct lex *lex);

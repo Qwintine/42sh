@@ -110,7 +110,7 @@ struct ast *parser_list(struct lex *lex, struct dictionnary *dict)
     struct ast_list *current = head;
 
     // récursion sur ast type and_or ( cf. parser_and_or )
-    current->elt = parser_and_or(lex, dict); 
+    current->elt = parser_and_or(lex, dict);
     if (!current->elt)
     {
         free(head);
@@ -132,7 +132,8 @@ struct ast *parser_list(struct lex *lex, struct dictionnary *dict)
 
         struct ast_list *new_node = (struct ast_list *)
             init_ast_list(); // éléments liste de block de and_or
-        new_node->elt = parser_and_or(lex, dict); // récursion sur ast type and_or
+        new_node->elt =
+            parser_and_or(lex, dict); // récursion sur ast type and_or
         if (!new_node->elt)
         {
             free(new_node);

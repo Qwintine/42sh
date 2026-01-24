@@ -89,7 +89,8 @@ static void arg_num(int num, struct dictionnary *vars)
  * 	nom de fichier -> file
  * 	rien -> stdin
  */
-FILE *arg_file(int argc, char **argv, int *prettyprint, struct dictionnary *vars)
+FILE *arg_file(int argc, char **argv, int *prettyprint,
+               struct dictionnary *vars)
 {
     FILE *entry = NULL;
     int arg_count = 0;
@@ -130,12 +131,12 @@ FILE *arg_file(int argc, char **argv, int *prettyprint, struct dictionnary *vars
         }
         else
         {
-            if(i>1 && vars != NULL)
+            if (i > 1 && vars != NULL)
             {
                 char *arg_name = malloc(20);
                 if (!arg_name)
                     continue;
-                char *inum = itoa(i-arg_count);
+                char *inum = itoa(i - arg_count);
                 if (!inum)
                 {
                     free(arg_name);
@@ -151,7 +152,7 @@ FILE *arg_file(int argc, char **argv, int *prettyprint, struct dictionnary *vars
         }
     }
     arg_num(argc - arg_count, vars);
-    add_var_arg(vars, "@", argv+arg_count);
+    add_var_arg(vars, "@", argv + arg_count);
     if (!entry)
     {
         entry = stdin_to_mem();
