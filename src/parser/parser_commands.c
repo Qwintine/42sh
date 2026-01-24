@@ -130,11 +130,7 @@ ERROR:
 
 struct ast *parser_fundef(struct lex *lex, char *cmd, struct dictionnary *dict)
 {
-    if(!peek(lex) || !(peek(lex)->token_type == OPENING_PARENTHESIS))
-        return NULL;
-    discard_token(pop(lex));
-
-    if(!peek(lex) || !(peek(lex)->token_type == CLOSING_PARENTHESIS))
+    if(!peek(lex) || !(peek(lex)->token_type == FUNCTION))
         return NULL;
     discard_token(pop(lex));
 
@@ -142,10 +138,6 @@ struct ast *parser_fundef(struct lex *lex, char *cmd, struct dictionnary *dict)
         discard_token(pop(lex));
 
     add_func(dict,cmd,parser_shell_command(lex,dict));
-
-    if(!peek(lex) || !(peek(lex)->token_type == CLOSING_PARENTHESIS))
-        return NULL;
-    discard_token(pop(lex));
 
     return get_func(dict,cmd);
 }
@@ -166,7 +158,7 @@ struct ast *parser_command(struct lex *lex, struct dictionnary *dict)
         struct token *tok = pop(lex);
         cmd = tok->value;
         free(tok);
-        if(peek(lex)->token_type == OPENING_PARENTHESIS)
+        if(peek(lex)->token_type == FUNCTION)
             return parser_fundef(lex,cmd,dict);
     }
     return parser_simple_command(lex,cmd);
