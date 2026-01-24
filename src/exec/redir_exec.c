@@ -5,7 +5,14 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-/* TODO */
+/* Description:
+ * 	Read io num from string
+ * Arguments:
+ * 	char *string -> string to read
+ * 	int defaul -> default value
+ * Return:
+ *     int -> io num, defaul if invalid
+ */
 static int read_io(char *string, int defaul)
 {
     if (!string || !string[0])
@@ -24,7 +31,14 @@ static int read_io(char *string, int defaul)
     return res;
 }
 
-/* TODO */
+/* Description:
+ * 	Save fd state
+ * Arguments:
+ * 	struct redir_saved *redir_saved -> struct to save fds
+ * 	int fd -> fd to save
+ * Return:
+ * 	int -> 0 success, 1 failure
+ */
 static int fd_save(struct redir_saved *redir_saved, int fd)
 {
     if (fcntl(fd, F_GETFD) < 0) // no fd open
@@ -51,6 +65,14 @@ static int fd_save(struct redir_saved *redir_saved, int fd)
     return 0;
 }
 
+/* Description:
+ * 	Open file for redir
+ * Arguments:
+ * 	enum type type -> redir type
+ * 	char *target -> targ file
+ * Return:
+ * 	int -> fd, -1 failure
+ */
 static int open_redir_file(enum type type, char *target)
 {
     if (type == REDIR_OUT || type == REDIR_NO_CLOBB)
@@ -64,6 +86,14 @@ static int open_redir_file(enum type type, char *target)
     return -1;
 }
 
+/* Description:
+ * 	Handle dup redir
+ * Arguments:
+ * 	struct redir *redirect -> redir struct
+ * 	int target -> target fd
+ * Return:
+ * 	int ->0 success, 1 failure
+ */
 static int handle_dup_redir(struct redir *redirect, int target)
 {
     int source_fd = read_io(redirect->target, -1);

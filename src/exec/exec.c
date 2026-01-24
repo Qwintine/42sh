@@ -18,8 +18,7 @@
 #include "../utils/redir.h"
 #include "redir_exec.h"
 
-/*
- * Description:
+/* Description:
  * 	Check if cmd is builtin
  * Arguments:
  * 	char **words -> args passed to builtin
@@ -37,8 +36,7 @@ static int is_builtin(char **words)
         || !strcmp(words[0], "unset") || !strcmp(words[0], "export");
 }
 
-/*
- * Description:
+/* Description:
  * 	Execute builtin cmd with given args
  * Arguments:
  * 	char **words -> args passed to builtin
@@ -95,8 +93,7 @@ static int exec_builtin(char **words, int *exit, struct dictionnary *vars)
     return -1;
 }
 
-/*
- * Description:
+/* Description:
  * 	Execute funct with given arguments
  * Arguments:
  * 	struct ast *func -> AST node of funct
@@ -151,8 +148,7 @@ static int exec_func(struct ast *func, struct ast_cmd *ast_cmd,
     }
     return res;
 }
-/*
- * Description:
+/* Description:
  * 	Update special var "?" with given status
  * Arguments:
  * 	struct dictionnary *vars -> dictionnary of variables
@@ -175,8 +171,7 @@ static void update_exit(struct dictionnary *vars, int status)
     }
 }
 
-/*
- * Description:
+/* Description:
  * 	Exec assignments in cmd
  * Arguments:
  * 	struct ast_cmd *ast_cmd -> AST node
@@ -204,8 +199,7 @@ static int exec_assignment(struct ast_cmd *ast_cmd, struct dictionnary *vars)
     return 0;
 }
 
-/*
- * Description:
+/* Description:
  * 	Execute the builtin command with given args
  * Arguments:
  * 	struct ast_cmd *ast_cmd -> AST node
@@ -230,8 +224,7 @@ static int exec_b(struct ast_cmd *ast_cmd, char **expanded,
     update_exit(vars, r);
     return r;
 }
-/*
- * Description:
+/* Description:
  *  Execute the command with given arguments
  * Arguments:
  * 	struct ast_cmd *ast_cmd-> AST node
@@ -333,8 +326,7 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars, int *exit)
     return exec(ast_cmd, expanded, vars);
 }
 
-/*
- * Description:
+/* Description:
  * 	Execute a pipeline of commands
  * Arguments:
  * 	struct ast_cmd **cmd -> commands to execute
