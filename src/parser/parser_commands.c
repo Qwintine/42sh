@@ -126,7 +126,6 @@ ERROR:
 
 struct ast *parser_fundef(struct lex *lex, struct dictionnary *dict)
 {
-    printf("Parsing function definition\n");
     if(!peek(lex) || !(peek(lex)->token_type == FUNCTION))
         return NULL;
     char *cmd = strdup(peek(lex)->value);
@@ -137,8 +136,9 @@ struct ast *parser_fundef(struct lex *lex, struct dictionnary *dict)
         discard_token(pop(lex));
 
     add_func(dict,cmd,parser_shell_command(lex,dict));
-
-    return get_func(dict,cmd);
+    
+    struct ast_list *empty = (struct ast_list *)init_ast_list();
+    return (struct ast *)empty;
 }
 
 // prochaine step -> ajouter gestion  { redirections } après shell_command

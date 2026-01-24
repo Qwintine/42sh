@@ -190,6 +190,9 @@ echo "=========================== Builtin break/continue =======================
 echo "=========================== Command blocks ===========================\n"
 . tests/test_files/command_blocks.sh
 
+echo "=========================== Functions ===========================\n"
+. tests/test_files/function.sh
+
 printf "Fonctionel => Total: %d | Passed: %d | Failed: %d\n\n" "$TOTAL" "$PASS" "$((TOTAL - PASS))"
 
 if [ "${COVERAGE:-no}" = "yes" ]; then

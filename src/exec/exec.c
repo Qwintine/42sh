@@ -125,6 +125,17 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars, int *exit)
         return 0;
     }
 
+    if (ast_cmd->words[0])
+    {
+        struct ast *func = get_func(vars, ast_cmd->words[0]);
+        if (func)
+        {
+            int func_exit = 0;
+            int res = run_ast(func, vars, &func_exit);
+            return res;
+        }
+    }
+
     char **expanded = expand(vars, ast_cmd->words);
     if (!expanded || !expanded[0])
     {

@@ -197,33 +197,23 @@ char **expand(struct dictionnary *vars, char **words)
     size_t j = 0;
     while (words[i]!=NULL)
     {
-        struct ast *f = get_func(vars, words[i]);
-        if(f)
+        res[j] = malloc(1);
+        res[j][0] = 0;
+        size_t ibis = 0;
+        while(words[i][ibis] != 0)
         {
-            printf("Expanding function: %s\n", words[i]);
-            int exit = 0;
-            run_ast(f, vars, &exit);
-            i++;
-        }
-        else
-        {
-            res[j] = malloc(1);
-            res[j][0] = 0;
-            size_t ibis = 0;
-            while(words[i][ibis] != 0)
+            if(words[i][ibis] == '$')
             {
-                if(words[i][ibis] == '$')
+                char *var = var_expand(vars,words[i],&ibis);
+                if(!var)
                 {
-                    char *var = var_expand(vars,words[i],&ibis);
-                    if(!var)
-                    {
-                        ibis++;
-                        continue;
-                    }
-                    res[j] = realloc(res[j], strlen(res[j])+strlen(var)+1);
-                    strcat(res[j],var);
-                    free(var);
+                    ibis++;
+                    continue;
                 }
+                res[j] = realloc(res[j], strlen(res[j])+strlen(var)+1);
+                strcat(res[j],var);
+                free(var);
+            }
                 else if(words[i][ibis] == '\'')
                 {
                     char *var = single_quote_expand(words[i], &ibis);
@@ -269,7 +259,6 @@ char **expand(struct dictionnary *vars, char **words)
                 free(res[j]);
                 res[j] = NULL;
             }
-        }
     }
     if(res[0] == NULL)
     {
