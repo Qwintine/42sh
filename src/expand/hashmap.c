@@ -237,6 +237,28 @@ ERROR:
     return 1;
 }
 
+/*static int update_or_append_func(struct function *bucket, struct function *new,
+                                char *key, struct ast *cmd_block)
+{
+    struct function *target = bucket;
+    while (target)
+    {
+        if (strcmp(target->key, key) == 0)
+        {
+            free_ast(target->ast);
+            target->ast = cmd_block;
+            //free(new->key);
+            //free(new);
+            return 0;
+        }
+        if (!target->next)
+            break;
+        target = target->next;
+    }
+    target->next = new;
+    return 0;
+}*/
+
 int add_func(struct dictionnary *dict, char *key, struct ast *cmd_block)
 {
     struct function *new = malloc(sizeof(struct function));
@@ -253,18 +275,25 @@ int add_func(struct dictionnary *dict, char *key, struct ast *cmd_block)
     }
 
     struct function *target = dict->function[ind];
-    while (target->next)
+    while (target)
     {
         if (strcmp(target->key, key) == 0)
         {
-            free_func(new);
+            free_ast(target->ast);
             target->ast = cmd_block;
+            free(new->key);
+            free(new);
+            return 0;
+        }
+        if (!target->next)
+        {
+            target->next = new;
             return 0;
         }
         target = target->next;
     }
-    target->next = new;
-    return 0;
+    return 1;
+    //return update_or_append_func(dict->function[ind], new, key, cmd_block);
 }
 
 /*Description:
