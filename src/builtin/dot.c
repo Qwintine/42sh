@@ -50,6 +50,7 @@ int dot_b(char **words, struct dictionnary *vars, int *exit)
 	if (!words || !words[0])
 	{
 		fprintf(stderr, "42sh: dot: filename argument required\n");
+		*exit = 1;
 		return 2;
 	}
 

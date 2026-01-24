@@ -1,6 +1,6 @@
 #!/bin/sh
 
-testcase "dot no args error" "-c" ". 2>/dev/null"
+testcase "dot no args error" "-c" ". 2>/dev/null; echo \$?"
 testcase "dot basic" "-c" ". tests/test_files/dot_test_helper1.sh; echo \$a"
 # testcase "dot with function" "-c" ". tests/test_files/dot_test_helper2.sh; test_func"
 testcase "dot exit status" "-c" ". tests/test_files/dot_test_helper3.sh; echo \$?"

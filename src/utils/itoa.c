@@ -4,6 +4,8 @@ char *itoa(int num)
 {
     int i = 0;
     char *res = malloc(20);
+    if (!res)
+        return NULL;
     if(num == 0)
     {
         res[0] = '0';

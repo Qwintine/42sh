@@ -116,7 +116,14 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars, int *exit)
             i++;
         }
         char *wexit = itoa(0);
+        if (!wexit)
+            return 0;
         char *assignment = malloc(strlen("?=") + strlen(wexit) + 1);
+        if (!assignment)
+        {
+            free(wexit);
+            return 0;
+        }
         assignment = strcpy(assignment, "?=");
         assignment = strcat(assignment, wexit);
         add_var(vars, assignment);
@@ -134,8 +141,19 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars, int *exit)
     }
     if(!expanded[1] && ast_cmd->words[1])
     {
-        expanded[1] = calloc(1,1); // rajouter check
-        expanded = realloc(expanded,3 * sizeof(char*)); // rajouter check
+        expanded[1] = calloc(1,1);
+        if (!expanded[1])
+        {
+            free_ex(expanded);
+            return 127;
+        }
+        char **new_expanded = realloc(expanded,3 * sizeof(char*));
+        if (!new_expanded)
+        {
+            free_ex(expanded);
+            return 127;
+        }
+        expanded = new_expanded;
         expanded[2] = NULL;
     }
 
@@ -151,12 +169,18 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars, int *exit)
         free_ex(expanded);
         restore_redirs(&redir_saved);
         char *wexit = itoa(r);
-        char *assignment = malloc(strlen("?=") + strlen(wexit) + 1);
-        assignment = strcpy(assignment, "?=");
-        assignment = strcat(assignment, wexit);
-        add_var(vars, assignment);
-        free(wexit);
-        free(assignment);
+        if (wexit)
+        {
+            char *assignment = malloc(strlen("?=") + strlen(wexit) + 1);
+            if (assignment)
+            {
+                assignment = strcpy(assignment, "?=");
+                assignment = strcat(assignment, wexit);
+                add_var(vars, assignment);
+                free(assignment);
+            }
+            free(wexit);
+        }
         return r;
     }
 
@@ -188,21 +212,33 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars, int *exit)
     if (WIFEXITED(status))
     {
         char *wexit = itoa((int)WEXITSTATUS(status));
-        char *assignment = malloc(strlen("?=") + strlen(wexit) + 1);
-        assignment = strcpy(assignment, "?=");
-        assignment = strcat(assignment, wexit);
-        add_var(vars, assignment);
-        free(wexit);
-        free(assignment);
+        if (wexit)
+        {
+            char *assignment = malloc(strlen("?=") + strlen(wexit) + 1);
+            if (assignment)
+            {
+                assignment = strcpy(assignment, "?=");
+                assignment = strcat(assignment, wexit);
+                add_var(vars, assignment);
+                free(assignment);
+            }
+            free(wexit);
+        }
         return WEXITSTATUS(status);
     }
     char *wexit = itoa(127);
-    char *assignment = malloc(strlen("?=") + strlen(wexit) + 1);
-    assignment = strcpy(assignment, "?=");
-    assignment = strcat(assignment, wexit);
-    add_var(vars, assignment);
-    free(wexit);
-    free(assignment);
+    if (wexit)
+    {
+        char *assignment = malloc(strlen("?=") + strlen(wexit) + 1);
+        if (assignment)
+        {
+            assignment = strcpy(assignment, "?=");
+            assignment = strcat(assignment, wexit);
+            add_var(vars, assignment);
+            free(assignment);
+        }
+        free(wexit);
+    }
     return 127;
 }
 
