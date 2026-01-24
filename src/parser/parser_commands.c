@@ -11,17 +11,17 @@
  * 	Grammar:
  * 		either an if, while or until block
  */
-struct ast *parser_shell_command(struct lex *lex)
+struct ast *parser_shell_command(struct lex *lex, struct dictionnary *dict)
 {
     struct ast *ast = NULL;
     if (peek(lex) && peek(lex)->token_type == IF)
-        ast = parser_rule_if(lex);
+        ast = parser_rule_if(lex,dict);
     else if (peek(lex) && peek(lex)->token_type == WHILE)
-        ast = parser_rule_while(lex);
+        ast = parser_rule_while(lex,dict);
     else if (peek(lex) && peek(lex)->token_type == UNTIL)
-        ast = parser_rule_until(lex);
+        ast = parser_rule_until(lex,dict);
     else
-        ast = parser_rule_for(lex);
+        ast = parser_rule_for(lex,dict);
 
     if (peek(lex)
         && (peek(lex)->token_type == IO_NUMBER
@@ -130,7 +130,7 @@ ERROR:
     return NULL;
 }
 
-struct ast *parser_fundef(struct lex *lex, char *cmd)
+struct ast *parser_fundef(struct lex *lex, char *cmd, struct dictionnary *dict)
 {
     if(!peek(lex) || !peek(lex)->token_type == OPENING_PARENTHESIS)
         return NULL;
@@ -140,11 +140,10 @@ struct ast *parser_fundef(struct lex *lex, char *cmd)
         return NULL;
     discard_token(pop(lex));
 
-    if(!peek(lex) || !peek(lex)->token_type == OPENING_BRACKETS)
-        return NULL;
-    discard_token(pop(lex));
+    while(peek(lex) && peek(lex)->token_type == NEWLINE)
+        discard_token(pop(lex));
 
-    //add_func(...,cmd,parser_compound_list);
+    add_func(dict,cmd,parser_shell_command(lex,dict));
 
     if(!peek(lex) || !peek(lex)->token_type == CLOSING_PARENTHESIS)
         return NULL;
@@ -152,13 +151,13 @@ struct ast *parser_fundef(struct lex *lex, char *cmd)
 }
 
 // prochaine step -> ajouter gestion  { redirections } après shell_command
-struct ast *parser_command(struct lex *lex)
+struct ast *parser_command(struct lex *lex, struct dictionnary *dict)
 {
     if (peek(lex)
         && (peek(lex)->token_type == IF || peek(lex)->token_type == WHILE
             || peek(lex)->token_type == UNTIL || peek(lex)->token_type == FOR))
     {
-        return parser_shell_command(lex);
+        return parser_shell_command(lex, dict);
     }
     char *cmd = NULL;
     if(peek(lex) && peek(lex)->token_type == WORD)
@@ -167,7 +166,7 @@ struct ast *parser_command(struct lex *lex)
         cmd = tok->value;
         free(tok);
         if(peek(lex)->token_type = OPENING_PARENTHESIS)
-            return parser_fundef(lex,cmd);
+            return parser_fundef(lex,cmd,dict);
     }
     return parser_simple_command(lex,cmd);
 }
