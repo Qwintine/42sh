@@ -1,7 +1,7 @@
 #include "unset.h"
 #include <string.h>
 
-static void free_node(struct values *val)
+static void free_node(struct variables *val)
 {
 	if(val)
 	{
@@ -21,19 +21,19 @@ int unset(struct dictionnary *to_unset, char **names)
 		for(size_t i =0; names[i]; i++) // maybe use better algo ?
 		{
 			int ind = hash(names[i]);
-			struct values *val = to_unset->values[ind];//use hash fonc]
+			struct variables *val = to_unset->variables[ind];//use hash fonc]
 			if(val)
 			{
 				if(!strcmp(val->key, names[i]))
 				{
 					if(!val->next)
 					{
-						to_unset->values[ind] = NULL;
+						to_unset->variables[ind] = NULL;
 						free_node(val);
 					}
 					else
 					{
-						to_unset->values[ind] = val->next;
+						to_unset->variables[ind] = val->next;
 						free_node(val);
 					}
 				}
@@ -45,7 +45,7 @@ int unset(struct dictionnary *to_unset, char **names)
 					}
 					if(val && val->next) // possible to add a check for readonly once implem
 					{
-						struct values *temp = val->next;
+						struct variables *temp = val->next;
 						val->next = temp->next;
 						free_node(temp);
 					}

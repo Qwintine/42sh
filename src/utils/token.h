@@ -16,6 +16,8 @@ enum type
     DO,
     DONE,
     IN,
+    CLOSING_PARENTHESIS,
+    OPENING_PARENTHESIS,
     REDIR_OUT, // >
     REDIR_IN, // <
     REDIR_APPEND, // >>

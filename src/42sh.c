@@ -42,7 +42,7 @@ int main(int argc, char **argv)
 
     while (!eof)
     {
-        struct ast *ast = parser(entry, &eof);
+        struct ast *ast = parser(entry, &eof, vars);
 
         if (!ast)
         {

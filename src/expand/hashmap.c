@@ -1,5 +1,6 @@
 #define _POSIX_C_SOURCE 200809L
 #include "expand.h"
+#include "../ast/ast.h"
 
 int hash(char *str)
 {
@@ -215,7 +216,7 @@ int add_var_arg(struct dictionnary *dict, char *key, char **val)
     {
         if (strcmp(target->key, key) == 0)
         {
-            free_val(new);
+            free_var(new);
             target->elt = val;
             return 0;
         }
@@ -230,7 +231,7 @@ ERROR:
     return 1;
 }
 
-int add_func(struct dictionnary *dict, char *key, ast *cmd_block)
+int add_func(struct dictionnary *dict, char *key, struct ast *cmd_block)
 {
     struct function *new = malloc(sizeof(struct function));
     new->key = key;
@@ -250,8 +251,8 @@ int add_func(struct dictionnary *dict, char *key, ast *cmd_block)
     {
         if (strcmp(target->key, key) == 0)
         {
-            free_val(new);
-            target->elt = val;
+            free_func(new);
+            target->ast = cmd_block;
             return 0;
         }
         target = target->next;
@@ -310,6 +311,22 @@ char **get_var(struct dictionnary *dict, char *key)
     return res;
 }
 
+struct ast *get_func(struct dictionnary *dict, char *key)
+{
+    int ind = hash(key);
+
+    struct function *target = dict->function[ind];
+    while (target && strcmp(target->key, key) != 0)
+    {
+        target = target->next;
+    }
+    if (!target)
+    {
+        return NULL;
+    }
+    return target->ast;
+}
+
 void free_var(struct variables *var)
 {
     while (var)
@@ -345,7 +362,7 @@ void free_dict(struct dictionnary *dict)
     for (size_t i = 0; i < 20; i++)
     {
         free_var(dict->variables[i]);
-        free_func(dict->function[i])
+        free_func(dict->function[i]);
     }
     free(dict);
 }
