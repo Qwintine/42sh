@@ -110,7 +110,7 @@ char *special(char *key)
         srand((unsigned)time(NULL));
         return itoa(rand());
     }
-    if(!strcmp(key, "PATH"))
+    if (!strcmp(key, "PATH"))
     {
         char *path = getenv("PATH");
         if (path)
@@ -160,11 +160,13 @@ int add_var(struct dictionnary *dict, char *varas)
         i++;
     }
 
-    if (!dict || !varas || varas[i] != '=') return 1;
+    if (!dict || !varas || varas[i] != '=')
+        return 1;
 
     char *key = malloc(i + 1);
     char *val = malloc(strlen(varas + i + 1) + 1);
-    if (!key || !val) goto ERROR;
+    if (!key || !val)
+        goto ERROR;
 
     strncpy(key, varas, i);
     key[i] = '\0';
@@ -183,7 +185,8 @@ int add_var(struct dictionnary *dict, char *varas)
 
     struct variables *new = malloc(sizeof(struct variables));
 
-    if (!new) goto ERROR;
+    if (!new)
+        goto ERROR;
 
     new->key = key;
     new->elt = malloc(2 * sizeof(char *));
@@ -258,7 +261,7 @@ int add_var_arg(struct dictionnary *dict, char *key, char **val)
         free(new);
         goto ERROR;
     }
-    if(dup_val_to_elt(new, val, i)) 
+    if (dup_val_to_elt(new, val, i))
         goto ERROR;
     new->elt[i] = NULL;
     new->next = NULL;

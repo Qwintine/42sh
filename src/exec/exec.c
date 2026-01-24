@@ -19,13 +19,13 @@
 #include "redir_exec.h"
 
 /*
-* Description:
-* 	Check if cmd is builtin
-* Arguments:
-* 	char **words -> args passed to builtin
-* Return:
-* 	int -> 1 if builtin, 0 otherwise
-*/
+ * Description:
+ * 	Check if cmd is builtin
+ * Arguments:
+ * 	char **words -> args passed to builtin
+ * Return:
+ * 	int -> 1 if builtin, 0 otherwise
+ */
 static int is_builtin(char **words)
 {
     if (!words || !words[0])
@@ -38,15 +38,15 @@ static int is_builtin(char **words)
 }
 
 /*
-* Description:
-* 	Execute builtin cmd with given args
-* Arguments:
-* 	char **words -> args passed to builtin
-* 	int *exit -> pointer to exit status
-* 	struct dictionnary *vars -> dictionnary of vars
-* Return:
-* 	int -> Exit status of builtin cmd
-*/
+ * Description:
+ * 	Execute builtin cmd with given args
+ * Arguments:
+ * 	char **words -> args passed to builtin
+ * 	int *exit -> pointer to exit status
+ * 	struct dictionnary *vars -> dictionnary of vars
+ * Return:
+ * 	int -> Exit status of builtin cmd
+ */
 static int exec_builtin(char **words, int *exit, struct dictionnary *vars)
 {
     char *cmd = words[0];
@@ -96,15 +96,15 @@ static int exec_builtin(char **words, int *exit, struct dictionnary *vars)
 }
 
 /*
-* Description:
-* 	Execute funct with given arguments
-* Arguments:
-* 	struct ast *func -> AST node of funct
-* 	struct ast_cmd *ast_cmd -> AST node of cmd
-* 	struct dictionnary *vars -> dictionnary of vars
-* Return:
-* 	int -> Exit status of funct
-*/
+ * Description:
+ * 	Execute funct with given arguments
+ * Arguments:
+ * 	struct ast *func -> AST node of funct
+ * 	struct ast_cmd *ast_cmd -> AST node of cmd
+ * 	struct dictionnary *vars -> dictionnary of vars
+ * Return:
+ * 	int -> Exit status of funct
+ */
 static int exec_func(struct ast *func, struct ast_cmd *ast_cmd,
                      struct dictionnary *vars)
 {
@@ -151,12 +151,12 @@ static int exec_func(struct ast *func, struct ast_cmd *ast_cmd,
     }
     return res;
 }
- /*
+/*
  * Description:
  * 	Update special var "?" with given status
  * Arguments:
  * 	struct dictionnary *vars -> dictionnary of variables
- * 	int status -> status to set "?" to 
+ * 	int status -> status to set "?" to
  */
 static void update_exit(struct dictionnary *vars, int status)
 {
@@ -176,16 +176,15 @@ static void update_exit(struct dictionnary *vars, int status)
 }
 
 /*
-* Description:
-* 	Exec assignments in cmd
-* Arguments:
-* 	struct ast_cmd *ast_cmd -> AST node
-* 	struct dictionnary *vars -> dictionnary of vars
-* Return:
-* 	int -> Exit status of assignment exec
-*/
-static int exec_assignment(struct ast_cmd *ast_cmd,
-                                 struct dictionnary *vars)
+ * Description:
+ * 	Exec assignments in cmd
+ * Arguments:
+ * 	struct ast_cmd *ast_cmd -> AST node
+ * 	struct dictionnary *vars -> dictionnary of vars
+ * Return:
+ * 	int -> Exit status of assignment exec
+ */
+static int exec_assignment(struct ast_cmd *ast_cmd, struct dictionnary *vars)
 {
     if (ast_cmd->redirs)
     {
@@ -206,18 +205,18 @@ static int exec_assignment(struct ast_cmd *ast_cmd,
 }
 
 /*
-* Description:
-* 	Execute the builtin command with given args
-* Arguments:
-* 	struct ast_cmd *ast_cmd -> AST node
-* 	char **expanded -> expanded arguments
-* 	struct dictionnary *vars -> dictionnary of vars
-* 	int *exit -> pointer to exit status
-* Return:
-* 	int -> Exit status of builtin command
-*/
+ * Description:
+ * 	Execute the builtin command with given args
+ * Arguments:
+ * 	struct ast_cmd *ast_cmd -> AST node
+ * 	char **expanded -> expanded arguments
+ * 	struct dictionnary *vars -> dictionnary of vars
+ * 	int *exit -> pointer to exit status
+ * Return:
+ * 	int -> Exit status of builtin command
+ */
 static int exec_b(struct ast_cmd *ast_cmd, char **expanded,
-                            struct dictionnary *vars, int *exit)
+                  struct dictionnary *vars, int *exit)
 {
     struct redir_saved redir_saved;
     if (redir_apply(ast_cmd->redirs, &redir_saved))
@@ -231,7 +230,7 @@ static int exec_b(struct ast_cmd *ast_cmd, char **expanded,
     update_exit(vars, r);
     return r;
 }
- /*
+/*
  * Description:
  *  Execute the command with given arguments
  * Arguments:
@@ -239,10 +238,10 @@ static int exec_b(struct ast_cmd *ast_cmd, char **expanded,
  * 	char **expanded -> expanded arguments
  * 	struct dictionnary *vars -> dictionnary of variables
  * Return:
- * 	int ->Exit status of the command 
+ * 	int ->Exit status of the command
  */
 static int exec(struct ast_cmd *ast_cmd, char **expanded,
-                             struct dictionnary *vars)
+                struct dictionnary *vars)
 {
     pid_t pid = fork();
     if (pid == 0)
@@ -335,16 +334,16 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars, int *exit)
 }
 
 /*
-* Description:
-* 	Execute a pipeline of commands
-* Arguments:
-* 	struct ast_cmd **cmd -> commands to execute
-* 	int fd[2] -> file descriptors for the pipe
-* 	struct dictionnary *vars -> the dictionnary of variables
-* 	int *exit -> pointer to the exit status
-* Return:
-* 	int -> Exit status of last command executed
-*/
+ * Description:
+ * 	Execute a pipeline of commands
+ * Arguments:
+ * 	struct ast_cmd **cmd -> commands to execute
+ * 	int fd[2] -> file descriptors for the pipe
+ * 	struct dictionnary *vars -> the dictionnary of variables
+ * 	int *exit -> pointer to the exit status
+ * Return:
+ * 	int -> Exit status of last command executed
+ */
 int exec_pipe(struct ast_cmd **cmd, int fd[2], struct dictionnary *vars,
               int *exit)
 {
