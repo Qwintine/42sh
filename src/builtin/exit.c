@@ -23,7 +23,8 @@ int exit_b(char **codes, int *exit)
 {   
     if (codes[0] != NULL && codes[1] != NULL) // too much args
     {
-        fprintf(stderr, "42sh: exit: too many arguments\n");
+        fprintf(stderr, "42sh: exit: too many args\n");
+        *exit = 1;
         return 1;
     }
     

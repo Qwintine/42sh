@@ -84,6 +84,11 @@ struct ast *init_ast_pipe(void)
     node->base.type = AST_PIPE;
     node->negation = 0;
     node->cmd = malloc(sizeof(struct ast_cmd *));
+    if (!node->cmd)
+    {
+        free(node);
+        return NULL;
+    }
     node->cmd[0] = NULL;
     return (struct ast *)node;
 }
@@ -125,6 +130,11 @@ struct ast *init_ast_for(void)
     node->base.type = AST_FOR;
     node->var = NULL;
     node->words = malloc(sizeof(char *));
+    if (!node->words)
+    {
+        free(node);
+        return NULL;
+    }
     node->words[0] = NULL;
     node->body = NULL;
     return (struct ast *)node;
