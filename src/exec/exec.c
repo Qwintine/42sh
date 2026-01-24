@@ -124,6 +124,93 @@ static int exec_func(struct ast *func, struct ast_cmd *ast_cmd,
     return res;
 }
 
+static void update_exit(struct dictionnary *vars, int status)
+{
+    char *wexit = itoa(status);
+    if (wexit)
+    {
+        char *assignment = malloc(strlen("?=") + strlen(wexit) + 1);
+        if (assignment)
+        {
+            assignment = strcpy(assignment, "?=");
+            assignment = strcat(assignment, wexit);
+            add_var(vars, assignment);
+            free(assignment);
+        }
+        free(wexit);
+    }
+}
+
+static int exec_assignment(struct ast_cmd *ast_cmd,
+                                 struct dictionnary *vars)
+{
+    if (ast_cmd->redirs)
+    {
+        struct redir_saved redir_saved;
+        if (redir_apply(ast_cmd->redirs, &redir_saved))
+            return 1;
+        restore_redirs(&redir_saved);
+    }
+    size_t i = 0;
+    while (ast_cmd->assignment[i])
+    {
+        if (add_var(vars, ast_cmd->assignment[i]))
+            return 1;
+        i++;
+    }
+    update_exit(vars, 0);
+    return 0;
+}
+
+static int exec_b(struct ast_cmd *ast_cmd, char **expanded,
+                            struct dictionnary *vars, int *exit)
+{
+    struct redir_saved redir_saved;
+    if (redir_apply(ast_cmd->redirs, &redir_saved))
+    {
+        free_ex(expanded);
+        return 1;
+    }
+    int r = exec_builtin(expanded, exit, vars);
+    free_ex(expanded);
+    restore_redirs(&redir_saved);
+    update_exit(vars, r);
+    return r;
+}
+
+static int exec(struct ast_cmd *ast_cmd, char **expanded,
+                             struct dictionnary *vars)
+{
+    pid_t pid = fork();
+    if (pid == 0)
+    {
+        struct redir_saved redir_saved;
+        if (redir_apply(ast_cmd->redirs, &redir_saved))
+            _exit(1);
+        execvp(expanded[0], expanded);
+        fprintf(stderr, "Command unknown\n");
+        free_ex(expanded);
+        _exit(127);
+    }
+    size_t i = 0;
+    while (ast_cmd->assignment[i])
+    {
+        if (add_var(vars, ast_cmd->assignment[i]))
+            return 1;
+        i++;
+    }
+    free_ex(expanded);
+    int status;
+    waitpid(pid, &status, 0);
+    if (WIFEXITED(status))
+    {
+        update_exit_status(vars, WEXITSTATUS(status));
+        return WEXITSTATUS(status);
+    }
+    update_exit(vars, 127);
+    return 127;
+}
+
 /* Description:
  *  	execute les commandes avec les args donnes
  * Arguments:
@@ -146,39 +233,7 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars, int *exit)
         return 2;
 
     if (!ast_cmd->words || !ast_cmd->words[0])
-    {
-        if (ast_cmd->redirs)
-        {
-            struct redir_saved redir_saved;
-            if (redir_apply(ast_cmd->redirs, &redir_saved))
-                return 1;
-            restore_redirs(&redir_saved);
-        }
-        size_t i = 0;
-        while (ast_cmd->assignment[i])
-        {
-            if (add_var(vars, ast_cmd->assignment[i]))
-            {
-                return 1;
-            }
-            i++;
-        }
-        char *wexit = itoa(0);
-        if (!wexit)
-            return 0;
-        char *assignment = malloc(strlen("?=") + strlen(wexit) + 1);
-        if (!assignment)
-        {
-            free(wexit);
-            return 0;
-        }
-        assignment = strcpy(assignment, "?=");
-        assignment = strcat(assignment, wexit);
-        add_var(vars, assignment);
-        free(wexit);
-        free(assignment);
-        return 0;
-    }
+        return exec_assignment(ast_cmd, vars);
 
     if (ast_cmd->words[0])
     {
@@ -213,88 +268,9 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars, int *exit)
     }
 
     if (is_builtin(expanded))
-    {
-        struct redir_saved redir_saved;
-        if (redir_apply(ast_cmd->redirs, &redir_saved))
-        {
-            free_ex(expanded);
-            return 1;
-        }
-        int r = exec_builtin(expanded, exit, vars);
-        free_ex(expanded);
-        restore_redirs(&redir_saved);
-        char *wexit = itoa(r);
-        if (wexit)
-        {
-            char *assignment = malloc(strlen("?=") + strlen(wexit) + 1);
-            if (assignment)
-            {
-                assignment = strcpy(assignment, "?=");
-                assignment = strcat(assignment, wexit);
-                add_var(vars, assignment);
-                free(assignment);
-            }
-            free(wexit);
-        }
-        return r;
-    }
+        return exec_b(ast_cmd, expanded, vars, exit);
 
-    pid_t pid = fork();
-
-    if (pid == 0)
-    {
-        struct redir_saved redir_saved;
-        if (redir_apply(ast_cmd->redirs, &redir_saved))
-            _exit(1);
-        execvp(expanded[0], expanded);
-        fprintf(stderr, "Command unknown\n");
-        free_ex(expanded);
-        _exit(127);
-    }
-
-    size_t i = 0;
-    while (ast_cmd->assignment[i])
-    {
-        if (add_var(vars, ast_cmd->assignment[i]))
-        {
-            return 1;
-        }
-        i++;
-    }
-    free_ex(expanded);
-    int status;
-    waitpid(pid, &status, 0);
-    if (WIFEXITED(status))
-    {
-        char *wexit = itoa((int)WEXITSTATUS(status));
-        if (wexit)
-        {
-            char *assignment = malloc(strlen("?=") + strlen(wexit) + 1);
-            if (assignment)
-            {
-                assignment = strcpy(assignment, "?=");
-                assignment = strcat(assignment, wexit);
-                add_var(vars, assignment);
-                free(assignment);
-            }
-            free(wexit);
-        }
-        return WEXITSTATUS(status);
-    }
-    char *wexit = itoa(127);
-    if (wexit)
-    {
-        char *assignment = malloc(strlen("?=") + strlen(wexit) + 1);
-        if (assignment)
-        {
-            assignment = strcpy(assignment, "?=");
-            assignment = strcat(assignment, wexit);
-            add_var(vars, assignment);
-            free(assignment);
-        }
-        free(wexit);
-    }
-    return 127;
+    return exec(ast_cmd, expanded, vars);
 }
 
 int exec_pipe(struct ast_cmd **cmd, int fd[2], struct dictionnary *vars,
