@@ -49,7 +49,6 @@ struct ast_cmd
 {
     struct ast base;
     char **assignment;
-    enum type *types;
     char **words; // arguments de la commande
     struct redir **redirs; // redir à appliquer dans l'ordre
 };

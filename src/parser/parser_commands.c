@@ -62,7 +62,7 @@ struct ast *parser_shell_command(struct lex *lex)
  * 		| prefix {prefix}
  */
 // prochaine step -> ajouter gestion des préfixes ( cf. Trove Shell Syntax )
-struct ast *parser_simple_command(struct lex *lex)
+struct ast *parser_simple_command(struct lex *lex, char *cmd )
 {
     struct ast_cmd *ast_cmd = (struct ast_cmd *)init_ast_cmd();
     size_t w = 0;
@@ -79,17 +79,25 @@ struct ast *parser_simple_command(struct lex *lex)
     lex->context = WORD;
     if (peek(lex) && peek(lex)->token_type == WORD)
     {
-        struct token *tok = pop(lex);
-        if (!tok)
-            goto ERROR;
-        ast_cmd->words[w] = tok->value;
+        char *val = NULL;
+        if(cmd)
+        {
+            val = cmd;
+        }
+        else
+        {
+            struct token *tok = pop(lex);
+            if (!tok)
+                goto ERROR;
+            val = tok->value;
+            free(tok);
+        }
+        ast_cmd->words[w] = val;
         ast_cmd->types = realloc(ast_cmd->types, (w + 1) * sizeof(enum type));
         if (!ast_cmd->types)
         {
             goto ERROR;
         }
-        ast_cmd->types[w] = tok->token_type;
-        free(tok);
         w++;
         ast_cmd->words = realloc(ast_cmd->words, (w + 1) * sizeof(char *));
         if (!ast_cmd->words)
@@ -122,6 +130,27 @@ ERROR:
     return NULL;
 }
 
+struct ast *parser_fundef(struct lex *lex, char *cmd)
+{
+    if(!peek(lex) || !peek(lex)->token_type == OPENING_PARENTHESIS)
+        return NULL;
+    discard_token(pop(lex));
+
+    if(!peek(lex) || !peek(lex)->token_type == CLOSING_PARENTHESIS)
+        return NULL;
+    discard_token(pop(lex));
+
+    if(!peek(lex) || !peek(lex)->token_type == OPENING_BRACKETS)
+        return NULL;
+    discard_token(pop(lex));
+
+    //add_func(...,cmd,parser_compound_list);
+
+    if(!peek(lex) || !peek(lex)->token_type == CLOSING_PARENTHESIS)
+        return NULL;
+    discard_token(pop(lex));
+}
+
 // prochaine step -> ajouter gestion  { redirections } après shell_command
 struct ast *parser_command(struct lex *lex)
 {
@@ -131,5 +160,14 @@ struct ast *parser_command(struct lex *lex)
     {
         return parser_shell_command(lex);
     }
-    return parser_simple_command(lex);
+    char *cmd = NULL;
+    if(peek(lex) && peek(lex)->token_type == WORD)
+    {
+        struct token *tok = peek(lex)
+        cmd = tok->value;
+        free(tok);
+        if(peek(lex)->token_type = OPENING_PARENTHESIS)
+            return parser_fundef(lex,cmd);
+    }
+    return parser_simple_command(lex,cmd);
 }
