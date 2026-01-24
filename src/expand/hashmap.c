@@ -253,14 +253,18 @@ int add_func(struct dictionnary *dict, char *key, struct ast *cmd_block)
     }
 
     struct function *target = dict->function[ind];
-    while (target->next)
+    while (target)
     {
         if (strcmp(target->key, key) == 0)
         {
-            free_func(new);
+            free_ast(target->ast);
             target->ast = cmd_block;
+            free(new->key);
+            free(new);
             return 0;
         }
+        if (!target->next)
+            break;
         target = target->next;
     }
     target->next = new;

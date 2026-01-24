@@ -77,6 +77,39 @@ static int exec_builtin(char **words, int *exit, struct dictionnary *vars)
     return -1;
 }
 
+static int exec_func(struct ast *func, struct ast_cmd *ast_cmd, 
+                         struct dictionnary *vars)
+{
+    char **expanded = expand(vars, ast_cmd->words);
+    char **old_params[10] = {NULL};
+    char key[2] = "0";
+    
+    for (int i = 1; expanded && expanded[i] && i < 10; i++)
+    {
+        key[0] = '0' + i;
+        old_params[i] = get_var(vars, key);
+        char **val = malloc(2 * sizeof(char *));
+        val[0] = expanded[i];
+        val[1] = NULL;
+        add_var_arg(vars, key, val);
+    }
+    
+    int func_exit = 0;
+    int res = run_ast(func, vars, &func_exit);
+    
+    for (int i = 1; i < 10 && old_params[i]; i++)
+    {
+        key[0] = '0' + i;
+        if (old_params[i][0])
+            add_var_arg(vars, key, old_params[i]);
+        else
+            free(old_params[i]);
+    }
+    
+    free(expanded);
+    return res;
+}
+
 /* Description:
  *  	execute les commandes avec les args donnes
  * Arguments:
@@ -129,11 +162,7 @@ int exec_cmd(struct ast_cmd *ast_cmd, struct dictionnary *vars, int *exit)
     {
         struct ast *func = get_func(vars, ast_cmd->words[0]);
         if (func)
-        {
-            int func_exit = 0;
-            int res = run_ast(func, vars, &func_exit);
-            return res;
-        }
+            return exec_func(func, ast_cmd, vars);
     }
 
     char **expanded = expand(vars, ast_cmd->words);
