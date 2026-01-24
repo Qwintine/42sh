@@ -17,19 +17,19 @@ static int update_pwd(struct dictionnary *vars)
         free(pwd);
         return 1;
     }
-
+    
     char *saved_pwd = pwd[0];
     free(pwd);
     if (saved_pwd == NULL)
         return 1;
-
+    
     char new_pwd[1024];
     if (!getcwd(new_pwd, sizeof(new_pwd)))
     {
         free(saved_pwd);
         return 1;
     }
-
+    
     char *oldpwd_var = malloc(strlen(saved_pwd) + 8);
     if (!oldpwd_var)
     {
@@ -39,7 +39,7 @@ static int update_pwd(struct dictionnary *vars)
     strcpy(oldpwd_var, "OLDPWD=");
     strcat(oldpwd_var, saved_pwd);
     free(saved_pwd);
-
+    
     char *pwd_var = malloc(strlen(new_pwd) + 5);
     if (!pwd_var)
     {
@@ -48,83 +48,83 @@ static int update_pwd(struct dictionnary *vars)
     }
     strcpy(pwd_var, "PWD=");
     strcat(pwd_var, new_pwd);
-
+    
     add_var(vars, oldpwd_var);
     add_var(vars, pwd_var);
     free(oldpwd_var);
     free(pwd_var);
-
+    
     return 0;
+}
+
+struct cd_result 
+{
+    char *path;
+    char **var;
+};
+
+static struct cd_result resolve_path(char **args, struct dictionnary *vars,
+    int *print_path)
+{
+    struct cd_result result = {NULL, NULL};
+    
+    if (args[0] == NULL)
+    {
+        result.var = get_var(vars, "HOME");
+        if (result.var == NULL || result.var[0] == NULL)
+        {
+            fprintf(stderr, "cd: HOME not set\n");
+            if (result.var) free_ex(result.var);
+            return result;
+        }
+        result.path = result.var[0];
+    }
+    else if (strcmp(args[0], "-") == 0)
+    {
+        result.var = get_var(vars, "OLDPWD");
+        if (result.var == NULL || result.var[0] == NULL)
+        {
+            fprintf(stderr, "cd: OLDPWD not set\n");
+            if (result.var) free_ex(result.var);
+            return result;
+        }
+        result.path = result.var[0];
+        *print_path = 1;
+    }
+    else
+    {
+        result.path = strdup(args[0]);
+        if (!result.path)
+            return result;
+    }
+    return result;
 }
 
 int cd_b(char **args, struct dictionnary *vars)
 {
-    char *path;
-    char **home = NULL;
-    char **oldpwd = NULL;
     int print_path = 0;
-
-    if (args[0] == NULL)
+    struct cd_result res = resolve_path(args, vars, &print_path);
+    
+    if (res.path == NULL)
+        return 1;
+    
+    if (chdir(res.path) != 0)
     {
-        home = get_var(vars, "HOME");
-        if (home == NULL || home[0] == NULL)
-        {
-            fprintf(stderr, "cd: HOME not set\n");
-            return 1;
-        }
-        path = home[0];
-    }
-    else if (strcmp(args[0], "-") == 0)
-    {
-        oldpwd = get_var(vars, "OLDPWD");
-        if (oldpwd == NULL || oldpwd[0] == NULL)
-        {
-            return 1;
-        }
-        path = oldpwd[0];
-        print_path = 1;
-    }
-    else
-    {
-        path = strdup(args[0]);
-    }
-
-    if (chdir(path) != 0)
-    {
-        fprintf(stderr, "cd: wrong path: %s\n", path);
-        free(path);
+        fprintf(stderr, "cd: wrong path: %s\n", res.path);
+        if (res.var) free_ex(res.var);
+        else free(res.path);
         return 1;
     }
-
-    char *path_to_print = NULL;
+    
     if (print_path)
     {
-        path_to_print = strdup(path);
-        if (!path_to_print)
-        {
-            if (home)
-                free_ex(home);
-            if (oldpwd)
-                free_ex(oldpwd);
-            return 1;
-        }
-    }
-
-    int result = update_pwd(vars);
-
-    if (path_to_print != NULL)
-    {
-        printf("%s\n", path_to_print);
+        printf("%s\n", res.path);
         fflush(stdout);
-        free(path_to_print);
     }
-
-    if (path != NULL)
-        free(path);
-    if (home != NULL)
-        free(home);
-    if (oldpwd != NULL)
-        free(oldpwd);
-
-    return result;
+    
+    int ret = update_pwd(vars);
+    if (res.var) free_ex(res.var);
+    else free(res.path);
+    
+    return ret;
 }
