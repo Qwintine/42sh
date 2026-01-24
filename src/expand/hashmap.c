@@ -98,7 +98,6 @@ struct dictionnary *init_dict(void)
     char *ifs = strdup(" \t\n");
     if (ifs)
         add_special(dict, "IFS", ifs);
-    // key[2] = "PATH";
 
     return dict;
 }
@@ -111,8 +110,14 @@ char *special(char *key)
         srand((unsigned)time(NULL));
         return itoa(rand());
     }
-    if (!strcmp(key, "UID"))
-        return itoa((int)getuid());
+    if(!strcmp(key, "PATH"))
+    {
+        char *path = getenv("PATH");
+        if (path)
+            return strdup(path);
+        else
+            return strdup("");
+    }
     return 0;
 }
 
@@ -155,15 +160,11 @@ int add_var(struct dictionnary *dict, char *varas)
         i++;
     }
 
-    if (!dict || !varas || varas[i] != '=')
-        return 1;
+    if (!dict || !varas || varas[i] != '=') return 1;
 
     char *key = malloc(i + 1);
     char *val = malloc(strlen(varas + i + 1) + 1);
-    if (!key || !val)
-    {
-        goto ERROR;
-    }
+    if (!key || !val) goto ERROR;
 
     strncpy(key, varas, i);
     key[i] = '\0';
@@ -182,10 +183,7 @@ int add_var(struct dictionnary *dict, char *varas)
 
     struct variables *new = malloc(sizeof(struct variables));
 
-    if (!new)
-    {
-        goto ERROR;
-    }
+    if (!new) goto ERROR;
 
     new->key = key;
     new->elt = malloc(2 * sizeof(char *));
@@ -202,9 +200,9 @@ int add_var(struct dictionnary *dict, char *varas)
     if (!dict->variables[ind])
     {
         dict->variables[ind] = new;
-        char *env_val = getenv(key);
+        /*char *env_val = getenv(key);
         if (env_val != NULL)
-            setenv(key, val, 1);
+            setenv(key, val, 1);*/
         return 0;
     }
 
@@ -215,6 +213,24 @@ ERROR:
     free(key);
     free(val);
     return 1;
+}
+
+static int dup_val_to_elt(struct variables *new, char **val, size_t i)
+{
+    for (size_t j = 0; j < i; j++)
+    {
+        new->elt[j] = strdup(val[j]);
+        if (!new->elt[j])
+        {
+            for (size_t k = 0; k < j; k++)
+                free(new->elt[k]);
+            free(new->elt);
+            free(new->key);
+            free(new);
+            return 1;
+        }
+    }
+    return 0;
 }
 
 int add_var_arg(struct dictionnary *dict, char *key, char **val)
@@ -242,19 +258,8 @@ int add_var_arg(struct dictionnary *dict, char *key, char **val)
         free(new);
         goto ERROR;
     }
-    for (size_t j = 0; j < i; j++)
-    {
-        new->elt[j] = strdup(val[j]);
-        if (!new->elt[j])
-        {
-            for (size_t k = 0; k < j; k++)
-                free(new->elt[k]);
-            free(new->elt);
-            free(new->key);
-            free(new);
-            goto ERROR;
-        }
-    }
+    if(dup_val_to_elt(new, val, i)) 
+        goto ERROR;
     new->elt[i] = NULL;
     new->next = NULL;
     if (!new->elt)
