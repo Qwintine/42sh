@@ -11,6 +11,81 @@ static int is_word(char c)
             || (c >= '0' && c <= '9') || c == '_');
 }
 
+static int var_exp_no_brack(char *word, size_t *ind, char **key)
+{
+    char next = word[(*ind) + 1];
+    if (next == '#' || next == '?' || next == '@' || next == '*'
+        || next == '$' || next == '!' || next == '-'
+        || (next >= '0' && next <= '9'))
+    {
+        (*ind)++;
+        char *tmp = realloc((*key), 2);
+        if (!tmp)
+        {
+            return 1;
+        }
+        (*key) = tmp;
+        (*key)[0] = next;
+        (*key)[1] = 0;
+    }
+    else
+    {
+        while (is_word(word[(*ind) + 1]))
+        {
+            (*ind)++;
+            char *tmp = realloc((*key), strlen((*key)) + 2);
+            if (!tmp)
+            {
+                return 1;
+            }
+            (*key) = tmp;
+            size_t len = strlen(*key);
+            (*key)[len] = word[(*ind)];
+            (*key)[len + 1] = 0;
+        }
+    }
+    return 0;
+}
+
+static int var_exp_brack(char *word, size_t *ind, char **key)
+{
+    (*ind) += 2;
+    while (word[*ind] != 0 && word[*ind] != '}')
+    {
+        char *tmp = realloc(*key, strlen(*key) + 2);
+        if (!tmp)
+        {
+            return 1;
+        }
+        *key = tmp;
+        size_t len = strlen(*key);
+        (*key)[len] = word[*ind];
+        (*key)[len + 1] = 0;
+        (*ind)++;
+    }
+    if (word[*ind] == 0)
+    {
+        return 1;
+    }
+    return 0;
+}
+
+static void val_append(char **res, char *to_add, char *next)
+{
+    char *tmp = realloc(*res, strlen(*res) + strlen(to_add) + 1);
+        if (!tmp)
+        {
+            free(*res);
+            *res = NULL;
+            return;
+        }
+        *res = tmp;
+        strcat(*res, to_add);
+        if (next != NULL)
+            strcat(*res, " ");
+        free(to_add);
+}
+
 static char *var_expand(struct dictionnary *vars, char *word, size_t *ind)
 {
     char *key = malloc(1);
@@ -19,22 +94,7 @@ static char *var_expand(struct dictionnary *vars, char *word, size_t *ind)
     key[0] = 0;
     if (word[(*ind) + 1] == '{')
     {
-        (*ind) += 2;
-        while (word[*ind] != 0 && word[*ind] != '}')
-        {
-            char *tmp = realloc(key, strlen(key) + 2);
-            if (!tmp)
-            {
-                free(key);
-                return NULL;
-            }
-            key = tmp;
-            size_t len = strlen(key);
-            key[len] = word[*ind];
-            key[len + 1] = 0;
-            (*ind)++;
-        }
-        if (word[*ind] == 0)
+        if(var_exp_brack(word, ind, &key))
         {
             free(key);
             return NULL;
@@ -42,38 +102,10 @@ static char *var_expand(struct dictionnary *vars, char *word, size_t *ind)
     }
     else
     {
-        char next = word[(*ind) + 1];
-        if (next == '#' || next == '?' || next == '@' || next == '*'
-            || next == '$' || next == '!' || next == '-'
-            || (next >= '0' && next <= '9'))
+        if(var_exp_no_brack(word, ind, &key))
         {
-            (*ind)++;
-            char *tmp = realloc(key, 2);
-            if (!tmp)
-            {
-                free(key);
-                return NULL;
-            }
-            key = tmp;
-            key[0] = next;
-            key[1] = 0;
-        }
-        else
-        {
-            while (is_word(word[(*ind) + 1]))
-            {
-                (*ind)++;
-                char *tmp = realloc(key, strlen(key) + 2);
-                if (!tmp)
-                {
-                    free(key);
-                    return NULL;
-                }
-                key = tmp;
-                size_t len = strlen(key);
-                key[len] = word[(*ind)];
-                key[len + 1] = 0;
-            }
+            free(key);
+            return NULL;
         }
     }
     char **val = get_var(vars, key);
@@ -97,18 +129,7 @@ static char *var_expand(struct dictionnary *vars, char *word, size_t *ind)
     size_t j = 0;
     while (val[j] != NULL)
     {
-        char *tmp = realloc(res, strlen(res) + strlen(val[j]) + 2);
-        if (!tmp)
-        {
-            free(res);
-            free_ex(val);
-            return NULL;
-        }
-        res = tmp;
-        strcat(res, val[j]);
-        if (val[j + 1] != NULL)
-            strcat(res, " ");
-        free(val[j]);
+        val_append(&res, val[j], val[j + 1]);
         j++;
     }
     free(val);
@@ -118,6 +139,64 @@ static char *var_expand(struct dictionnary *vars, char *word, size_t *ind)
 static int is_expandable(char c)
 {
     return (c == '$' || c == '"' || c == '\'' || c == '\\');
+}
+
+static int in_dquote_exp(char *word, size_t *ind, struct dictionnary *vars, 
+                            char **res)
+{
+    if (word[*ind] == '$')
+    {
+        char *var = var_expand(vars, word, ind);
+        if (!var)
+        {
+            free(*res);
+            return 1;
+        }
+        char *tmp = realloc(*res, strlen(*res) + strlen(var) + 1);
+        if (!tmp)
+        {
+            free(var);
+            free(*res);
+            return 1;
+        }
+        *res = tmp;
+        strcat(*res, var);
+        free(var);
+        (*ind)++;
+    }
+    else if (word[*ind] == '\\')
+    {
+        if (is_expandable(word[*ind + 1]))
+        {
+            (*ind)++;
+        }
+        char *tmp = realloc(*res, strlen(*res) + 2);
+        if (!tmp)
+        {
+            free(*res);
+            return 1;
+        }
+        *res = tmp;
+        size_t len = strlen(*res);
+        (*res)[len] = word[*ind];
+        (*res)[len + 1] = 0;
+        (*ind)++;
+    }
+    else
+    {
+        char *tmp = realloc(*res, strlen(*res) + 2);
+        if (!tmp)
+        {
+            free(*res);
+            return 1;
+        }
+        *res = tmp;
+        size_t len = strlen(*res);
+        (*res)[len] = word[*ind];
+        (*res)[len + 1] = 0;
+        (*ind)++;
+    }
+    return 0;
 }
 
 static char *double_quotes_expand(struct dictionnary *vars, char *word,
@@ -137,57 +216,9 @@ static char *double_quotes_expand(struct dictionnary *vars, char *word,
         }
         if (word[*ind] != '"')
         {
-            if (word[*ind] == '$')
+            if(in_dquote_exp(word, ind, vars, &res))
             {
-                char *var = var_expand(vars, word, ind);
-                if (!var)
-                {
-                    free(res);
-                    return NULL;
-                }
-                char *tmp = realloc(res, strlen(res) + strlen(var) + 1);
-                if (!tmp)
-                {
-                    free(var);
-                    free(res);
-                    return NULL;
-                }
-                res = tmp;
-                strcat(res, var);
-                free(var);
-                (*ind)++;
-            }
-            else if (word[*ind] == '\\')
-            {
-                if (is_expandable(word[*ind + 1]))
-                {
-                    (*ind)++;
-                }
-                char *tmp = realloc(res, strlen(res) + 2);
-                if (!tmp)
-                {
-                    free(res);
-                    return NULL;
-                }
-                res = tmp;
-                size_t len = strlen(res);
-                res[len] = word[*ind];
-                res[len + 1] = 0;
-                (*ind)++;
-            }
-            else
-            {
-                char *tmp = realloc(res, strlen(res) + 2);
-                if (!tmp)
-                {
-                    free(res);
-                    return NULL;
-                }
-                res = tmp;
-                size_t len = strlen(res);
-                res[len] = word[*ind];
-                res[len + 1] = 0;
-                (*ind)++;
+                return NULL;
             }
         }
         else
@@ -263,6 +294,28 @@ static char *single_quote_expand(char *word, size_t *ind)
     return res;
 }
 
+static void expand_dollar(struct dictionnary *vars, char *word,
+                           size_t *ind,  char **res)
+{
+    char *var = var_expand(vars, word, ind);
+    if (!var)
+    {
+        (*ind)++;
+        continue;
+    }
+    char *tmp = realloc(*res, strlen(*res) + strlen(var) + 1);
+    if (!tmp)
+    {
+        free(var);
+        free_ex(*res);
+        return1;
+    }
+    *res = tmp;
+    strcat(*res, var);
+    free(var);
+    return 0;
+}
+
 char **expand(struct dictionnary *vars, char **words)
 {
     char **res = malloc(sizeof(char *));
@@ -285,22 +338,10 @@ char **expand(struct dictionnary *vars, char **words)
         {
             if (words[i][ibis] == '$')
             {
-                char *var = var_expand(vars, words[i], &ibis);
-                if (!var)
+                if(expand_dollar(vars, words[i], &ibis, &res[j]))
                 {
-                    ibis++;
-                    continue;
-                }
-                char *tmp = realloc(res[j], strlen(res[j]) + strlen(var) + 1);
-                if (!tmp)
-                {
-                    free(var);
-                    free_ex(res);
                     return NULL;
                 }
-                res[j] = tmp;
-                strcat(res[j], var);
-                free(var);
             }
             else if (words[i][ibis] == '\'')
             {
@@ -316,16 +357,10 @@ char **expand(struct dictionnary *vars, char **words)
                 strcat(res[j], var);
                 free(var);
             }
-            else if (words[i][ibis] == '\\')
-            {
-                ibis++;
-                res[j] = realloc(res[j], strlen(res[j]) + 2);
-                size_t len = strlen(res[j]);
-                res[j][len] = words[i][ibis];
-                res[j][len + 1] = 0;
-            }
             else
             {
+                if(words[i][ibis] == '\\')
+                    ibis++;
                 res[j] = realloc(res[j], strlen(res[j]) + 2);
                 size_t len = strlen(res[j]);
                 res[j][len] = words[i][ibis];
