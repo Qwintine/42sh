@@ -14,8 +14,18 @@ void free_stdin_buffer(void)
     }
 }
 
-// Solution de contournement pour lire stdin avec fmemopen
-// (pas sur que ça tienne dans le temps)
+/* Description:
+ * 	Charge stdin en mémoire via fmemopen
+ * Arguments:
+ * 	void
+ * Retour:
+ * 	FILE * -> pointeur sur buffer mémoire contenant stdin
+ * 	NULL en cas d'erreur d'allocation
+ * Verbose:
+ * 	Lit stdin par blocs de 4096 octets
+ * 	Double la capacité du buffer si nécessaire
+ * 	Le buffer alloué est stocké dans stdin_buffer (à libérer via free_stdin_buffer)
+ */
 static FILE *stdin_to_mem(void)
 {
     size_t capacity = 4096;
@@ -78,10 +88,45 @@ static void arg_num(int num, struct dictionnary *vars)
     }
 }
 
+
+/* Description:
+ *  Helper: Ajoute un arg au dictionnaire de variables
+ * Arguments:
+ * 	vars -> dictionnaire de variables
+ * 	index -> numéro de l'arg
+ * 	value -> valeur de l'arg
+ * Retour:
+ * 	void
+ */
+static void add_positional_arg(struct dictionnary *vars, int index, 
+                               char *value)
+{
+    char *arg_name = malloc(20);
+    if (!arg_name)
+        return;
+    
+    char *inum = itoa(index);
+    if (!inum)
+    {
+        free(arg_name);
+        return;
+    }
+    
+    strcpy(arg_name, inum);
+    free(inum);
+    strcat(arg_name, "=");
+    strcat(arg_name, value);
+    add_var(vars, arg_name);
+    free(arg_name);
+}
+
+
 /* Description:
  * 	Gère options scripts et arguments
  * Arguments:
- * 	Arguments binaire
+ * 	argc, argv -> arguments passés au programme
+ * 	prettyprint -> int à 1 si option --prettyprint passée
+ * 	vars -> dictionnaire de variables
  * Retour:
  * 	File * -> caractères à parser
  * Verbose:
@@ -102,10 +147,8 @@ FILE *arg_file(int argc, char **argv, int *prettyprint,
             i++;
             if (!argv[i])
             {
-                fprintf(
-                    stderr,
-                    "42h: IO no argument after -c\n"); // erreur : pas
-                                                       // d'argument après -c
+                // erreur : pas d'argument après -c
+                fprintf(stderr,"42h: IO no argument after -c\n"); 
                 return NULL;
             }
             entry = fmemopen(argv[i], strlen(argv[i]), "r");
@@ -129,26 +172,9 @@ FILE *arg_file(int argc, char **argv, int *prettyprint,
                 return NULL;
             }
         }
-        else
+        else if (i > 1 && vars != NULL)
         {
-            if (i > 1 && vars != NULL)
-            {
-                char *arg_name = malloc(20);
-                if (!arg_name)
-                    continue;
-                char *inum = itoa(i - arg_count);
-                if (!inum)
-                {
-                    free(arg_name);
-                    continue;
-                }
-                arg_name = strcpy(arg_name, inum);
-                free(inum);
-                arg_name = strcat(arg_name, "=");
-                arg_name = strcat(arg_name, argv[i]);
-                add_var(vars, arg_name);
-                free(arg_name);
-            }
+            add_positional_arg(vars, i - arg_count, argv[i]);
         }
     }
     arg_num(argc - arg_count, vars);

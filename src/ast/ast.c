@@ -310,11 +310,11 @@ static int ast_run_loop(struct ast *ast, struct dictionnary *vars, int *exit)
     {
         if (*exit)
             return res;
-
+        
         res = run_ast(ast_loop->body, vars, exit);
         if (*exit)
             return res;
-
+            
         if (get_break() > 0)
         {
             if (res != 0)
@@ -347,7 +347,7 @@ static int ast_run_for(struct ast *ast, struct dictionnary *vars, int *exit)
     else
     {
         char **all_vars = expand(vars, ast_for->words);
-        if (all_vars[0] == NULL)
+        if(all_vars[0] == NULL)
         {
             free(all_vars);
             return 0;
@@ -366,7 +366,7 @@ static int ast_run_for(struct ast *ast, struct dictionnary *vars, int *exit)
             res = run_ast(ast_for->body, vars, exit);
             free(varas);
             free(all_vars[i]);
-
+            
             if (*exit)
             {
                 for (size_t j = i + 1; all_vars[j] != NULL; j++)
@@ -374,7 +374,7 @@ static int ast_run_for(struct ast *ast, struct dictionnary *vars, int *exit)
                 free(all_vars);
                 return res;
             }
-
+            
             if (get_break() > 0)
             {
                 if (res != 0)
@@ -436,8 +436,7 @@ static int ast_run_and_or(struct ast *ast, struct dictionnary *vars, int *exit)
     return res;
 }
 
-static int ast_run_shell_redir(struct ast *ast, struct dictionnary *vars,
-                               int *exit)
+static int ast_run_shell_redir(struct ast *ast, struct dictionnary *vars, int *exit)
 {
     struct ast_shell_redir *ast_shell = (struct ast_shell_redir *)ast;
     struct redir_saved redir_saved;

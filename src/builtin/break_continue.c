@@ -16,7 +16,7 @@ int get_continue(void)
     return continue_n;
 }
 
-void update_break(void)
+void set_break(void)
 {
     if (break_n > 0)
         break_n--;
