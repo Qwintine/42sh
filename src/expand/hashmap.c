@@ -11,6 +11,7 @@
 #include "../utils/itoa.h"
 #include "expand.h"
 
+//hashing function for the dictionnary
 int hash(char *str)
 {
     size_t res = 0;
@@ -41,7 +42,7 @@ static void add_special(struct dictionnary *dict, char *key, char *val)
 }
 
 /*Description:
- *	Initialise the dictionnary
+ *	Initialise the dictionnary and adds special variables from the get go
  *Argument:
  *	The hashing function used by the dictionnary to hash the key
  */
@@ -102,6 +103,7 @@ struct dictionnary *init_dict(void)
     return dict;
 }
 
+//special variables handling
 char *special(char *key)
 {
     if (!strcmp(key, "RANDOM"))
@@ -121,6 +123,7 @@ char *special(char *key)
     return 0;
 }
 
+//helper function to update or append a variable in the dictionnary
 static int update_or_append_var(struct variables *bucket, struct variables *new,
                                 char *key, char *val)
 {
@@ -149,8 +152,7 @@ static int update_or_append_var(struct variables *bucket, struct variables *new,
 /*Description:
  *  Add a variable to the dictionnary
  *Arguments:
- *  key: the variable name
- *  val: the variable value
+ *  varas: the variable as a string "<KEY>=<VALUE>"
  */
 int add_var(struct dictionnary *dict, char *varas)
 {
@@ -203,9 +205,6 @@ int add_var(struct dictionnary *dict, char *varas)
     if (!dict->variables[ind])
     {
         dict->variables[ind] = new;
-        /*char *env_val = getenv(key);
-        if (env_val != NULL)
-            setenv(key, val, 1);*/
         return 0;
     }
 
@@ -218,6 +217,7 @@ ERROR:
     return 1;
 }
 
+//helper function to duplicate values into the variable element
 static int dup_val_to_elt(struct variables *new, char **val, size_t i)
 {
     for (size_t j = 0; j < i; j++)
@@ -236,6 +236,14 @@ static int dup_val_to_elt(struct variables *new, char **val, size_t i)
     return 0;
 }
 
+/*Description:
+ *  Add a variable with multiple arguments to the dictionnary
+ *Arguments:
+ *  key: the variable name
+ *  val: the variable value as a list of strings
+ *Extra:
+ *  Especially useful for handling the $@ variable
+ */
 int add_var_arg(struct dictionnary *dict, char *key, char **val)
 {
     struct variables *new = malloc(sizeof(struct variables));
@@ -298,6 +306,12 @@ ERROR:
     return 1;
 }
 
+/*Description:
+ *  Add a function to the dictionnary
+ *Arguments:
+ *  key: the function name
+ *  cmd_block: the function body as an AST
+ */
 int add_func(struct dictionnary *dict, char *key, struct ast *cmd_block)
 {
     struct function *new = malloc(sizeof(struct function));
@@ -402,6 +416,11 @@ char **get_var(struct dictionnary *dict, char *key)
     return res;
 }
 
+/*Description:
+ *  Get the function from the dictionnary
+ *Arguments:
+ *  key: the function name
+ */
 struct ast *get_func(struct dictionnary *dict, char *key)
 {
     int ind = hash(key);

@@ -2,6 +2,11 @@
 
 #include <stdlib.h>
 
+/* Description:
+ * 	Init redir struct
+ * Return:
+ * 	struct redir * -> inited struct
+ */
 struct redir *init_redir(void)
 {
     struct redir *redir = malloc(sizeof(struct redir));
@@ -15,6 +20,11 @@ struct redir *init_redir(void)
     return redir;
 }
 
+/* Description:
+ * 	Free redir struct
+ * Arguments:
+ * 	struct redir *redir -> redir to free
+ */
 void free_redir(struct redir *redir)
 {
     if (redir->io_num)

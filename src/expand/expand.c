@@ -5,12 +5,14 @@
 
 #include "../ast/ast.h"
 
+//check if character is part of a word following the SCL
 static int is_word(char c)
 {
     return ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')
             || (c >= '0' && c <= '9') || c == '_');
 }
 
+//variable expansion if the word starts with $ without brackets
 static int var_exp_no_brack(char *word, size_t *ind, char **key)
 {
     char next = word[(*ind) + 1];
@@ -46,6 +48,7 @@ static int var_exp_no_brack(char *word, size_t *ind, char **key)
     return 0;
 }
 
+//variable expansion if the word starts with $ with brackets
 static int var_exp_brack(char *word, size_t *ind, char **key)
 {
     (*ind) += 2;
@@ -69,6 +72,7 @@ static int var_exp_brack(char *word, size_t *ind, char **key)
     return 0;
 }
 
+//append value to result after fetching the value
 static void val_append(char **res, char *to_add, char *next)
 {
     char *tmp = realloc(*res, strlen(*res) + strlen(to_add) + 1);
@@ -85,6 +89,7 @@ static void val_append(char **res, char *to_add, char *next)
     free(to_add);
 }
 
+//expand variables
 static char *var_expand(struct dictionnary *vars, char *word, size_t *ind)
 {
     char *key = malloc(1);
@@ -140,6 +145,7 @@ static int is_expandable(char c)
     return (c == '$' || c == '"' || c == '\'' || c == '\\');
 }
 
+//expansion inside of double quotes
 static int in_dquote_exp(char *word, size_t *ind, struct dictionnary *vars,
                          char **res)
 {
@@ -163,6 +169,8 @@ static int in_dquote_exp(char *word, size_t *ind, struct dictionnary *vars,
         free(var);
         (*ind)++;
     }
+    //if there is a antislash, it must be ignored and the next character is
+    // added to the result regardless of what it is
     else if (word[*ind] == '\\')
     {
         if (is_expandable(word[*ind + 1]))
@@ -198,6 +206,7 @@ static int in_dquote_exp(char *word, size_t *ind, struct dictionnary *vars,
     return 0;
 }
 
+//expanding double quotes
 static char *double_quotes_expand(struct dictionnary *vars, char *word,
                                   size_t *ind)
 {
@@ -241,6 +250,7 @@ void free_ex(char **ex)
     free(ex);
 }
 
+//expanding single quotes
 static char *single_quote_expand(char *word, size_t *ind)
 {
     char *res = malloc(1);
@@ -269,6 +279,7 @@ static char *single_quote_expand(char *word, size_t *ind)
             res[len + 1] = 0;
             (*ind)++;
         }
+        //same as above
         else if (word[*ind] == '\\')
         {
             char *tmp = realloc(res, strlen(res) + 2);
@@ -305,12 +316,14 @@ static int append_char(char **res, char c)
     return 0;
 }
 
+//expanding one word of the command
 static char *expand_word(struct dictionnary *vars, char *word)
 {
     char *res = calloc(1, 1);
     if (!res)
         return NULL;
     size_t ibis = 0;
+    //iterating through the word, useful in "toto$tata" cases
     while (word[ibis] != 0)
     {
         if (word[ibis] == '$')
@@ -369,6 +382,7 @@ static char *expand_word(struct dictionnary *vars, char *word)
     return res;
 }
 
+//expanding list of words
 char **expand(struct dictionnary *vars, char **words)
 {
     char **res = malloc(sizeof(char *));

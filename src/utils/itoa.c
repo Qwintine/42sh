@@ -1,5 +1,12 @@
 #include "itoa.h"
 
+/* Description:
+ * 	Convert int to string
+ * Arguments:
+ * 	int num ->num to convert
+ * Return:
+ * 	char * -> num in string
+ */
 char *itoa(int num)
 {
     int i = 0;
