@@ -78,7 +78,6 @@ static void arg_num(int num, struct dictionnary *vars)
     }
 }
 
-
 /* Description:
  *  Helper: Ajoute un arg au dictionnaire de variables
  * Arguments:
@@ -88,20 +87,19 @@ static void arg_num(int num, struct dictionnary *vars)
  * Return:
  * 	void
  */
-static void add_positional_arg(struct dictionnary *vars, int index, 
-                               char *value)
+static void add_positional_arg(struct dictionnary *vars, int index, char *value)
 {
     char *arg_name = malloc(20);
     if (!arg_name)
         return;
-    
+
     char *inum = itoa(index);
     if (!inum)
     {
         free(arg_name);
         return;
     }
-    
+
     strcpy(arg_name, inum);
     free(inum);
     strcat(arg_name, "=");
@@ -109,7 +107,6 @@ static void add_positional_arg(struct dictionnary *vars, int index,
     add_var(vars, arg_name);
     free(arg_name);
 }
-
 
 /* Description:
  * 	Gère options scripts et arguments
@@ -138,7 +135,7 @@ FILE *arg_file(int argc, char **argv, int *prettyprint,
             if (!argv[i])
             {
                 // erreur : pas d'argument après -c
-                fprintf(stderr,"42h: IO no argument after -c\n"); 
+                fprintf(stderr, "42h: IO no argument after -c\n");
                 return NULL;
             }
             entry = fmemopen(argv[i], strlen(argv[i]), "r");
