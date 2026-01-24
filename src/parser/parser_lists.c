@@ -26,7 +26,8 @@ struct ast *parser_compound_list(struct lex *lex, struct dictionnary *dict)
         || peek(lex)->token_type == ELSE || peek(lex)->token_type == ELIF
         || peek(lex)->token_type == FI || peek(lex)->token_type == DO
         || peek(lex)->token_type == DONE || peek(lex)->token_type == END
-        || peek(lex)->token_type == SEMI_COLON)
+        || peek(lex)->token_type == SEMI_COLON
+        || peek(lex)->token_type == CLOSING_BRACKET)
     {
         return NULL;
     }
@@ -55,7 +56,8 @@ struct ast *parser_compound_list(struct lex *lex, struct dictionnary *dict)
         if (!peek(lex) || peek(lex)->token_type == END
             || peek(lex)->token_type == THEN || peek(lex)->token_type == ELSE
             || peek(lex)->token_type == ELIF || peek(lex)->token_type == FI
-            || peek(lex)->token_type == DO || peek(lex)->token_type == DONE)
+            || peek(lex)->token_type == DO || peek(lex)->token_type == DONE
+            || peek(lex)->token_type == CLOSING_BRACKET)
         {
             break;
         }

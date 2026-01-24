@@ -9,6 +9,7 @@ struct quote_status
 {
     int double_quote;
     int single_quote;
+    int bracket_open;
 };
 
 // Permet de renvoyer les tokens un par un au parser depuis un stream de données

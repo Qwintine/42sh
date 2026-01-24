@@ -85,13 +85,6 @@ static void arg_num(int num, struct dictionnary *vars)
 FILE *arg_file(int argc, char **argv, int *prettyprint, struct dictionnary *vars)
 {
     FILE *entry = NULL;
-    char **blank = malloc(4 * sizeof(char *));
-    blank[0] = " ";
-    blank[1] = "\t";
-    blank[2] = "\n";
-    blank[3] = NULL;
-    add_var_arg(vars, "IFS", blank);
-    free(blank);
     int arg_count = 0;
     for (int i = 1; i < argc; i++)
     {

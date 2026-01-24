@@ -1,21 +1,6 @@
 #ifndef HASHMAP_H
 #define HASHMAP_H
 
-#include <stddef.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
-#include <unistd.h>
-
-#include "../utils/itoa.h"
-
-enum val_type
-{
-    VAR,
-    FUNC,    
-};
-
 struct variables
 {
     char *key;
