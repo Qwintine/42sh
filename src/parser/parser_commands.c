@@ -143,7 +143,6 @@ struct ast *parser_fundef(struct lex *lex, struct dictionnary *dict)
     return (struct ast *)empty;
 }
 
-// prochaine step -> ajouter gestion  { redirections } après shell_command
 struct ast *parser_command(struct lex *lex, struct dictionnary *dict)
 {
     if (peek(lex)

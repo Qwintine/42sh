@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static int break_n = 0; // racist 
+static int break_n = 0; // racist
 static int continue_n = 0; // racist
 
 /* Helpers style object oriented programming */

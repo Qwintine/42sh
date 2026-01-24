@@ -31,10 +31,8 @@ struct ast *parser(FILE *entry, int *eof, struct dictionnary *dict)
         free_lex(lex);
         return NULL;
     }
-
-    while (peek(lex)
-           && peek(lex)->token_type
-               == NEWLINE) // consomme newline until début code évaluable
+    // consomme newline until début code évaluable
+    while (peek(lex) && peek(lex)->token_type == NEWLINE)
     {
         discard_token(pop(lex));
     }

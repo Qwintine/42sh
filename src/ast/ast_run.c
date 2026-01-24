@@ -194,8 +194,7 @@ int ast_run_and_or(struct ast *ast, struct dictionnary *vars, int *exit)
     return res;
 }
 
-int ast_run_shell_redir(struct ast *ast, struct dictionnary *vars,
-                               int *exit)
+int ast_run_shell_redir(struct ast *ast, struct dictionnary *vars, int *exit)
 {
     struct ast_shell_redir *ast_shell = (struct ast_shell_redir *)ast;
     struct redir_saved redir_saved;

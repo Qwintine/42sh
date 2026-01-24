@@ -14,9 +14,8 @@ static int is_word(char c)
 static int var_exp_no_brack(char *word, size_t *ind, char **key)
 {
     char next = word[(*ind) + 1];
-    if (next == '#' || next == '?' || next == '@' || next == '*'
-        || next == '$' || next == '!' || next == '-'
-        || (next >= '0' && next <= '9'))
+    if (next == '#' || next == '?' || next == '@' || next == '*' || next == '$'
+        || next == '!' || next == '-' || (next >= '0' && next <= '9'))
     {
         (*ind)++;
         char *tmp = realloc((*key), 2);
@@ -73,17 +72,17 @@ static int var_exp_brack(char *word, size_t *ind, char **key)
 static void val_append(char **res, char *to_add, char *next)
 {
     char *tmp = realloc(*res, strlen(*res) + strlen(to_add) + 1);
-        if (!tmp)
-        {
-            free(*res);
-            *res = NULL;
-            return;
-        }
-        *res = tmp;
-        strcat(*res, to_add);
-        if (next != NULL)
-            strcat(*res, " ");
-        free(to_add);
+    if (!tmp)
+    {
+        free(*res);
+        *res = NULL;
+        return;
+    }
+    *res = tmp;
+    strcat(*res, to_add);
+    if (next != NULL)
+        strcat(*res, " ");
+    free(to_add);
 }
 
 static char *var_expand(struct dictionnary *vars, char *word, size_t *ind)
@@ -94,7 +93,7 @@ static char *var_expand(struct dictionnary *vars, char *word, size_t *ind)
     key[0] = 0;
     if (word[(*ind) + 1] == '{')
     {
-        if(var_exp_brack(word, ind, &key))
+        if (var_exp_brack(word, ind, &key))
         {
             free(key);
             return NULL;
@@ -102,7 +101,7 @@ static char *var_expand(struct dictionnary *vars, char *word, size_t *ind)
     }
     else
     {
-        if(var_exp_no_brack(word, ind, &key))
+        if (var_exp_no_brack(word, ind, &key))
         {
             free(key);
             return NULL;
@@ -141,8 +140,8 @@ static int is_expandable(char c)
     return (c == '$' || c == '"' || c == '\'' || c == '\\');
 }
 
-static int in_dquote_exp(char *word, size_t *ind, struct dictionnary *vars, 
-                            char **res)
+static int in_dquote_exp(char *word, size_t *ind, struct dictionnary *vars,
+                         char **res)
 {
     if (word[*ind] == '$')
     {
@@ -216,7 +215,7 @@ static char *double_quotes_expand(struct dictionnary *vars, char *word,
         }
         if (word[*ind] != '"')
         {
-            if(in_dquote_exp(word, ind, vars, &res))
+            if (in_dquote_exp(word, ind, vars, &res))
             {
                 return NULL;
             }
@@ -294,6 +293,82 @@ static char *single_quote_expand(char *word, size_t *ind)
     return res;
 }
 
+static int append_char(char **res, char c)
+{
+    char *tmp = realloc(*res, strlen(*res) + 2);
+    if (!tmp)
+        return 1;
+    *res = tmp;
+    size_t len = strlen(*res);
+    (*res)[len] = c;
+    (*res)[len + 1] = 0;
+    return 0;
+}
+
+static char *expand_word(struct dictionnary *vars, char *word)
+{
+    char *res = calloc(1, 1);
+    if (!res)
+        return NULL;
+    size_t ibis = 0;
+    while (word[ibis] != 0)
+    {
+        if (word[ibis] == '$')
+        {
+            char *var = var_expand(vars, word, &ibis);
+            if (!var)
+            {
+                ibis++;
+                continue;
+            }
+            char *tmp = realloc(res, strlen(res) + strlen(var) + 1);
+            if (!tmp)
+            {
+                free(var);
+                free(res);
+                return NULL;
+            }
+            res = tmp;
+            strcat(res, var);
+            free(var);
+        }
+        else if (word[ibis] == '\'')
+        {
+            char *var = single_quote_expand(word, &ibis);
+            res = realloc(res, strlen(res) + strlen(var) + 1);
+            strcat(res, var);
+            free(var);
+        }
+        else if (word[ibis] == '"')
+        {
+            char *var = double_quotes_expand(vars, word, &ibis);
+            res = realloc(res, strlen(res) + strlen(var) + 1);
+            strcat(res, var);
+            free(var);
+        }
+        else if (word[ibis] == '\\')
+        {
+            ibis++;
+            if (append_char(&res, word[ibis]))
+            {
+                free(res);
+                return NULL;
+            }
+        }
+        else
+        {
+            if (append_char(&res, word[ibis]))
+            {
+                free(res);
+                return NULL;
+            }
+        }
+        if (word[ibis] != 0)
+            ibis++;
+    }
+    return res;
+}
+
 char **expand(struct dictionnary *vars, char **words)
 {
     char **res = malloc(sizeof(char *));
@@ -304,66 +379,11 @@ char **expand(struct dictionnary *vars, char **words)
     size_t j = 0;
     while (words[i] != NULL)
     {
-        res[j] = malloc(1);
+        res[j] = expand_word(vars, words[i]);
         if (!res[j])
         {
             free_ex(res);
             return NULL;
-        }
-        res[j][0] = 0;
-        size_t ibis = 0;
-        while (words[i][ibis] != 0)
-        {
-            if (words[i][ibis] == '$')
-            {
-                char *var = var_expand(vars, words[i], &ibis);
-                if (!var)
-                {
-                    ibis++;
-                    continue;
-                }
-                char *tmp = realloc(res[j], strlen(res[j]) + strlen(var) + 1);
-                if (!tmp)
-                {
-                    free(var);
-                    free_ex(res);
-                    return NULL;
-                }
-                res[j] = tmp;
-                strcat(res[j], var);
-                free(var);
-            }
-            else if (words[i][ibis] == '\'')
-            {
-                char *var = single_quote_expand(words[i], &ibis);
-                res[j] = realloc(res[j], strlen(res[j]) + strlen(var) + 1);
-                strcat(res[j], var);
-                free(var);
-            }
-            else if (words[i][ibis] == '"')
-            {
-                char *var = double_quotes_expand(vars, words[i], &ibis);
-                res[j] = realloc(res[j], strlen(res[j]) + strlen(var) + 1);
-                strcat(res[j], var);
-                free(var);
-            }
-            else if (words[i][ibis] == '\\')
-            {
-                ibis++;
-                res[j] = realloc(res[j], strlen(res[j]) + 2);
-                size_t len = strlen(res[j]);
-                res[j][len] = words[i][ibis];
-                res[j][len + 1] = 0;
-            }
-            else
-            {
-                res[j] = realloc(res[j], strlen(res[j]) + 2);
-                size_t len = strlen(res[j]);
-                res[j][len] = words[i][ibis];
-                res[j][len + 1] = 0;
-            }
-            if (words[i][ibis] != 0)
-                ibis++;
         }
         i++;
         j++;
