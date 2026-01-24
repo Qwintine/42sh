@@ -1,5 +1,14 @@
 #define _POSIX_C_SOURCE 200809L
 #include "expand.h"
+#include <stddef.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <time.h>
+#include <unistd.h>
+
+#include "../utils/itoa.h"
+#include <pwd.h>
 
 int hash(char *str)
 {
@@ -12,6 +21,17 @@ int hash(char *str)
     res = res % 20;
     int r = res;
     return r;
+}
+
+static void add_special(struct dictionnary *dict, char *key, char *val)
+{
+    char *varas = malloc(strlen(key) + strlen(val) + 2);
+    varas = strcpy(varas,key);
+    varas = strcat(varas, "=");
+    varas = strcat(varas, val);
+    add_var(dict,varas);
+    free(varas);
+    free(val);
 }
 
 /*Description:
@@ -28,35 +48,16 @@ struct dictionnary *init_dict(void)
         dict->values[i] = NULL;
     }
 
-    char *r = itoa(getpid());
-    char *varas = malloc(strlen("$") + strlen(r) + 2);
-    varas = strcpy(varas,"$");
-    varas = strcat(varas, "=");
-    varas = strcat(varas, r);
-    add_var(dict,varas);
-    free(varas);
-    free(r);
-
-    char **key = malloc(4 * sizeof(char *));
-    key[0] = "PWD";
-    key[1] = "HOME";
-    key[2] = "PATH";
-    key[3] = NULL;
-
-    for (size_t i = 0; key[i] != NULL; i++)
-    {
-        char *r = getenv(key[i]);
-        if (r == NULL)
-            continue;
-        char *varas = malloc(strlen(key[i]) + strlen(r) + 2);
-        varas = strcpy(varas,key[i]);
-        varas = strcat(varas, "=");
-        varas = strcat(varas, r);
-        add_var(dict,varas);
-        free(varas);
-    }
-
-    free(key);
+    add_special(dict, "$", itoa(getpid()));
+    struct passwd *pw = getpwuid(getuid());
+    add_special(dict, "UID", itoa((int)getuid()));
+    add_special(dict, "HOME", strdup(pw->pw_dir));
+    char* cwd = malloc(2048);
+    cwd = getcwd(cwd, 2048);
+    add_special(dict, "PWD", strdup(cwd));
+    free(cwd);
+    add_special(dict, "IFS", strdup(" \t\n"));
+    //key[2] = "PATH";
 
     return dict;
 }

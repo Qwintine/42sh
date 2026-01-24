@@ -1,5 +1,8 @@
 #include "expand.h"
 
+#include <stdlib.h>
+#include <string.h>
+
 static int is_word(char c)
 {
     return ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') 

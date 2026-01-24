@@ -1,5 +1,8 @@
 #include "parser_aux.h"
 
+#include <stdlib.h>
+#include <string.h>
+
 /*
  * Description:
  * 	Parse an elif block when called
