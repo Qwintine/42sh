@@ -81,8 +81,11 @@ struct ast *parser_else_clause(struct lex *lex, struct dictionnary *dict)
 /*
  * Description:
  * 	Handle a 'if' block by calling corresponding parser at each step
- * Return:
- *
+ * Arguments:
+ * 	struct lex *lex -> lexer 
+ * struct dictionnary *dict -> dictionnary of var + func
+ * Return: 
+ * struct ast * -> AST if 
  * Verbose:
  * 	Grammar:
  * 		'if' compound_list 'then' compound_list [else_clause] 'fi' ;
@@ -139,8 +142,6 @@ ERROR:
 /*
  * Description:
  * 	Handle a 'while' block by calling corresponding parser at each step
- * Return:
- *
  * Verbose:
  * 	Grammar:
  * 		'while' compound_list 'do' compound_list 'done' ;
@@ -187,8 +188,6 @@ ERROR:
 /*
  * Description:
  * 	Handle a 'until' block by calling corresponding parser at each step
- * Return:
- *
  * Verbose:
  * 	Grammar:
  * 		'until' compound_list 'do' compound_list 'done' ;
@@ -235,6 +234,7 @@ ERROR:
     return NULL;
 }
 
+// Helper for parser_rule_for
 static int parser_rule_for_aux(struct lex *lex, struct ast_for *ast_for)
 {
     if (peek(lex)
@@ -270,6 +270,14 @@ static int parser_rule_for_aux(struct lex *lex, struct ast_for *ast_for)
     return 0;
 }
 
+/*
+ * Description:
+ * 	Handle a for block by calling corresponding parser at each step
+ * Verbose:
+ * 	Grammar:
+ * 		'for' WORD ( [';'] | [ {'\n'} 'in' { WORD } ( ';' | '\n' ) ] ) {'\n'}
+ *  'do' compound_list 'done' ;
+ */
 struct ast *parser_rule_for(struct lex *lex, struct dictionnary *dict)
 {
     if (!peek(lex) || peek(lex)->token_type != FOR)
@@ -314,6 +322,13 @@ ERROR:
     return NULL;
 }
 
+/*
+ * Description:
+ * 	Handle a command block enclosed in brackets
+ * Verbose:
+ * 	Grammar:
+ * 		'{' compound_list '}';
+ */
 struct ast *parser_rule_command_block(struct lex *lex, struct dictionnary *dict)
 {
     if (!peek(lex) || !(peek(lex)->token_type == OPENING_BRACKET))

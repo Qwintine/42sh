@@ -20,7 +20,6 @@
  * 	      | '\n'
  * 	      | EOF
  * 	      ;
- * 	TODO
  */
 struct ast *parser(FILE *entry, int *eof, struct dictionnary *dict)
 {
