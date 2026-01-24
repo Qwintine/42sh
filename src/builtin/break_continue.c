@@ -3,8 +3,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static int break_n = 0;
-static int continue_n = 0;
+static int break_n = 0; // racist 
+static int continue_n = 0; // racist
+
+/* Helper style object oriented programming */
 
 int get_break(void)
 {

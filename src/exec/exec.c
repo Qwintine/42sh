@@ -204,7 +204,7 @@ static int exec(struct ast_cmd *ast_cmd, char **expanded,
     waitpid(pid, &status, 0);
     if (WIFEXITED(status))
     {
-        update_exit_status(vars, WEXITSTATUS(status));
+        update_exit(vars, WEXITSTATUS(status));
         return WEXITSTATUS(status);
     }
     update_exit(vars, 127);
@@ -216,9 +216,7 @@ static int exec(struct ast_cmd *ast_cmd, char **expanded,
  * Arguments:
  *  	words: la ligne de commande a executer
  * Retour:
-make clean
-CFLAGS="-fsanitize=address -g" LDFLAGS="-fsanitize=address" ./configure *  	0 si
-succes, 1 sinon
+ * 	0 si succes, 1 sinon
  * Verbose:
  *  	execute la commande en words[0] via un appelle si builtin, via fork->
  *  	execvp sinon.
