@@ -69,14 +69,17 @@ struct ast *parser_simple_command(struct lex *lex, char *cmd )
 {
     struct ast_cmd *ast_cmd = (struct ast_cmd *)init_ast_cmd();
     size_t w = 0;
-    while (peek(lex)
-           && (peek(lex)->token_type == IO_NUMBER
-               || is_redir(peek(lex)->token_type)
-               || peek(lex)->token_type == ASSIGNMENT))
+    if(!cmd)
     {
-        if (parser_prefix(lex, ast_cmd))
+        while (peek(lex)
+            && (peek(lex)->token_type == IO_NUMBER
+                || is_redir(peek(lex)->token_type)
+                || peek(lex)->token_type == ASSIGNMENT))
         {
-            goto ERROR;
+            if (parser_prefix(lex, ast_cmd))
+            {
+                goto ERROR;
+            }
         }
     }
     lex->context = WORD;
@@ -155,10 +158,11 @@ struct ast *parser_command(struct lex *lex, struct dictionnary *dict)
     char *cmd = NULL;
     if(peek(lex) && peek(lex)->token_type == WORD)
     {
+        lex->context = WORD;
         struct token *tok = pop(lex);
         cmd = tok->value;
         free(tok);
-        if(peek(lex)->token_type == FUNCTION)
+        if(peek(lex) && peek(lex)->token_type == FUNCTION)
             return parser_fundef(lex,cmd,dict);
     }
     return parser_simple_command(lex,cmd);
