@@ -294,28 +294,6 @@ static char *single_quote_expand(char *word, size_t *ind)
     return res;
 }
 
-static void expand_dollar(struct dictionnary *vars, char *word,
-                           size_t *ind,  char **res)
-{
-    char *var = var_expand(vars, word, ind);
-    if (!var)
-    {
-        (*ind)++;
-        continue;
-    }
-    char *tmp = realloc(*res, strlen(*res) + strlen(var) + 1);
-    if (!tmp)
-    {
-        free(var);
-        free_ex(*res);
-        return1;
-    }
-    *res = tmp;
-    strcat(*res, var);
-    free(var);
-    return 0;
-}
-
 char **expand(struct dictionnary *vars, char **words)
 {
     char **res = malloc(sizeof(char *));
@@ -338,10 +316,22 @@ char **expand(struct dictionnary *vars, char **words)
         {
             if (words[i][ibis] == '$')
             {
-                if(expand_dollar(vars, words[i], &ibis, &res[j]))
+                char *var = var_expand(vars, words[i], &ibis);
+                if (!var)
                 {
+                    ibis++;
+                    continue;
+                }
+                char *tmp = realloc(res[j], strlen(res[j]) + strlen(var) + 1);
+                if (!tmp)
+                {
+                    free(var);
+                    free_ex(res);
                     return NULL;
                 }
+                res[j] = tmp;
+                strcat(res[j], var);
+                free(var);
             }
             else if (words[i][ibis] == '\'')
             {
@@ -357,10 +347,16 @@ char **expand(struct dictionnary *vars, char **words)
                 strcat(res[j], var);
                 free(var);
             }
+            else if (words[i][ibis] == '\\')
+            {
+                ibis++;
+                res[j] = realloc(res[j], strlen(res[j]) + 2);
+                size_t len = strlen(res[j]);
+                res[j][len] = words[i][ibis];
+                res[j][len + 1] = 0;
+            }
             else
             {
-                if(words[i][ibis] == '\\')
-                    ibis++;
                 res[j] = realloc(res[j], strlen(res[j]) + 2);
                 size_t len = strlen(res[j]);
                 res[j][len] = words[i][ibis];
