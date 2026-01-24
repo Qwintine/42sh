@@ -7,6 +7,6 @@ int continue_b(char **args);
 int get_break(void);
 int get_continue(void);
 void set_break(void);
-void update_continue(void);
+void set_continue(void);
 
 #endif /* BREAK_CONTINUE_H */

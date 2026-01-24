@@ -14,18 +14,8 @@ void free_stdin_buffer(void)
     }
 }
 
-/* Description:
- * 	Charge stdin en mémoire via fmemopen
- * Arguments:
- * 	void
- * Retour:
- * 	FILE * -> pointeur sur buffer mémoire contenant stdin
- * 	NULL en cas d'erreur d'allocation
- * Verbose:
- * 	Lit stdin par blocs de 4096 octets
- * 	Double la capacité du buffer si nécessaire
- * 	Le buffer alloué est stocké dans stdin_buffer (à libérer via free_stdin_buffer)
- */
+// Solution de contournement pour lire stdin avec fmemopen
+// (pas sur que ça tienne dans le temps)
 static FILE *stdin_to_mem(void)
 {
     size_t capacity = 4096;
@@ -95,7 +85,7 @@ static void arg_num(int num, struct dictionnary *vars)
  * 	vars -> dictionnaire de variables
  * 	index -> numéro de l'arg
  * 	value -> valeur de l'arg
- * Retour:
+ * Return:
  * 	void
  */
 static void add_positional_arg(struct dictionnary *vars, int index, 
@@ -127,7 +117,7 @@ static void add_positional_arg(struct dictionnary *vars, int index,
  * 	argc, argv -> arguments passés au programme
  * 	prettyprint -> int à 1 si option --prettyprint passée
  * 	vars -> dictionnaire de variables
- * Retour:
+ * Return:
  * 	File * -> caractères à parser
  * Verbose:
  * 	-c string
