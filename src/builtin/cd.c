@@ -59,6 +59,7 @@ int cd_b(char **args, struct dictionnary *vars)
         home = get_var(vars, "HOME");
         if (home == NULL || home[0] == NULL)
         {
+            fprintf(stderr, "cd: HOME not set\n");
             return 1;
         }
         path = home[0];
