@@ -14,7 +14,7 @@
  *  struct quote_status *quote_status -> status des quotes en cours
  * Retour:
  *  int -> code de retour (0 = succès, 1 = erreur, -1 = continuer)
-*/
+ */
 static int sub_switch_op(struct lex *lex, struct token *tok, char *buf,
                          struct quote_status *quote_status)
 {
@@ -57,7 +57,7 @@ static int sub_switch_op(struct lex *lex, struct token *tok, char *buf,
  *  struct quote_status *quote_status -> status des quotes en cours
  * Retour:
  *  int -> code de retour (0 = succès, 1 = erreur, -1 = continuer)
-*/
+ */
 static int sub_switch_delim(struct lex *lex, struct token *tok, char *buf,
                             struct quote_status *quote_status)
 {
@@ -117,7 +117,7 @@ static int sub_switch_delim(struct lex *lex, struct token *tok, char *buf,
  *  struct quote_status *quote_status -> status des quotes en cours
  * Retour:
  *  int -> code de retour (0 = succès, 1 = erreur, -1 = continuer)
-*/
+ */
 static int sub_switch(struct lex *lex, struct token *tok, char *buf,
                       struct quote_status *quote_status)
 {

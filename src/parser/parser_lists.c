@@ -43,7 +43,8 @@ struct ast *parser_compound_list(struct lex *lex, struct dictionnary *dict)
         return NULL;
     }
 
-    while (peek(lex) && (peek(lex)->token_type == SEMI_COLON
+    while (peek(lex)
+           && (peek(lex)->token_type == SEMI_COLON
                || peek(lex)->token_type == NEWLINE))
     {
         discard_token(pop(lex));

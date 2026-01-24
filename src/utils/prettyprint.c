@@ -46,7 +46,7 @@ static void ast_print_cmd(struct ast *ast)
 }
 
 /* Description:
- * 	Print aST list 
+ * 	Print aST list
  * Arguments:
  * 	struct ast *ast -> AST to print
  */

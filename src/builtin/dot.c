@@ -101,7 +101,7 @@ int main_loop(FILE *entry, struct dictionnary *vars, int *exit)
 }
 
 /* Description:
- * 	Execute the dot builtin cmd	
+ * 	Execute the dot builtin cmd
  * Arguments:
  * 	char **words -> args passed to dot
  * 	struct dictionnary *vars -> dictionnary of vars

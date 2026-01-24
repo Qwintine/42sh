@@ -106,7 +106,7 @@ static int handle_dup_redir(struct redir *redirect, int target)
 
 /* Description:
  * 	Apply redirs
-  * Arguments:
+ * Arguments:
  * 	struct redir **redirs -> redir to apply
  * 	struct redir_saved *redir_saved -> struct save fd
  * Return:

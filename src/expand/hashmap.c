@@ -11,7 +11,7 @@
 #include "../utils/itoa.h"
 #include "expand.h"
 
-//hashing function for the dictionnary
+// hashing function for the dictionnary
 int hash(char *str)
 {
     size_t res = 0;
@@ -103,7 +103,7 @@ struct dictionnary *init_dict(void)
     return dict;
 }
 
-//special variables handling
+// special variables handling
 char *special(char *key)
 {
     if (!strcmp(key, "RANDOM"))
@@ -123,7 +123,7 @@ char *special(char *key)
     return 0;
 }
 
-//helper function to update or append a variable in the dictionnary
+// helper function to update or append a variable in the dictionnary
 static int update_or_append_var(struct variables *bucket, struct variables *new,
                                 char *key, char *val)
 {
@@ -147,6 +147,22 @@ static int update_or_append_var(struct variables *bucket, struct variables *new,
     }
     target->next = new;
     return 0;
+}
+
+static char *expand_value(struct dictionnary *dict, char *val)
+{
+    char **to_ex = malloc(2 * sizeof(char *));
+    to_ex[0] = val;
+    to_ex[1] = NULL;
+    char **expanded = expand(dict, to_ex);
+    if (expanded && expanded[0])
+    {
+        free(val);
+        val = expanded[0];
+    }
+    free(to_ex);
+    free(expanded);
+    return val;
 }
 
 /*Description:
@@ -173,17 +189,7 @@ int add_var(struct dictionnary *dict, char *varas)
     strncpy(key, varas, i);
     key[i] = '\0';
     strcpy(val, varas + i + 1);
-    char **to_ex = malloc(2 * sizeof(char *));
-    to_ex[0] = val;
-    to_ex[1] = NULL;
-    char **expanded = expand(dict, to_ex);
-    if (expanded && expanded[0])
-    {
-        free(val);
-        val = expanded[0];
-    }
-    free(to_ex);
-    free(expanded);
+    val = expand_value(dict, val);
 
     struct variables *new = malloc(sizeof(struct variables));
 
@@ -217,7 +223,7 @@ ERROR:
     return 1;
 }
 
-//helper function to duplicate values into the variable element
+// helper function to duplicate values into the variable element
 static int dup_val_to_elt(struct variables *new, char **val, size_t i)
 {
     for (size_t j = 0; j < i; j++)

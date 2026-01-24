@@ -82,10 +82,10 @@ struct ast *parser_else_clause(struct lex *lex, struct dictionnary *dict)
  * Description:
  * 	Handle a 'if' block by calling corresponding parser at each step
  * Arguments:
- * 	struct lex *lex -> lexer 
+ * 	struct lex *lex -> lexer
  * struct dictionnary *dict -> dictionnary of var + func
- * Return: 
- * struct ast * -> AST if 
+ * Return:
+ * struct ast * -> AST if
  * Verbose:
  * 	Grammar:
  * 		'if' compound_list 'then' compound_list [else_clause] 'fi' ;

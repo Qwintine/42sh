@@ -158,7 +158,7 @@ int handle_delimiter(struct token *tok, char c,
  *  char val -> char actuel
  * Retour:
  *  int -> code de retour (0 = succès, 1 = erreur, -1 = continuer)
-*/
+ */
 int new_op(struct token *tok, int quote, FILE *entry, char val)
 {
     if (!quote)
@@ -283,7 +283,7 @@ static int handle_closing_bracket(struct lex *lex, struct token *tok,
  *  char val -> char actuel
  * Retour:
  *  int -> code de retour (0 = succès, 1 = erreur, -1 = continuer)
-*/
+ */
 int handle_bracket(struct lex *lex, struct token *tok,
                    struct quote_status *quote_status, char val)
 {
@@ -301,7 +301,7 @@ int handle_bracket(struct lex *lex, struct token *tok,
  *  char val -> char actuel
  * Retour:
  *  int -> code de retour (0 = succès, 1 = erreur, -1 = continuer)
-*/
+ */
 int handle_parenthesis(struct lex *lex, struct token *tok,
                        struct quote_status *quote_status, char val)
 {
