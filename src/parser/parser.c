@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "../ast/ast_aux.h"
 #include "parser_aux.h"
 
 /*
@@ -19,9 +20,8 @@
  * 	      | '\n'
  * 	      | EOF
  * 	      ;
- * 	TODO
  */
-struct ast *parser(FILE *entry, int *eof)
+struct ast *parser(FILE *entry, int *eof, struct dictionnary *dict)
 {
     struct lex *lex = init_lex(entry);
     lex->context = KEYWORD;
@@ -30,10 +30,8 @@ struct ast *parser(FILE *entry, int *eof)
         free_lex(lex);
         return NULL;
     }
-
-    while (peek(lex)
-           && peek(lex)->token_type
-               == NEWLINE) // consomme newline until début code évaluable
+    // consomme newline until début code évaluable
+    while (peek(lex) && peek(lex)->token_type == NEWLINE)
     {
         discard_token(pop(lex));
     }
@@ -50,8 +48,8 @@ struct ast *parser(FILE *entry, int *eof)
         free_lex(lex);
         return NULL;
     }
-    struct ast *ast =
-        parser_list(lex); // récursion sur ast type list ( cf. parser_list )
+    struct ast *ast = parser_list(
+        lex, dict); // récursion sur ast type list ( cf. parser_list )
 
     if (!ast) // remontée erreur syntax / grammaire
     {

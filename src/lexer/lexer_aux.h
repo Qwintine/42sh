@@ -18,10 +18,13 @@ int handle_quote(int *quote, int other_quote, struct token *tok, char val);
 int handle_newline(struct token *tok, int quote, FILE *entry);
 int handle_semicolon(struct token *tok, int quote, FILE *entry);
 int handle_blank(struct token *tok, char c, int quote);
-int handle_delimiter(struct token *tok, char c, int quote, FILE *entry);
+int handle_delimiter(struct token *tok, char c,
+                     struct quote_status *quote_status, FILE *entry);
 int new_op(struct token *tok, int quote, FILE *entry, char val);
 int handle_bracket(struct lex *lex, struct token *tok,
-                           struct quote_status *quote_status, char val);
+                   struct quote_status *quote_status, char val);
+int handle_parenthesis(struct lex *lex, struct token *tok,
+                       struct quote_status *quote_status, char val);
 
 // lexer_tokens.c
 struct token *end_token(struct token *tok, struct lex *lex);

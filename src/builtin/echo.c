@@ -1,8 +1,9 @@
+#include "echo.h"
+
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "echo.h"
 
 /* Description:
  *  	insert 2 character
@@ -29,7 +30,9 @@ static char *insert_in(size_t ind, char *str)
     else
         return str;
 
-    char *res = malloc(size+1);
+    char *res = malloc(size + 1);
+    if (!res)
+        return str;
     res = strncpy(res, str, ind);
     res[ind] = replacement;
     ind++;
@@ -42,6 +45,16 @@ static char *insert_in(size_t ind, char *str)
     return res;
 }
 
+/*
+ * Description:
+ *   Parse -n, -e, and -E options
+ * Arguments:
+ *   string: option string to parse
+ *   an: pointer to int for -n option
+ *   ae: pointer to int for -e and -E options
+ * Return:
+ *   0 success, 1 invalid option
+ */
 static int args_echo(char *string, int *an, int *ae)
 {
     size_t i = 1;

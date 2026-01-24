@@ -4,6 +4,7 @@
 
 #include "lexer_aux.h"
 
+// Termine le token en cours si fin de fichier
 struct token *end_token(struct token *tok, struct lex *lex)
 {
     if (feof(lex->entry) != 0)
@@ -21,9 +22,9 @@ struct token *end_token(struct token *tok, struct lex *lex)
             else if (tok->value[0] == '|')
                 tok->token_type = PIPE;
             else if (tok->value[0] == '<')
-                return NULL; 
+                return NULL;
             else if (tok->value[0] == '>')
-                return NULL; 
+                return NULL;
         }
         return tok;
     }
@@ -94,6 +95,7 @@ int verif_token_loop(struct token *tok, enum type context)
     return 0;
 }
 
+// Vérifie si le token correspond au type attendu
 int verif_token(struct token *tok, enum type context)
 {
     if (context == IF || context == THEN || context == ELIF || context == ELSE
@@ -109,6 +111,7 @@ int verif_token(struct token *tok, enum type context)
     return 0;
 }
 
+// Retourne le type du token en fonction de sa valeur
 enum type check_type(char *value)
 {
     if (strcmp(value, "if") == 0)

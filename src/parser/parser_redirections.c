@@ -3,6 +3,12 @@
 #include "../utils/redir.h"
 #include "parser_aux.h"
 
+/*
+ * Description:
+ * 	Parse a redirection
+ * Return:
+ * 	0 on success, 1 on error
+ */
 int parser_redir(struct lex *lex, struct ast_cmd *ast_cmd)
 {
     struct redir *redir = init_redir();
@@ -35,19 +41,83 @@ int parser_redir(struct lex *lex, struct ast_cmd *ast_cmd)
             ind++;
         }
         ast_cmd->redirs[ind++] = redir;
-        ast_cmd->redirs =
+        struct redir **new_redirs =
             realloc(ast_cmd->redirs, (ind + 1) * sizeof(struct redir *));
 
-        if (!ast_cmd->redirs)
+        if (!new_redirs)
         {
+            free_redir(redir);
             return 1;
         }
+        ast_cmd->redirs = new_redirs;
         ast_cmd->redirs[ind] = NULL;
         return 0;
     }
     return 1;
 }
 
+/*
+ * Description:
+ * 	Parse a redirection in a shell command context
+ * Return:
+ * 	0 on success, 1 on error
+ */
+int parser_redir_shell(struct lex *lex, struct ast_shell_redir *shell)
+{
+    struct redir *redir = init_redir();
+    if (redir)
+    {
+        if (peek(lex) && peek(lex)->token_type == IO_NUMBER)
+        {
+            redir->io_num = peek(lex)->value;
+            free(pop(lex));
+        }
+
+        if (!peek(lex) || !is_redir(peek(lex)->token_type))
+        {
+            free_redir(redir);
+            return 1;
+        }
+        redir->type = peek(lex)->token_type;
+        discard_token(pop(lex));
+        lex->context = WORD;
+        if (!peek(lex) || peek(lex)->token_type != WORD)
+        {
+            free_redir(redir);
+            return 1;
+        }
+        redir->target = peek(lex)->value;
+        free(pop(lex));
+        size_t ind = 0;
+        while (shell->redirs[ind])
+        {
+            ind++;
+        }
+        shell->redirs[ind++] = redir;
+        struct redir **new_redirs =
+            realloc(shell->redirs, (ind + 1) * sizeof(struct redir *));
+
+        if (!new_redirs)
+        {
+            free_redir(redir);
+            return 1;
+        }
+        shell->redirs = new_redirs;
+        shell->redirs[ind] = NULL;
+        return 0;
+    }
+    return 1;
+}
+
+/*
+ * Description:
+ * 	Handle an element in a command: either a word or a redirection
+ * Return:
+ * 	0 on success, 1 on error
+ * Grammar:
+ * 	        word
+ *          | redirection ;
+ */
 int parser_element(struct lex *lex, struct ast_cmd *ast_cmd, size_t *w)
 {
     if (peek(lex))
@@ -58,16 +128,13 @@ int parser_element(struct lex *lex, struct ast_cmd *ast_cmd, size_t *w)
             if (!tok)
                 return 1;
             ast_cmd->words[*w] = tok->value;
-            ast_cmd->types =
-                realloc(ast_cmd->types, (*w + 1) * sizeof(enum type));
-            if (!ast_cmd->types)
-                return 1;
-            ast_cmd->types[*w] = tok->token_type;
             free(tok);
             (*w)++;
-            ast_cmd->words = realloc(ast_cmd->words, (*w + 1) * sizeof(char *));
-            if (!ast_cmd->words)
+            char **new_words =
+                realloc(ast_cmd->words, (*w + 1) * sizeof(char *));
+            if (!new_words)
                 return 1;
+            ast_cmd->words = new_words;
             ast_cmd->words[*w] = NULL;
         }
         else if (peek(lex)->token_type == IO_NUMBER
@@ -80,7 +147,15 @@ int parser_element(struct lex *lex, struct ast_cmd *ast_cmd, size_t *w)
     return 1;
 }
 
-/* TODO */
+/*
+ * Description:
+ * 	Handle a prefix in a command: either an assignment or a redirection
+ * Return:
+ * 	0 on success, 1 on error
+ * Grammar:
+ * 	        assignment
+ *          | redirection ;
+ */
 int parser_prefix(struct lex *lex, struct ast_cmd *ast_cmd)
 {
     if (peek(lex) && peek(lex)->token_type == ASSIGNMENT)
@@ -93,8 +168,11 @@ int parser_prefix(struct lex *lex, struct ast_cmd *ast_cmd)
         ast_cmd->assignment[i] = tok->value;
         i++;
         free(tok);
-        ast_cmd->assignment =
+        char **new_assignment =
             realloc(ast_cmd->assignment, (i + 1) * sizeof(char *));
+        if (!new_assignment)
+            return 1;
+        ast_cmd->assignment = new_assignment;
         ast_cmd->assignment[i] = NULL;
         return 0;
     }

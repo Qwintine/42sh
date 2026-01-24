@@ -49,7 +49,6 @@ struct ast_cmd
 {
     struct ast base;
     char **assignment;
-    enum type *types;
     char **words; // arguments de la commande
     struct redir **redirs; // redir à appliquer dans l'ordre
 };
@@ -88,14 +87,6 @@ struct ast_shell_redir
 typedef void (*ast_handler_free)(struct ast *);
 typedef int (*ast_handler_run)(struct ast *, struct dictionnary *, int *);
 
-struct ast *init_ast_list(void);
-struct ast *init_ast_cmd(void);
-struct ast *init_ast_if(void);
-struct ast *init_ast_pipe(void);
-struct ast *init_ast_loop(void);
-struct ast *init_ast_and_or(void);
-struct ast *init_ast_shell_redir(void);
-struct ast *init_ast_for(void);
 void free_ast(struct ast *node);
 int run_ast(struct ast *node, struct dictionnary *vars, int *exit);
 

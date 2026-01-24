@@ -5,6 +5,16 @@
 
 #include "lexer_aux.h"
 
+/* Description:
+ *  Gestion des opérateurs
+ * Arguments:
+ *  struct lex *lex -> struct du lexeur
+ *  struct token *tok -> token en cours de création
+ *  char *buf -> buffer de lecture
+ *  struct quote_status *quote_status -> status des quotes en cours
+ * Retour:
+ *  int -> code de retour (0 = succès, 1 = erreur, -1 = continuer)
+ */
 static int sub_switch_op(struct lex *lex, struct token *tok, char *buf,
                          struct quote_status *quote_status)
 {
@@ -38,6 +48,16 @@ static int sub_switch_op(struct lex *lex, struct token *tok, char *buf,
     return -1;
 }
 
+/* Description:
+ *  Gestion des délimiteurs
+ * Arguments:
+ *  struct lex *lex -> struct du lexeur
+ *  struct token *tok -> token en cours de création
+ *  char *buf -> buffer de lecture
+ *  struct quote_status *quote_status -> status des quotes en cours
+ * Retour:
+ *  int -> code de retour (0 = succès, 1 = erreur, -1 = continuer)
+ */
 static int sub_switch_delim(struct lex *lex, struct token *tok, char *buf,
                             struct quote_status *quote_status)
 {
@@ -51,10 +71,7 @@ static int sub_switch_delim(struct lex *lex, struct token *tok, char *buf,
     case '\n': // cas 7
     case ' ': // cas 8
     case '\t': {
-        int result = handle_delimiter(tok, buf[0],
-                                      quote_status->double_quote
-                                          || quote_status->single_quote,
-                                      lex->entry);
+        int result = handle_delimiter(tok, buf[0], quote_status, lex->entry);
         if (result < 0)
             return 1;
         if (result > 0)
@@ -69,9 +86,16 @@ static int sub_switch_delim(struct lex *lex, struct token *tok, char *buf,
         break;
     }
     case '{':
-    case '}':
-    {
+    case '}': {
         int res = handle_bracket(lex, tok, quote_status, buf[0]);
+        if (res == 1)
+            return 1;
+        if (res == 0)
+            return 0;
+        break;
+    }
+    case '(': {
+        int res = handle_parenthesis(lex, tok, quote_status, buf[0]);
         if (res == 1)
             return 1;
         if (res == 0)
@@ -84,6 +108,16 @@ static int sub_switch_delim(struct lex *lex, struct token *tok, char *buf,
     return -1;
 }
 
+/* Description:
+ *  identique a la fonction lexer
+ * Arguments:
+ *  struct lex *lex -> struct du lexeur
+ *  struct token *tok -> token en cours de création
+ *  char *buf -> buffer de lecture
+ *  struct quote_status *quote_status -> status des quotes en cours
+ * Retour:
+ *  int -> code de retour (0 = succès, 1 = erreur, -1 = continuer)
+ */
 static int sub_switch(struct lex *lex, struct token *tok, char *buf,
                       struct quote_status *quote_status)
 {
@@ -141,9 +175,9 @@ static int sub_switch(struct lex *lex, struct token *tok, char *buf,
 /* Description:
  * 	transforme le FILE en token
  * Arguments:
- * 	le FILE et le contexte à parser
+ * 	struct lex *lex -> struct du lexeur:
  * Retour:
- * 	int -> code de retour (0 = succès, 1 = erreur)
+ * 	int -> code de retour (0 = succès, 1 = erreur, -1 = continuer)
  * Verbose:
  * 	Suit la SCL pour créer les tokens
  */
@@ -181,7 +215,8 @@ int lexer(struct lex *lex)
     }
     lex->current_token = end_token(tok, lex); // cas 1
     if (!lex->current_token || verif_token(lex->current_token, lex->context)
-        || quote_status.double_quote || quote_status.single_quote || quote_status.bracket_open)
+        || quote_status.double_quote || quote_status.single_quote
+        || quote_status.bracket_open)
         goto ERROR;
     if (lex->current_token->token_type == KEYWORD && lex->context == KEYWORD)
         lex->current_token->token_type = check_type(lex->current_token->value);

@@ -15,7 +15,8 @@ libparser_a_SOURCES =  \
   ../lexer/lexer_handlers.c \
   ../lexer/lexer_tokens.c \
   ../lexer/lexer_operators.c \
-  ../ast/ast.c
+  ../ast/ast.c \
+  ../ast/ast_init.c
 
 libparser_a_CPPFLAGS = -I$(top_srcdir)/src
 

@@ -60,10 +60,17 @@ static void arg_num(int num, struct dictionnary *vars)
     else
     {
         char *a_n = malloc(20);
+        if (!a_n)
+            return;
         a_n[0] = '#';
         a_n[1] = '=';
         a_n[2] = 0;
         char *inum = itoa(num);
+        if (!inum)
+        {
+            free(a_n);
+            return;
+        }
         a_n = strcat(a_n, inum);
         free(inum);
         add_var(vars, a_n);
@@ -72,26 +79,52 @@ static void arg_num(int num, struct dictionnary *vars)
 }
 
 /* Description:
+ *  Helper: Ajoute un arg au dictionnaire de variables
+ * Arguments:
+ * 	vars -> dictionnaire de variables
+ * 	index -> numéro de l'arg
+ * 	value -> valeur de l'arg
+ * Return:
+ * 	void
+ */
+static void add_positional_arg(struct dictionnary *vars, int index, char *value)
+{
+    char *arg_name = malloc(20);
+    if (!arg_name)
+        return;
+
+    char *inum = itoa(index);
+    if (!inum)
+    {
+        free(arg_name);
+        return;
+    }
+
+    strcpy(arg_name, inum);
+    free(inum);
+    strcat(arg_name, "=");
+    strcat(arg_name, value);
+    add_var(vars, arg_name);
+    free(arg_name);
+}
+
+/* Description:
  * 	Gère options scripts et arguments
  * Arguments:
- * 	Arguments binaire
- * Retour:
+ * 	argc, argv -> arguments passés au programme
+ * 	prettyprint -> int à 1 si option --prettyprint passée
+ * 	vars -> dictionnaire de variables
+ * Return:
  * 	File * -> caractères à parser
  * Verbose:
  * 	-c string
  * 	nom de fichier -> file
  * 	rien -> stdin
  */
-FILE *arg_file(int argc, char **argv, int *prettyprint, struct dictionnary *vars)
+FILE *arg_file(int argc, char **argv, int *prettyprint,
+               struct dictionnary *vars)
 {
     FILE *entry = NULL;
-    char **blank = malloc(4 * sizeof(char *));
-    blank[0] = " ";
-    blank[1] = "\t";
-    blank[2] = "\n";
-    blank[3] = NULL;
-    add_var_arg(vars, "IFS", blank);
-    free(blank);
     int arg_count = 0;
     for (int i = 1; i < argc; i++)
     {
@@ -101,13 +134,15 @@ FILE *arg_file(int argc, char **argv, int *prettyprint, struct dictionnary *vars
             i++;
             if (!argv[i])
             {
-                fprintf(
-                    stderr,
-                    "42h: IO no argument after -c\n"); // erreur : pas
-                                                       // d'argument après -c
+                // erreur : pas d'argument après -c
+                fprintf(stderr, "42h: IO no argument after -c\n");
                 return NULL;
             }
             entry = fmemopen(argv[i], strlen(argv[i]), "r");
+            if (!entry)
+            {
+                return NULL;
+            }
         }
         else if (strcmp(argv[i], "--prettyprint") == 0)
         {
@@ -119,24 +154,18 @@ FILE *arg_file(int argc, char **argv, int *prettyprint, struct dictionnary *vars
         {
             arg_count = 2;
             entry = fopen(argv[i], "r");
-        }
-        else
-        {
-            if(i>1 && vars != NULL)
+            if (!entry)
             {
-                char *arg_name = malloc(20);
-                char *inum = itoa(i-arg_count);
-                arg_name = strcpy(arg_name, inum);
-                free(inum);
-                arg_name = strcat(arg_name, "=");
-                arg_name = strcat(arg_name, argv[i]);
-                add_var(vars, arg_name);
-                free(arg_name);
+                return NULL;
             }
+        }
+        else if (i > 1 && vars != NULL)
+        {
+            add_positional_arg(vars, i - arg_count, argv[i]);
         }
     }
     arg_num(argc - arg_count, vars);
-    add_var_arg(vars, "@", argv+arg_count);
+    add_var_arg(vars, "@", argv + arg_count);
     if (!entry)
     {
         entry = stdin_to_mem();

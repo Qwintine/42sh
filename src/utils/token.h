@@ -18,6 +18,7 @@ enum type
     IN,
     OPENING_BRACKET,
     CLOSING_BRACKET,
+    FUNCTION,
     REDIR_OUT, // >
     REDIR_IN, // <
     REDIR_APPEND, // >>

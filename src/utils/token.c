@@ -2,11 +2,18 @@
 
 #include <stdlib.h>
 
+/* Description:
+ * 	init struct lex
+ * Arguments:
+ * 	FILE *entry -> file to read
+ * Return:
+ * 	struct lex * -> inited struct
+ */
 struct lex *init_lex(FILE *entry)
 {
     struct lex *lex = malloc(sizeof(struct lex));
-    if(!lex)
-	    return NULL;
+    if (!lex)
+        return NULL;
     lex->entry = entry;
     lex->current_token = NULL;
     lex->context = KEYWORD;
@@ -14,21 +21,29 @@ struct lex *init_lex(FILE *entry)
     return lex;
 }
 
+/* Description:
+ * 	Init struct token
+ * Arguments:
+ * 	enum type context -> type token
+ * Return:
+ * 	struct token * -> init struct
+ */
 struct token *init_token(enum type context)
 {
     struct token *tok = malloc(sizeof(struct token));
-    if(!tok)
-	    return NULL;
+    if (!tok)
+        return NULL;
     tok->token_type = context;
     tok->value = calloc(1, sizeof(char));
-    if(!tok->value)
+    if (!tok->value)
     {
-	    free(tok);
-	    return NULL;
+        free(tok);
+        return NULL;
     }
     return tok;
 }
 
+// Free lexer
 void free_lex(struct lex *lex)
 {
     if (lex->current_token)
@@ -36,6 +51,7 @@ void free_lex(struct lex *lex)
     free(lex);
 }
 
+// Free token
 void free_token(struct token *tok)
 {
     if (tok->value)

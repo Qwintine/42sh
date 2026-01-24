@@ -79,17 +79,7 @@ run_criterion() {
   gcc -std=c99 -Wall -Wextra -Werror \
     $(pkg-config --cflags criterion) \
     tests/tests_unitaires/tests.c \
-    src/io/io.c \
-    src/utils/token.c \
-    src/utils/redir.c \
-    src/utils/itoa.c \
-    src/expand/expand.c \
-    src/expand/hashmap.c \
-    src/lexer/lexer.c \
-    src/lexer/lexer_handlers.c \
-    src/lexer/lexer_operators.c \
-    src/lexer/lexer_tokens.c \
-    src/lexer/lexer_utils.c \
+    src/*/*.c \
     $(pkg-config --libs criterion) \
     -o tests/crit_tests >/dev/null 2>&1
 
@@ -188,17 +178,30 @@ echo "=========================== Variables ==================================\n
 . tests/test_files/variables.sh
 
 #================================== Step 3 ====================================
+
 echo "================================= Builtin exit =================================\n"
 . tests/test_files/exit.sh
 
 echo "============================= Builtin cd ==============================\n"
 . tests/test_files/cd.sh
 
+echo "=========================== Builtin export ===========================\n"
+. tests/test_files/export.sh
+
+echo "=========================== Builtin unset ===========================\n"
+. tests/test_files/unset.sh
+
+echo "=========================== Builtin dot ===========================\n"
+. tests/test_files/dot.sh
+
 echo "=========================== Builtin break/continue ===========================\n"
 . tests/test_files/break_continue.sh
 
 echo "=========================== Command blocks ===========================\n"
 . tests/test_files/command_blocks.sh
+
+echo "=========================== Functions ===========================\n"
+. tests/test_files/function.sh
 
 printf "Fonctionel => Total: %d | Passed: %d | Failed: %d\n\n" "$TOTAL" "$PASS" "$((TOTAL - PASS))"
 

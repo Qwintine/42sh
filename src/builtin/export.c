@@ -1,35 +1,81 @@
-#define  _POSIX_C_SOURCE 200112L
+#define _POSIX_C_SOURCE 200112L
 #include "export.h"
 
+#include <ctype.h>
+
+/* Description:
+ * 	Check if valid var name
+ * Arguments:
+ * 	char *name -> variable name
+ * Return:
+ * 	int -> 1 if valid, 0 otherwise
+ */
+static int is_valid_name(char *name)
+{
+    if (!name || !*name || isdigit(*name))
+        return 0;
+    for (size_t i = 0; name[i] && name[i] != '='; i++)
+    {
+        if (!isalnum(name[i]) && name[i] != '_')
+            return 0;
+    }
+    return 1;
+}
+
+/* Description:
+ * 	Execute export builtin cmd
+ * Arguments:
+ * 	char **args -> args passed to export
+ * 	struct dictionnary *dict -> dictionnary of vars
+ * Return:
+ * 	int -> Exit status of export cmd
+ */
 int export_b(char **args, struct dictionnary *dict)
 {
+    int ret = 0;
     for (size_t i = 0; args[i] != NULL; i++)
     {
         char *arg = args[i];
-        int equal = 0;
-        size_t i = 0; 
-        while(arg[i]!='=' && arg[i]!=0)
-        { 
-            i++;
+
+        if (!is_valid_name(arg))
+        {
+            ret = 1;
+            continue;
         }
-        equal = arg[i]=='=';
+
+        int equal = 0;
+        size_t j = 0;
+        while (arg[j] != '=' && arg[j] != 0)
+        {
+            j++;
+        }
+        equal = arg[j] == '=';
         char *key = "";
         char *val = "";
-        if(equal)
+        if (equal)
         {
-            add_var(dict,arg);
-            arg[i] = 0;
+            add_var(dict, arg);
+            arg[j] = 0;
             key = arg;
-            val = arg+i+1;
+            val = arg + j + 1;
+            setenv(key, val, 1);
         }
         else
         {
             key = arg;
             char **var = get_var(dict, key);
-            val = var[0];
-            free(var);
+            if (var && var[0])
+            {
+                val = var[0];
+            }
+            else
+            {
+                val = "";
+            }
+            setenv(key, val, 1);
+            if (var)
+                free(var);
         }
-        setenv(key,val,1);
     }
-    return 0;
+    return ret;
 }

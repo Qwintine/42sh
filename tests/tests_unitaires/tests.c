@@ -646,3 +646,31 @@ Test(Test42sh, lex_brackets, .init = cr_redirect_stdout)
     free_lex(lx);
     free_dict(vars);
 }
+
+Test(Test42sh, lex_parentheses, .init = cr_redirect_stdout)
+{
+    struct dictionnary *vars = init_dict();
+    FILE *f = arg_file(3, (char*[]){"program", "-c", "$test() ( echo ok; ) $( echo ok; )"}, NULL, vars);
+    cr_assert_not_null(f);
+
+    struct lex *lx = init_lex(f);
+    cr_assert_not_null(lx);
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, FUNCTION));
+    cr_expect(eq(str, lx->current_token->value, "$test()"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, WORD));
+    cr_expect(eq(str, lx->current_token->value, "( echo ok; )"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, WORD));
+    cr_expect(eq(str, lx->current_token->value, "$( echo ok; )"));
+
+    cr_expect(eq(int, lexer(lx), 0));
+    cr_expect(eq(int, lx->current_token->token_type, END));
+
+    free_lex(lx);
+    free_dict(vars);
+}

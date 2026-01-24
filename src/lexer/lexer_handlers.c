@@ -4,17 +4,7 @@
 
 #include "lexer_aux.h"
 
-/*
- * Description:
- *	Helper;  Handle different \ behaviors
- * Arguments:
- *	char **value -> value to concat to if needed
- *	FILE *entry -> Input stream
- *	int in_quotes -> quote state
- * Return:
- *	0 success / 1 failure
- */
-
+// gère le comportement des commentaires
 int handle_com(int in_quotes, struct lex *lex, struct token *tok, char *buf)
 {
     if (!in_quotes)
@@ -41,6 +31,7 @@ int handle_com(int in_quotes, struct lex *lex, struct token *tok, char *buf)
     return 0;
 }
 
+// gère les différents comportements de backslash
 int handle_backslash(char **value, FILE *entry)
 {
     char buf[1];
@@ -75,6 +66,7 @@ int handle_backslash(char **value, FILE *entry)
     return 0;
 }
 
+// active/désactive les quotes et ajoute le char à la valeur
 int handle_quote(int *quote, int other_quote, struct token *tok, char val)
 {
     tok->value = concat(tok->value, val);
@@ -145,8 +137,11 @@ int handle_blank(struct token *tok, char c, int quote)
     return 0;
 }
 
-int handle_delimiter(struct token *tok, char c, int quote, FILE *entry)
+// gère le comportement des délimiteurs
+int handle_delimiter(struct token *tok, char c,
+                     struct quote_status *quote_status, FILE *entry)
 {
+    int quote = quote_status->double_quote || quote_status->single_quote;
     if (c == '\n')
         return handle_newline(tok, quote, entry);
     if (c == ';')
@@ -154,6 +149,16 @@ int handle_delimiter(struct token *tok, char c, int quote, FILE *entry)
     return handle_blank(tok, c, quote);
 }
 
+/* Description:
+ *  crée un token IO_NUMBER si possible sinon ajoute le char à la valeur
+ * Arguments:
+ *  struct token *tok -> token en cours de création
+ *  int quote -> status des quotes en cours
+ *  FILE *entry -> le FILE d'entrée
+ *  char val -> char actuel
+ * Retour:
+ *  int -> code de retour (0 = succès, 1 = erreur, -1 = continuer)
+ */
 int new_op(struct token *tok, int quote, FILE *entry, char val)
 {
     if (!quote)
@@ -179,7 +184,7 @@ int new_op(struct token *tok, int quote, FILE *entry, char val)
 }
 
 static int handle_opening_bracket(struct lex *lex, struct token *tok,
-                           struct quote_status *quote_status)
+                                  struct quote_status *quote_status)
 {
     if (!quote_status->double_quote && !quote_status->single_quote)
     {
@@ -226,7 +231,7 @@ static int handle_opening_bracket(struct lex *lex, struct token *tok,
 }
 
 static int handle_closing_bracket(struct lex *lex, struct token *tok,
-                           struct quote_status *quote_status)
+                                  struct quote_status *quote_status)
 {
     if (!quote_status->double_quote && !quote_status->single_quote)
     {
@@ -269,10 +274,87 @@ static int handle_closing_bracket(struct lex *lex, struct token *tok,
     return -1;
 }
 
+/* Description:
+ *  crée un token de type OPENING_BRACKET ou CLOSING_BRACKET si possible
+ * Arguments:
+ *  struct lex *lex -> struct du lexeur
+ *  struct token *tok -> token en cours de création
+ *  struct quote_status *quote_status -> status des quotes en cours
+ *  char val -> char actuel
+ * Retour:
+ *  int -> code de retour (0 = succès, 1 = erreur, -1 = continuer)
+ */
 int handle_bracket(struct lex *lex, struct token *tok,
-                    struct quote_status *quote_status, char val)
+                   struct quote_status *quote_status, char val)
 {
     if (val == '{')
         return handle_opening_bracket(lex, tok, quote_status);
     return handle_closing_bracket(lex, tok, quote_status);
+}
+
+/* Description:
+ *  crée un token de type FUNCTION si possible
+ * Arguments:
+ *  struct lex *lex -> struct du lexeur
+ *  struct token *tok -> token en cours de création
+ *  struct quote_status *quote_status -> status des quotes en cours
+ *  char val -> char actuel
+ * Retour:
+ *  int -> code de retour (0 = succès, 1 = erreur, -1 = continuer)
+ */
+int handle_parenthesis(struct lex *lex, struct token *tok,
+                       struct quote_status *quote_status, char val)
+{
+    if (!quote_status->double_quote && !quote_status->single_quote)
+    {
+        char buf[1];
+        if (strlen(tok->value) > 0)
+        {
+            if (tok->value[strlen(tok->value) - 1] != '$'
+                && fread(buf, 1, 1, lex->entry))
+            {
+                if (buf[0] == ')')
+                {
+                    tok->value = concat(tok->value, val);
+                    if (!tok->value)
+                        return 1;
+                    tok->value = concat(tok->value, buf[0]);
+                    if (!tok->value)
+                        return 1;
+                    tok->token_type = FUNCTION;
+                    return -1;
+                }
+                else
+                {
+                    fseek(lex->entry, -2, SEEK_CUR);
+                    return 1;
+                }
+            }
+        }
+        tok->value = concat(tok->value, val);
+        if (!tok->value)
+            return 1;
+        tok->token_type = WORD;
+        while (fread(buf, 1, 1, lex->entry))
+        {
+            if (buf[0] == ')')
+            {
+                tok->value = concat(tok->value, buf[0]);
+                if (!tok->value)
+                    return 1;
+                return -1;
+            }
+            else
+            {
+                tok->value = concat(tok->value, buf[0]);
+                if (!tok->value)
+                    return 1;
+            }
+        }
+        return 1;
+    }
+    tok->value = concat(tok->value, val);
+    if (!tok->value)
+        return 1;
+    return -1;
 }
