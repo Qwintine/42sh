@@ -1,5 +1,6 @@
 #include <stdlib.h>
 
+#include "../ast/ast_aux.h"
 #include "parser_aux.h"
 
 // Parse a pipeline of commands separated by pipes

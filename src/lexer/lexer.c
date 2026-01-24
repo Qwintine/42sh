@@ -51,10 +51,7 @@ static int sub_switch_delim(struct lex *lex, struct token *tok, char *buf,
     case '\n': // cas 7
     case ' ': // cas 8
     case '\t': {
-        int result = handle_delimiter(tok, buf[0],
-                                      quote_status->double_quote
-                                          || quote_status->single_quote,
-                                      lex->entry);
+        int result = handle_delimiter(tok, buf[0], quote_status, lex->entry);
         if (result < 0)
             return 1;
         if (result > 0)

@@ -48,14 +48,13 @@ int valid_io(char *str)
     char *endptr;
     long num = strtol(str, &endptr, 10);
 
-    if (*endptr != '\0' || num < 0) // Check for errors
+    if (*endptr != '\0' || num < 0)
         return 0;
 
-    // Get max nb fd
     long max_fd = sysconf(_SC_OPEN_MAX);
     if (max_fd == -1)
     {
-        max_fd = 1024; // default fd max
+        max_fd = 1024;
     }
 
     if (num > max_fd)

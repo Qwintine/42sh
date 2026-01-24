@@ -145,8 +145,10 @@ int handle_blank(struct token *tok, char c, int quote)
     return 0;
 }
 
-int handle_delimiter(struct token *tok, char c, int quote, FILE *entry)
+int handle_delimiter(struct token *tok, char c,
+                     struct quote_status *quote_status, FILE *entry)
 {
+    int quote = quote_status->double_quote || quote_status->single_quote;
     if (c == '\n')
         return handle_newline(tok, quote, entry);
     if (c == ';')
