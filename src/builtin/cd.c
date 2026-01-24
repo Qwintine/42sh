@@ -13,7 +13,7 @@ static int update_pwd(struct dictionnary *vars)
     if (pwd == NULL || pwd[0] == NULL)
         return 1;
     
-    char *saved_pwd = strdup(pwd[0]);
+    char *saved_pwd = pwd[0];
     free(pwd);
     if (saved_pwd == NULL)
         return 1;
@@ -71,12 +71,13 @@ int cd_b(char **args, struct dictionnary *vars)
     }
     else
     {
-        path = args[0];
+        path = strdup(args[0]);
     }
     
     if (chdir(path) != 0)
     {
         fprintf(stderr, "cd: wrong path: %s\n", path);
+        free(path);
         return 1;
     }
     
@@ -95,6 +96,8 @@ int cd_b(char **args, struct dictionnary *vars)
         free(path_to_print);
     }
     
+    if(path != NULL)
+        free(path);
     if (home != NULL)
         free(home);
     if (oldpwd != NULL)
