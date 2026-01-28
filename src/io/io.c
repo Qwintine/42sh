@@ -51,6 +51,12 @@ static FILE *stdin_to_mem(void)
     return mem;
 }
 
+/* Description:
+ * Helper -> add number of args to dictionnary
+ * Arguments:
+ * 	int num -> num of args
+ *  struct dictionnary *vars -> dictionnary of var
+ */
 static void arg_num(int num, struct dictionnary *vars)
 {
     if (vars == NULL)

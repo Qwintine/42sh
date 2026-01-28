@@ -10,8 +10,6 @@
 /*
  * Description:
  * 	Handle a shell command block by calling corresponding parser at each step
- * Return:
- *
  * Verbose:
  * 	Grammar:
  * 		either an if, while or until block
@@ -155,7 +153,7 @@ struct ast *parser_fundef(struct lex *lex, struct dictionnary *dict)
  * Description:
  * 	Parse a command which can be either a simple command or a shell command
  * Return:
- * 	*ast -> ast containing either a simple command or a shell command
+ * 	*ast -> ast containing simple command or shell command
  * Verbose:
  * 	Grammar:
  * 	   simple_command

@@ -7,7 +7,7 @@
  * Description:
  * 	Parse a redirection
  * Return:
- * 	0 on success, 1 on error
+ * 	0 success, 1 error
  */
 int parser_redir(struct lex *lex, struct ast_cmd *ast_cmd)
 {
@@ -60,7 +60,7 @@ int parser_redir(struct lex *lex, struct ast_cmd *ast_cmd)
  * Description:
  * 	Parse a redirection in a shell command context
  * Return:
- * 	0 on success, 1 on error
+ * 	0 success, 1 error
  */
 int parser_redir_shell(struct lex *lex, struct ast_shell_redir *shell)
 {

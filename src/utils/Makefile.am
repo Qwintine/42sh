@@ -6,7 +6,9 @@ libutils_a_SOURCES =  \
   token.c \
   token.h \
   redir.c \
-  redir.h
+  redir.h \
+  hash.c \
+  hash.h
 
 libutils_a_CPPFLAGS = -I$(top_srcdir)/src
 

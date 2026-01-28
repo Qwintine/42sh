@@ -169,8 +169,6 @@ static int in_dquote_exp(char *word, size_t *ind, struct dictionnary *vars,
         free(var);
         (*ind)++;
     }
-    // if there is a antislash, it must be ignored and the next character is
-    //  added to the result regardless of what it is
     else if (word[*ind] == '\\')
     {
         if (is_expandable(word[*ind + 1]))
@@ -401,7 +399,7 @@ char **expand(struct dictionnary *vars, char **words)
         }
         i++;
         j++;
-        if (!res[j - 1][0] == 0)
+        if (res[j - 1][0] != 0)
         {
             res = realloc(res, (j + 1) * sizeof(char *));
             res[j] = NULL;

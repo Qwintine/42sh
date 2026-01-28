@@ -148,6 +148,7 @@ static int exec_func(struct ast *func, struct ast_cmd *ast_cmd,
     }
     return res;
 }
+
 /* Description:
  * 	Update special var "?" with given status
  * Arguments:
@@ -224,6 +225,7 @@ static int exec_b(struct ast_cmd *ast_cmd, char **expanded,
     update_exit(vars, r);
     return r;
 }
+
 /* Description:
  *  Execute the command with given arguments
  * Arguments:

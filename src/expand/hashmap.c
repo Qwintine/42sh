@@ -9,21 +9,9 @@
 
 #include "../ast/ast.h"
 #include "../utils/itoa.h"
+#include "../utils/hash.h"
 #include "expand.h"
 
-// hashing function for the dictionnary
-int hash(char *str)
-{
-    size_t res = 0;
-    for (size_t i = 0; str[i] != 0; i++)
-    {
-        res += str[i];
-    }
-    res *= res;
-    res = res % 20;
-    int r = res;
-    return r;
-}
 
 static void add_special(struct dictionnary *dict, char *key, char *val)
 {
@@ -168,7 +156,7 @@ static char *expand_value(struct dictionnary *dict, char *val)
 /*Description:
  *  Add a variable to the dictionnary
  *Arguments:
- *  varas: the variable as a string "<KEY>=<VALUE>"
+ *  varas: the variable as a string "KEY=VALUE"
  */
 int add_var(struct dictionnary *dict, char *varas)
 {

@@ -195,7 +195,7 @@ int lexer(struct lex *lex)
             && (tok->value[0] == '&' || tok->value[0] == '|'
                 || tok->value[0] == '>' || tok->value[0] == '<')) // cas 2/3
         {
-            int res;
+            int res = 0;
             if (tok->value[0] == '&' || tok->value[0] == '|')
                 res = manage_op(lex, tok, buf);
             else if (tok->value[0] == '>' || tok->value[0] == '<')
