@@ -8,10 +8,9 @@
 #include <unistd.h>
 
 #include "../ast/ast.h"
-#include "../utils/itoa.h"
 #include "../utils/hash.h"
+#include "../utils/itoa.h"
 #include "expand.h"
-
 
 static void add_special(struct dictionnary *dict, char *key, char *val)
 {
