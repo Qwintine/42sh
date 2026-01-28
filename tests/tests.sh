@@ -47,7 +47,6 @@ testcase() {
   if [ -s "$REF_ERR" ]; then
     ref_has_stderr=1
   fi
-  
   if [ -s "$TEST_ERR" ]; then
     test_has_stderr=1
   fi
@@ -119,6 +118,8 @@ run_criterion() {
   rm -f tests/crit_tests
 }
 
+#prettyprint
+. tests/test_files/prettyprint.sh
 #================================== Step 1 ====================================
 
 echo "=============================== Simple commands ================================\n"
