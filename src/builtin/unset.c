@@ -1,6 +1,6 @@
 #define _POSIX_C_SOURCE 200112L
 #include "unset.h"
-
+#include "../utils/hash.h"
 #include <stdlib.h>
 #include <string.h>
 

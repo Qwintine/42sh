@@ -12,7 +12,7 @@
 /* Description:
  * 	Concat path and string with '/' between
  * Arguments:
- * 	char *path -> path
+ * 	char *path -> PATH
  * 	char *string ->string to concat
  * Return:
  * 	char * -> concat string
@@ -125,7 +125,7 @@ int dot_b(char **words, struct dictionnary *vars, int *exit)
 
     if (strchr(words[0], '/'))
         entry = fopen(words[0], "r"); // / in path
-    else // search trough pafs values
+    else // search trough pafs values ( rires )
     {
         char *path = get_var(vars, "PATH")[0];
         if (!path)
@@ -159,14 +159,14 @@ int dot_b(char **words, struct dictionnary *vars, int *exit)
             char *full = concat(string, words[0]);
             free(string);
 
-            if (!full)
+            if (!full || !semi_colon)
                 break;
 
             entry = fopen(full, "r");
             free(full);
 
-            if (!semi_colon)
-                break;
+            /*if (!semi_colon)
+                break;*/
             path = semi_colon + 1;
         }
     }

@@ -399,7 +399,7 @@ char **expand(struct dictionnary *vars, char **words)
         }
         i++;
         j++;
-        if (!res[j - 1][0] == 0)
+        if (res[j - 1][0] != 0)
         {
             res = realloc(res, (j + 1) * sizeof(char *));
             res[j] = NULL;

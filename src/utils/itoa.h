@@ -1,5 +1,5 @@
-#ifndef ITOA_h
-#define ITOA_h
+#ifndef ITOA_H
+#define ITOA_H
 
 #include <stdlib.h>
 

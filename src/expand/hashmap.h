@@ -21,7 +21,6 @@ struct dictionnary
     struct function *function[20];
 };
 
-int hash(char *str);
 struct dictionnary *init_dict(void);
 int is_env(char *key);
 int add_var(struct dictionnary *dict, char *varas);
