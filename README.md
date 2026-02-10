@@ -113,8 +113,9 @@ Hello from script
 
 ## Project Structure
 
-src/
-lexer/       Tokenization <br>
+src/ <br>
+<pre>
+lexer/      Tokenization <br>
 parser/      AST construction <br>
 expand/      Variable expansion <br>
 exec/        Execution engine <br>
@@ -122,7 +123,8 @@ builtins/    Builtin commands <br>
 utils/       Utility functions <br>
 
 tests/         Test suite <br>
-docs/          Documentation <br>
+docs/ Documentation <br>
+</pre>
 
 ---
 
@@ -146,6 +148,4 @@ Some advanced features such as job control or full quoting rules may be incomple
 Quentin Pouyadoux <br>
 Victor Gardère <br>
 Victor Happe <br>
-
-EPITA — Systems Programming
 
