@@ -1,22 +1,38 @@
 # 42sh — POSIX-like Shell in C
 
-Implementation of a POSIX-like shell developed at EPITA.
-
-This project implements a command interpreter capable of parsing, expanding and executing shell commands using an architecture inspired by real Unix shells.  
-The focus of the project is on **systems programming, process management, parsing, and file descriptor handling**.
+A POSIX-like command interpreter written in C as part of the EPITA curriculum.
+This project focuses on systems programming concepts such as parsing, process management, file descriptor handling, and command execution.
 
 ---
 
-## Key Features
+## Features
 
-- Execution of simple commands
-- Pipelines (`|`)
-- Redirections (`>`, `<`, `>>`, file descriptors`)
-- Builtins (`cd`, `exit`, `export`, `unset`, `.`)
-- Environment variables and expansion
-- Parsing into an Abstract Syntax Tree (AST)
-- Error handling and exit status propagation
-- Memory management and resource cleanup
+### Execution
+
+* Simple command execution
+* Pipelines (`|`)
+* Redirections (`>`, `<`, `>>`, file descriptor redirections)
+* Execution of shell scripts (`.sh` files)
+
+### Builtins
+
+* `cd`
+* `exit`
+* `export`
+* `unset`
+* `.` (dot)
+
+### Shell Semantics
+
+* Environment variable storage and expansion
+* Exit status propagation
+* Error handling and diagnostics
+
+### Engineering
+
+* Modular architecture (lexer, parser, expansion, execution)
+* Memory and resource cleanup
+* Structured error handling
 
 ---
 
@@ -26,65 +42,110 @@ The shell is structured in several stages:
 
 input → lexer → parser → AST → expansion → execution
 
-### Modules:
+Modules:
 
-- **Lexer**: tokenization of input
-- **Parser**: syntax analysis and AST construction
-- **Expansion**: environment variables and word expansion
-- **Executor**: fork, exec, pipes and redirections
-- **Builtins**: internal shell commands
+* **Lexer**: tokenization of input
+* **Parser**: syntax analysis and AST construction
+* **Expansion**: environment variables and word expansion
+* **Executor**: fork, exec, pipes and redirections
+* **Builtins**: internal shell commands
+
+---
+
+## Technical Highlights
+
+* Process management using `fork()`, `execve()`, and `waitpid()`
+* Pipe and file descriptor handling using `dup2()` and `pipe()`
+* Abstract Syntax Tree (AST) design for command execution
+* Environment storage using a hashmap
+* Careful memory and resource management
 
 ---
 
 ## Build
 
 ### Requirements
-- GCC or Clang
-- Make
-- Autoconf / Automake
 
-### Build
+* GCC or Clang
+* Make
+* Autoconf / Automake
+
+### Build Steps
 
 ```bash
 autoreconf -fi
 ./configure
 make
+```
+
+---
 
 ## Usage
+
 Run interactive shell:
 
+```bash
 ./src/42sh
+```
+
 Execute a single command:
 
+```bash
 ./src/42sh -c "echo hello | wc -c"
-### Example
+```
 
-$ ./src/42sh
-42sh$ echo hello | wc -c
+Execute a script file:
+
+```bash
+./src/42sh script.sh
+```
+
+---
+
+## Example
+
+```bash
+$ ./src/42sh script.sh
+Hello from script
+```
+
+---
 
 ## Project Structure
+
 src/
-  lexer/       Tokenization
-  parser/      AST construction
-  expand/      Variable expansion
-  exec/        Execution engine
-  builtins/    Builtin commands
-  utils/       Utility functions
+lexer/       Tokenization
+parser/      AST construction
+expand/      Variable expansion
+exec/        Execution engine
+builtins/    Builtin commands
+utils/       Utility functions
+
+tests/         Test suite
+docs/          Documentation
+
+---
 
 ## Documentation
-Developer notes: docs/DEV.md
 
-User guide: docs/USER.md
+* Developer notes: docs/DEV.md
+* User guide: docs/USER.md
+* API documentation: generated with Doxygen
 
-API documentation: generated with Doxygen
+---
 
 ## Limitations
+
 This project is an educational shell and does not aim to be fully POSIX compliant.
 Some advanced features such as job control or full quoting rules may be incomplete.
 
+---
+
 ## Authors
+
 Quentin Pouyadoux
 Victor Gardère
 Victor Happe
-EPITA — Systems Programming 
+
+EPITA — Systems Programming
 
