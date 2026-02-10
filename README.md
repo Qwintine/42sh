@@ -114,17 +114,16 @@ Hello from script
 ## Project Structure
 
 src/ <br>
-<pre>
-lexer/      Tokenization <br>
-parser/      AST construction <br>
-expand/      Variable expansion <br>
-exec/        Execution engine <br>
-builtins/    Builtin commands <br>
-utils/       Utility functions <br>
+lexer/&nbsp;&nbsp;&nbsp;&nbsp;Tokenization <br>
+parser/&nbsp;&nbsp;&nbsp;&nbsp;AST construction <br>
+expand/&nbsp;&nbsp;&nbsp;&nbsp;Variable expansion <br>
+exec/&nbsp;&nbsp;&nbsp;&nbsp;Execution engine <br>
+builtins/&nbsp;&nbsp;&nbsp;&nbsp;Builtin commands <br>
+utils/&nbsp;&nbsp;&nbsp;&nbsp;Utility functions <br>
 
-tests/         Test suite <br>
-docs/ Documentation <br>
-</pre>
+tests/&nbsp;&nbsp;&nbsp;&nbsp;Test suite <br>
+docs/&nbsp;&nbsp;&nbsp;&nbsp;Documentation <br>
+
 
 ---
 
