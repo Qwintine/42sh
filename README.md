@@ -1,6 +1,6 @@
 # 42sh — POSIX-like Shell in C
 
-A POSIX-like command interpreter written in C as part of the EPITA curriculum.
+A POSIX-like command interpreter written in C as part of the EPITA curriculum. <br>
 This project focuses on systems programming concepts such as parsing, process management, file descriptor handling, and command execution.
 
 ---
@@ -114,15 +114,15 @@ Hello from script
 ## Project Structure
 
 src/
-lexer/       Tokenization
-parser/      AST construction
-expand/      Variable expansion
-exec/        Execution engine
-builtins/    Builtin commands
-utils/       Utility functions
+lexer/       Tokenization <br>
+parser/      AST construction <br>
+expand/      Variable expansion <br>
+exec/        Execution engine <br>
+builtins/    Builtin commands <br>
+utils/       Utility functions <br>
 
-tests/         Test suite
-docs/          Documentation
+tests/         Test suite <br>
+docs/          Documentation <br>
 
 ---
 
@@ -136,16 +136,16 @@ docs/          Documentation
 
 ## Limitations
 
-This project is an educational shell and does not aim to be fully POSIX compliant.
+This project is an educational shell and does not aim to be fully POSIX compliant. <br>
 Some advanced features such as job control or full quoting rules may be incomplete.
 
 ---
 
 ## Authors
 
-Quentin Pouyadoux
-Victor Gardère
-Victor Happe
+Quentin Pouyadoux <br>
+Victor Gardère <br>
+Victor Happe <br>
 
 EPITA — Systems Programming
 
