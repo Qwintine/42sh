@@ -1,7 +1,0 @@
-<map id="echo_b" name="echo_b">
-<area shape="rect" id="Node000001" title="print les strings sur le terminal" alt="" coords="5,31,73,56"/>
-<area shape="rect" id="Node000002" href="$echo_8c.html#a35bb3b6350dcd1d19a889822cc7dedf0" title="Parse &#45;n, &#45;e, and &#45;E options." alt="" coords="121,5,209,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="73,34,107,27,108,32,74,39"/>
-<area shape="rect" id="Node000003" href="$echo_8c.html#ad398eb4dcd3b31a7800eb6f3f510f2b2" title="insert 2 character" alt="" coords="126,55,205,80"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="74,47,113,55,112,60,73,52"/>
-</map>

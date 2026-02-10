@@ -1,0 +1,42 @@
+# Autotools
+autom4te.cache/
+aclocal.m4
+compile
+config.guess
+config.sub
+config.h.in
+config.h
+config.log
+config.status
+configure
+depcomp
+install-sh
+ltmain.sh
+missing
+Makefile
+Makefile.in
+*.o
+*.lo
+*.la
+*.a
+*.so
+*.dylib
+*.dll
+*.exe
+.libs/
+.deps/
+
+# Build dirs
+build/
+_build/
+dist/
+*.tar.gz
+
+# Doxygen generated
+docs/doxygen/html/
+docs/doxygen/latex/
+docs/doxygen/xml/
+docs/doxygen/man/
+docs/doxygen/rtf/
+docs/doxygen/*.tag
+

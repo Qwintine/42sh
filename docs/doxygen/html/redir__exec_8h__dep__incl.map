@@ -1,9 +1,0 @@
-<map id="src/exec/redir_exec.h" name="src/exec/redir_exec.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="138,5,297,31"/>
-<area shape="rect" id="Node000002" href="$ast__run_8c.html" title=" " alt="" coords="5,79,133,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="183,39,95,81,92,76,180,34"/>
-<area shape="rect" id="Node000003" href="$exec_8c.html" title=" " alt="" coords="157,79,277,104"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="220,44,220,79,215,79,215,44"/>
-<area shape="rect" id="Node000004" href="$redir__exec_8c.html" title=" " alt="" coords="301,79,459,104"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="257,34,354,76,352,81,255,39"/>
-</map>

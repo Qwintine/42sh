@@ -27,3 +27,8 @@ clean-all:
 debug:
 	$(MAKE) clean
 	CFLAGS="-g -O0" $(MAKE)
+
+
+.PHONY: doxygen
+doxygen:
+	$(MAKE) -C docs doxygen || true
