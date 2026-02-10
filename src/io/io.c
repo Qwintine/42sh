@@ -51,11 +51,11 @@ static FILE *stdin_to_mem(void)
     return mem;
 }
 
-/* Description:
- * Helper -> add number of args to dictionnary
- * Arguments:
- * 	int num -> num of args
- *  struct dictionnary *vars -> dictionnary of var
+/**
+ * @brief Helper -> add number of args to dictionnary
+ *
+ * @param int num -> num of args
+ * @param struct dictionnary *vars -> dictionnary of var
  */
 static void arg_num(int num, struct dictionnary *vars)
 {
@@ -84,14 +84,12 @@ static void arg_num(int num, struct dictionnary *vars)
     }
 }
 
-/* Description:
- *  Helper: Ajoute un arg au dictionnaire de variables
- * Arguments:
- * 	vars -> dictionnaire de variables
- * 	index -> numéro de l'arg
- * 	value -> valeur de l'arg
- * Return:
- * 	void
+/**
+ * @brief Helper: Ajoute un arg au dictionnaire de variables
+ *
+ * @param vars -> dictionnaire de variables
+ * @param index -> numéro de l'arg
+ * @param value -> valeur de l'arg
  */
 static void add_positional_arg(struct dictionnary *vars, int index, char *value)
 {
@@ -114,15 +112,16 @@ static void add_positional_arg(struct dictionnary *vars, int index, char *value)
     free(arg_name);
 }
 
-/* Description:
- * 	Gère options scripts et arguments
- * Arguments:
- * 	argc, argv -> arguments passés au programme
- * 	prettyprint -> int à 1 si option --prettyprint passée
- * 	vars -> dictionnaire de variables
- * Return:
- * 	File * -> caractères à parser
- * Verbose:
+/**
+ * @brief Gère options scripts et arguments
+ *
+ * @param argc, argv -> arguments passés au programme
+ * @param prettyprint -> int à 1 si option --prettyprint passée
+ * @param vars -> dictionnaire de variables
+ *
+ * @return File * -> caractères à parser
+ * 
+ * @note
  * 	-c string
  * 	nom de fichier -> file
  * 	rien -> stdin

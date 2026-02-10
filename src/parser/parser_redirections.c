@@ -3,11 +3,10 @@
 #include "../utils/redir.h"
 #include "parser_aux.h"
 
-/*
- * Description:
- * 	Parse a redirection
- * Return:
- * 	0 success, 1 error
+/**
+ * @brief Parse a redirection
+ * 
+ * @return 0 success, 1 error
  */
 int parser_redir(struct lex *lex, struct ast_cmd *ast_cmd)
 {
@@ -56,11 +55,10 @@ int parser_redir(struct lex *lex, struct ast_cmd *ast_cmd)
     return 1;
 }
 
-/*
- * Description:
- * 	Parse a redirection in a shell command context
- * Return:
- * 	0 success, 1 error
+/**
+ * @brief Parse a redirection in a shell command context
+ *
+ * @return 0 success, 1 error
  */
 int parser_redir_shell(struct lex *lex, struct ast_shell_redir *shell)
 {
@@ -109,12 +107,11 @@ int parser_redir_shell(struct lex *lex, struct ast_shell_redir *shell)
     return 1;
 }
 
-/*
- * Description:
- * 	Handle an element in a command: either a word or a redirection
- * Return:
- * 	0 on success, 1 on error
- * Grammar:
+/**
+ * @brief Handle an element in a command: either a word or a redirection
+ * 
+ * @return 0 on success, 1 on error
+ * @note Grammar:
  * 	        word
  *          | redirection ;
  */
@@ -147,12 +144,11 @@ int parser_element(struct lex *lex, struct ast_cmd *ast_cmd, size_t *w)
     return 1;
 }
 
-/*
- * Description:
- * 	Handle a prefix in a command: either an assignment or a redirection
- * Return:
- * 	0 on success, 1 on error
- * Grammar:
+/**
+ * @brief Handle a prefix in a command: either an assignment or a redirection
+ * 
+ * @return 0 on success, 1 on error
+ * @note Grammar:
  * 	        assignment
  *          | redirection ;
  */

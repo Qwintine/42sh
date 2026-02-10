@@ -6,10 +6,10 @@
 
 #include "../utils/hash.h"
 
-/* Description:
- * 	Free a var node
- * Arguments:
- * 	struct variables *val -> node to free
+/**
+ * @brief Free a var node
+ *
+ * @param struct variables *val -> node to free
  */
 static void free_node(struct variables *val)
 {
@@ -23,13 +23,13 @@ static void free_node(struct variables *val)
     }
 }
 
-/* Description:
- * 	Execute unset builtin cmd
- * Arguments:
- * 	struct dictionnary *to_unset -> dictionnary of vars
- * 	char **names -> names to unset
- * Return:
- * 	int -> number of vars that couldn't be deleted
+/**
+ *@brief Execute unset builtin cmd
+ *
+ * @param struct dictionnary *to_unset -> dictionnary of vars
+ * @param char **names -> names to unset
+ *
+ * @return int -> number of vars that couldn't be deleted
  */
 int unset(struct dictionnary *to_unset, char **names)
 {

@@ -5,15 +5,15 @@
 
 #include "lexer_aux.h"
 
-/* Description:
- *  Gestion des opérateurs
- * Arguments:
- *  struct lex *lex -> struct du lexeur
- *  struct token *tok -> token en cours de création
- *  char *buf -> buffer de lecture
- *  struct quote_status *quote_status -> status des quotes en cours
- * Retour:
- *  int -> code de retour (0 = succès, 1 = erreur, -1 = continuer)
+/**
+ * @brief Gestion des opérateurs
+ *
+ * @param struct lex *lex -> struct du lexeur
+ * @param struct token *tok -> token en cours de création
+ * @param char *buf -> buffer de lecture
+ * @param struct quote_status *quote_status -> status des quotes en cours
+ *
+ * @return int -> code de retour (0 = succès, 1 = erreur, -1 = continuer)
  */
 static int sub_switch_op(struct lex *lex, struct token *tok, char *buf,
                          struct quote_status *quote_status)
@@ -48,15 +48,15 @@ static int sub_switch_op(struct lex *lex, struct token *tok, char *buf,
     return -1;
 }
 
-/* Description:
- *  Gestion des délimiteurs
- * Arguments:
- *  struct lex *lex -> struct du lexeur
- *  struct token *tok -> token en cours de création
- *  char *buf -> buffer de lecture
- *  struct quote_status *quote_status -> status des quotes en cours
- * Retour:
- *  int -> code de retour (0 = succès, 1 = erreur, -1 = continuer)
+/**
+ * @brief Gestion des délimiteurs
+ * 
+ * @param struct lex *lex -> struct du lexeur
+ * @param struct token *tok -> token en cours de création
+ * @param char *buf -> buffer de lecture
+ * @param struct quote_status *quote_status -> status des quotes en cours
+ *
+ * @return int -> code de retour (0 = succès, 1 = erreur, -1 = continuer)
  */
 static int sub_switch_delim(struct lex *lex, struct token *tok, char *buf,
                             struct quote_status *quote_status)
@@ -108,15 +108,15 @@ static int sub_switch_delim(struct lex *lex, struct token *tok, char *buf,
     return -1;
 }
 
-/* Description:
- *  identique a la fonction lexer
- * Arguments:
- *  struct lex *lex -> struct du lexeur
- *  struct token *tok -> token en cours de création
- *  char *buf -> buffer de lecture
- *  struct quote_status *quote_status -> status des quotes en cours
- * Retour:
- *  int -> code de retour (0 = succès, 1 = erreur, -1 = continuer)
+/**
+ * @brief identique a la fonction lexer
+ *
+ * @param struct lex *lex -> struct du lexeur
+ * @param struct token *tok -> token en cours de création
+ * @param char *buf -> buffer de lecture
+ * @param struct quote_status *quote_status -> status des quotes en cours
+ *
+ * @return int -> code de retour (0 = succès, 1 = erreur, -1 = continuer)
  */
 static int sub_switch(struct lex *lex, struct token *tok, char *buf,
                       struct quote_status *quote_status)
@@ -172,14 +172,14 @@ static int sub_switch(struct lex *lex, struct token *tok, char *buf,
     return -1;
 }
 
-/* Description:
- * 	transforme le FILE en token
- * Arguments:
- * 	struct lex *lex -> struct du lexeur:
- * Retour:
- * 	int -> code de retour (0 = succès, 1 = erreur, -1 = continuer)
- * Verbose:
- * 	Suit la SCL pour créer les tokens
+/**
+ * @brief Transforme le FILE en token
+ * 
+ * @param struct lex *lex -> struct du lexeur:
+ * 
+ * @return int -> code de retour (0 = succès, 1 = erreur, -1 = continuer)
+ * 
+ * @note Suit la SCL pour créer les tokens
  */
 int lexer(struct lex *lex)
 {

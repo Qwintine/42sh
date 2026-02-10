@@ -2,12 +2,12 @@
 
 #include <stdlib.h>
 
-/* Description:
- * 	init struct lex
- * Arguments:
- * 	FILE *entry -> file to read
- * Return:
- * 	struct lex * -> inited struct
+/**
+ * @brief init struct lex
+ * 
+ * @param FILE *entry -> file to read
+ * 
+ * @return struct lex * -> inited struct
  */
 struct lex *init_lex(FILE *entry)
 {
@@ -21,12 +21,12 @@ struct lex *init_lex(FILE *entry)
     return lex;
 }
 
-/* Description:
- * 	Init struct token
- * Arguments:
- * 	enum type context -> type token
- * Return:
- * 	struct token * -> init struct
+/**
+ * @brief Init struct token
+ * 
+ * @param enum type context -> type token
+ * 
+ * @return struct token * -> init struct
  */
 struct token *init_token(enum type context)
 {
@@ -43,7 +43,7 @@ struct token *init_token(enum type context)
     return tok;
 }
 
-// Free lexer
+/** Free lexer*/
 void free_lex(struct lex *lex)
 {
     if (lex->current_token)
@@ -51,7 +51,7 @@ void free_lex(struct lex *lex)
     free(lex);
 }
 
-// Free token
+/** Free token*/
 void free_token(struct token *tok)
 {
     if (tok->value)

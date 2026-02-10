@@ -1,9 +1,9 @@
 #include "prettyprint.h"
 
-/* Description:
- * 	print ast if
- * Arguments:
- * 	struct ast *ast -> AST to print
+/**
+ * @brief print ast if
+ * 
+ * @param struct ast *ast -> AST to print
  */
 static void ast_print_if(struct ast *ast)
 {
@@ -23,10 +23,10 @@ static void ast_print_if(struct ast *ast)
     }
 }
 
-/* Description:
- * 	Print AST cmd
- * Arguments:
- * 	struct ast *ast -> AST to print
+/**
+ * @brief Print AST cmd
+ * 
+ * @return struct ast *ast -> AST to print
  */
 static void ast_print_cmd(struct ast *ast)
 {
@@ -45,10 +45,10 @@ static void ast_print_cmd(struct ast *ast)
     printf(";");
 }
 
-/* Description:
- * 	Print aST list
- * Arguments:
- * 	struct ast *ast -> AST to print
+/**
+ * @brief Print aST list
+ * 
+ * @param struct ast *ast -> AST to print
  */
 static void ast_print_list(struct ast *ast)
 {
@@ -61,10 +61,10 @@ static void ast_print_list(struct ast *ast)
     printf("\n");
 }
 
-/* Description:
- * 	Print ast pipe
- * Arguments:
- * 	struct ast *ast -> AST to print
+/**
+ * @brief Print ast pipe
+ * 
+ * @param struct ast *ast -> AST to print
  */
 static void ast_print_pipe(struct ast *ast)
 {
@@ -80,10 +80,10 @@ static void ast_print_pipe(struct ast *ast)
     }
 }
 
-/* Description:
- * 	main func to print
- * Arguments:
- * 	struct ast *ast -> AST to print
+/**
+ * @brief main func to print
+ * 
+ * @param struct ast *ast -> AST to print
  */
 void print_ast(struct ast *ast)
 {

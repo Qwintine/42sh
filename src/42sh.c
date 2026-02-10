@@ -7,14 +7,13 @@
 #include "parser/parser.h"
 #include "utils/prettyprint.h"
 
-/* Description:
- * 	Get file entry from args or stdin
- * Arguments:
- * 	int argc, char **argv -> binary's args
- * 	int *prettyprint -> prettyprint flag
- * 	struct dictionnary *vars -> dictionnary of vars
- * Return:
- *     int -> exit status
+/* *
+ * @brief Get file entry from args or stdin
+ *
+ * @param int argc, char **argv -> binary's args
+ * @param int *prettyprint -> prettyprint flag
+ * @param struct dictionnary *vars -> dictionnary of vars
+ * @return int -> exit status
  */
 int main(int argc, char **argv)
 {

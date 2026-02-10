@@ -3,12 +3,11 @@
 #include "../ast/ast_aux.h"
 #include "parser_aux.h"
 
-/*
- * Description:
- * 	Absorb a chain of and_or separeted by ';' or '\n'
- * Return:
- * 	*ast -> chained list of  parser_and_or result ast
- * Verbose:
+/**
+ * @brief Absorb a chain of and_or separeted by ';' or '\n'
+ *
+ * @return *ast -> chained list of  parser_and_or result ast
+ * @note
  * 	Grammar:
  * 		{'\n'} and_or { ( ';' | '\n' ) {'\n'} and_or } [';'] {'\n'} ;
  */
@@ -82,19 +81,18 @@ struct ast *parser_compound_list(struct lex *lex, struct dictionnary *dict)
     return (struct ast *)head;
 }
 
-/*
- * Description:
- * 	Parse list block into sub and_or block(s) separated by semi-colons
- * Arguments:
- * 	*lex -> struct of the lexer:
+/**
+ * @brief Parse list block into sub and_or block(s) separated by semi-colons
+ * 
+ * @param *lex -> struct of the lexer:
  * 		entry -> input stream
  * 		current_token -> last token returned by lexer
  * 		context -> context of the parser when retrieving a token
- * Return:
- * 	*ast:
+ *
+ * @return *ast:
  * 		NULL: Grammar/Syntax error
  * 		| *ast: ast of a list ( cf. Verbose )
- * Verbose:
+ * @note
  * 	Grammar:
  *		list = and_or { ';' and_or } [ ';' ]
  */

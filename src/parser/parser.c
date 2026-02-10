@@ -4,16 +4,16 @@
 #include "../ast/ast_aux.h"
 #include "parser_aux.h"
 
-/*
- * Description:
- * 	Parse the input of our shell into list
- * Arguments:
- * 	FILE *entry -> used to create struct lexer
- * Return:
- * 	struct ast * representing an Abstract Syntax Tree of our input / NULL on
+/**
+ * @brief Parse the input of our shell into list
+ * 
+ * @param FILE *entry -> used to create struct lexer
+ * 
+ * @return struct ast * representing an Abstract Syntax Tree of our input / NULL on
  * Error
  *
- * Verbose:
+ * 
+ * @note
  * 	Grammar:
  * 		list '\n'
  * 	      | list EOF

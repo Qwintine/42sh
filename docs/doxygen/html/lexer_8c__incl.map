@@ -1,0 +1,19 @@
+<map id="src/lexer/lexer.c" name="src/lexer/lexer.c">
+<area shape="rect" id="Node000001" title=" " alt="" coords="42,5,165,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="142,299,209,324"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="71,33,38,52,23,64,11,80,8,91,11,103,40,161,78,213,118,256,153,288,149,292,114,260,74,216,35,163,7,105,3,91,7,77,19,61,35,47,68,28"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="22,79,92,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="98,32,74,69,70,66,94,30"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="116,79,187,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="114,30,139,66,134,69,109,33"/>
+<area shape="rect" id="Node000005" href="$lexer__aux_8h.html" title=" " alt="" coords="211,79,308,104"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="130,28,223,70,221,75,128,33"/>
+<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="248,106,200,155,175,188,157,226,154,241,155,256,165,285,160,287,150,257,149,241,152,225,171,186,196,151,244,102"/>
+<area shape="rect" id="Node000006" href="$token_8h.html" title=" " alt="" coords="166,225,281,251"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="259,105,232,213,227,211,254,104"/>
+<area shape="rect" id="Node000007" href="$lexer_8h.html" title=" " alt="" coords="262,152,327,177"/>
+<area shape="poly" id="edge8_Node000005_Node000007" title=" " alt="" coords="268,103,285,138,280,141,263,106"/>
+<area shape="poly" id="edge7_Node000006_Node000002" title=" " alt="" coords="218,253,193,289,189,286,214,250"/>
+<area shape="poly" id="edge9_Node000007_Node000002" title=" " alt="" coords="300,177,305,212,303,233,295,252,281,269,263,283,223,301,221,297,260,279,277,266,291,249,298,231,300,212,295,178"/>
+<area shape="poly" id="edge10_Node000007_Node000006" title=" " alt="" coords="285,180,247,218,243,214,281,176"/>
+</map>

@@ -1,0 +1,10 @@
+<map id="handle_bracket" name="handle_bracket">
+<area shape="rect" id="Node000001" title="Crée un token de type OPENING_BRACKET ou CLOSING_BRACKET si possible." alt="" coords="5,31,127,56"/>
+<area shape="rect" id="Node000002" href="$lexer__handlers_8c.html#af0bc509a05ea8f1f639745c3db1edff0" title=" " alt="" coords="177,5,352,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="126,33,164,28,164,34,127,38"/>
+<area shape="rect" id="Node000004" href="$lexer__handlers_8c.html#ac6741237800ed58a7ea25d1b02c4ada3" title=" " alt="" coords="175,55,355,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="127,48,162,52,161,57,126,53"/>
+<area shape="rect" id="Node000003" href="$dot_8c.html#a36f9e0f75603ec6472a90c595e3bba79" title="Concat path and string with &#39;/&#39; between." alt="" coords="403,31,468,56"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="351,28,390,34,389,39,350,33"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="355,52,389,47,389,52,355,57"/>
+</map>

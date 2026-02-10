@@ -2,7 +2,7 @@
 
 #include <stddef.h>
 
-// hashing function for the dictionnary
+/** hashing function for the dictionnary*/
 int hash(char *str)
 {
     size_t res = 0;

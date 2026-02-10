@@ -6,7 +6,7 @@
 static int break_n = 0; // raciste ( je rigole hein )
 static int continue_n = 0; // raciste
 
-/* Helpers style object oriented programming */
+/** Helpers style object oriented programming */
 
 int get_break(void)
 {
@@ -43,12 +43,11 @@ static int is_nb(char *str)
     return 1;
 }
 
-/* Description:
- * 	Implements the break builtin
- * Arguments:
- * 	args -> arguments passed to the builtin
- * Return:
- * 	0 on success, 1 too many args, 128 invalid arg
+/**
+ * @brief Implements the break builtin
+ * 
+ * @param args -> arguments passed to the builtin
+ * @return 0 on success, 1 too many args, 128 invalid arg
  */
 int break_b(char **args)
 {
@@ -80,12 +79,11 @@ int break_b(char **args)
     return res;
 }
 
-/* Description:
- * 	Implements the continue builtin
- * Arguments:
- * 	args -> arguments passed to the builtin
- * Return:
- * 	0 on success, 1 too many args, 128 invalid arg
+/**
+ * @brief Implements the continue builtin
+ * 
+ * @param args -> arguments passed to the builtin
+ * @return 0 on success, 1 too many args, 128 invalid arg
  */
 int continue_b(char **args)
 {

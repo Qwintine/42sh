@@ -9,13 +9,12 @@
 #include "../lexer/lexer.h"
 #include "../parser/parser.h"
 
-/* Description:
- * 	Concat path and string with '/' between
- * Arguments:
- * 	char *path -> PATH
- * 	char *string ->string to concat
- * Return:
- * 	char * -> concat string
+/**
+ * @brief Concat path and string with '/' between
+ * 
+ * @param char *path -> PATH
+ * @param char *string ->string to concat 
+ * @return char * -> concat string
  */
 static char *concat(char *path, char *string)
 {
@@ -52,14 +51,14 @@ static char *concat(char *path, char *string)
     return res;
 }
 
-/* Description:
- * 	Main loop of dot builtin
- * Arguments:
- * 	FILE *entry -> file to read
- * 	struct dictionnary *vars -> dictionnary of vars
- * 	int *exit -> pointer to exit status
- * Return:
- * 	int -> Exit status of dot builtin
+/**
+ * @brief Main loop of dot builtin
+ * 
+ * @param FILE *entry -> file to read
+ * @param struct dictionnary *vars -> dictionnary of vars
+ * @param int *exit -> pointer to exit status
+ * 
+ * @return int -> Exit status of dot builtin
  */
 int main_loop(FILE *entry, struct dictionnary *vars, int *exit)
 {
@@ -100,14 +99,14 @@ int main_loop(FILE *entry, struct dictionnary *vars, int *exit)
     return res;
 }
 
-/* Description:
- * 	Execute the dot builtin cmd
- * Arguments:
- * 	char **words -> args passed to dot
- * 	struct dictionnary *vars -> dictionnary of vars
- * 	int *exit -> pointer to exit status
- * Return:
- * 	int -> Exit status of dot cmd
+/**
+ * @brief Execute the dot builtin cmd
+ *
+ * @param char **words -> args passed to dot
+ * @param struct dictionnary *vars -> dictionnary of vars
+ * @param int *exit -> pointer to exit status
+ *
+ * @return int -> Exit status of dot cmd
  */
 int dot_b(char **words, struct dictionnary *vars, int *exit)
 {

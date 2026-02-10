@@ -7,12 +7,12 @@
 #include <string.h>
 #include <unistd.h>
 
-/* Description:
- * 	Update PWD and OLDPWD vars after cd
- * Arguments:
- * 	struct dictionnary *vars -> dictionnary of vars
- * Return:
- * 	int -> 0 success, 1 failure
+/**
+ * @brief Update PWD and OLDPWD vars after cd
+ * 
+ * @param struct dictionnary *vars -> dictionnary of vars
+ *
+ * @return int -> 0 success, 1 failure
  */
 static int update_pwd(struct dictionnary *vars)
 {
@@ -64,21 +64,20 @@ static int update_pwd(struct dictionnary *vars)
     return 0;
 }
 
-// Structure to hold cd path result
+/** Structure to hold cd path result */
 struct cd_result
 {
     char *path;
     char **var;
 };
 
-/* Description:
- * 	Find the target path for cd command
- * Arguments:
- * 	char **args -> args passed to cd
- * 	struct dictionnary *vars -> dictionnary of vars
- * 	int *print_path -> flag indicate path should be printed
- * Return:
- * 	struct cd_result -> contains path + var to free
+/** 
+ * @brief Find the target path for cd command
+ * 
+ * @param char **args -> args passed to cd
+ * @param struct dictionnary *vars -> dictionnary of vars
+ * @param int *print_path -> flag indicate path should be printed
+ * @return struct cd_result -> contains path + var to free
  */
 static struct cd_result find_path(char **args, struct dictionnary *vars,
                                   int *print_path)
@@ -119,13 +118,13 @@ static struct cd_result find_path(char **args, struct dictionnary *vars,
     return result;
 }
 
-/* Description:
- * 	Execute the cd builtin cmd
- * Arguments:
- * 	char **args -> args passed to cd
- * 	struct dictionnary *vars -> dictionnary of vars
- * Return:
- * 	int -> Exit status of cd cmd
+/**
+ * @brief Execute the cd builtin cmd
+ * 
+ * @param char **args -> args passed to cd
+ * @param struct dictionnary *vars -> dictionnary of vars
+ * 
+ * @return int -> Exit status of cd cmd
  */
 int cd_b(char **args, struct dictionnary *vars)
 {

@@ -1,0 +1,14 @@
+<map id="sub_switch_op" name="sub_switch_op">
+<area shape="rect" id="Node000001" title="Gestion des opérateurs." alt="" coords="5,56,123,81"/>
+<area shape="rect" id="Node000002" href="$lexer__tokens_8c.html#ae59c383936dadf54742b836a5bd2a70b" title=" " alt="" coords="171,5,267,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="103,53,165,33,167,38,105,58"/>
+<area shape="rect" id="Node000003" href="$dot_8c.html#a36f9e0f75603ec6472a90c595e3bba79" title="Concat path and string with &#39;/&#39; between." alt="" coords="319,57,384,83"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="123,66,305,67,305,72,123,72"/>
+<area shape="rect" id="Node000004" href="$lexer__handlers_8c.html#a1320ab2067e73a5de0d576175ad3d363" title=" " alt="" coords="183,107,255,132"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="105,79,171,101,169,106,103,84"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="253,104,305,84,307,89,254,109"/>
+<area shape="rect" id="Node000005" href="$lexer__utils_8c.html#ad3b801c5fcc7cb2d760cb161bf5038a0" title=" " alt="" coords="315,107,388,132"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="255,117,301,117,301,122,255,122"/>
+<area shape="rect" id="Node000006" href="$lexer__utils_8c.html#a8fa30988b9ccc705850dfee0220bf34a" title=" " alt="" coords="436,107,511,132"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="388,117,422,117,422,122,388,122"/>
+</map>

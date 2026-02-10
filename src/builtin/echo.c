@@ -5,15 +5,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* Description:
- *  	insert 2 character
- * Arguments:
- *  	ind: l'indice du char a changer
- *  	str: string
- * Retour:
- *  	le string modifier
- * Verbose:
- *  	".....\n......." => ".....\\n......."
+/**
+ * @brief insert 2 character
+ *
+ *  @param ind: l'indice du char a changer
+ *  @param str: string
+ *
+ *  @return le string modifié
+ *
+ *  @note ".....\n......." => ".....\\n......."
  */
 static char *insert_in(size_t ind, char *str)
 {
@@ -45,15 +45,14 @@ static char *insert_in(size_t ind, char *str)
     return res;
 }
 
-/*
- * Description:
- *   Parse -n, -e, and -E options
- * Arguments:
- *   string: option string to parse
- *   an: pointer to int for -n option
- *   ae: pointer to int for -e and -E options
- * Return:
- *   0 success, 1 invalid option
+/**
+ * @brief Parse -n, -e, and -E options
+ *
+ *  @param string: option string to parse
+ *  @param an: pointer to int for -n option
+ *  @param ae: pointer to int for -e and -E options
+ * 
+ *  @return  0 success, 1 invalid option
  */
 static int args_echo(char *string, int *an, int *ae)
 {
@@ -83,14 +82,14 @@ static int args_echo(char *string, int *an, int *ae)
     return 0;
 }
 
-/* Description:
- *  	print les strings sur le terminal
- * Arguments:
- *  	strings: les elements a print
- * Retour:
- *  	0 si succes, 1 sinon
- * Verbose:
- *  	parse les option -neE si presente en premiere position
+/**
+ * @brief print les strings sur le terminal
+ *
+ * @param strings: les elements a print
+ *
+ * @return 0 si succes, 1 sinon
+ *  
+ * @note parse les option -neE si presente en premiere position
  */
 int echo_b(char **strings)
 {

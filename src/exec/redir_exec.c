@@ -5,13 +5,13 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-/* Description:
- * 	Read io num from string
- * Arguments:
- * 	char *string -> string to read
- * 	int defaul -> default value
- * Return:
- *     int -> io num, defaul if invalid
+/**
+ * @brief Read io num from string
+ *
+ * @param char *string -> string to read
+ * @param int defaul -> default value
+ *
+ * @return int -> io num, defaul if invalid
  */
 static int read_io(char *string, int defaul)
 {
@@ -31,13 +31,13 @@ static int read_io(char *string, int defaul)
     return res;
 }
 
-/* Description:
- * 	Save fd state
- * Arguments:
- * 	struct redir_saved *redir_saved -> struct to save fds
- * 	int fd -> fd to save
- * Return:
- * 	int -> 0 success, 1 failure
+/**
+ * @brief Save fd state
+ *
+ * @param struct redir_saved *redir_saved -> struct to save fds
+ * @param int fd -> fd to save
+ *
+ * @return int -> 0 success, 1 failure
  */
 static int fd_save(struct redir_saved *redir_saved, int fd)
 {
@@ -65,13 +65,13 @@ static int fd_save(struct redir_saved *redir_saved, int fd)
     return 0;
 }
 
-/* Description:
- * 	Open file for redir
- * Arguments:
- * 	enum type type -> redir type
- * 	char *target -> targ file
- * Return:
- * 	int -> fd, -1 failure
+/**
+ * @brief Open file for redir
+ *
+ * @param enum type type -> redir type
+ * @param char *target -> targ file
+ * 
+ * @return int -> fd, -1 failure
  */
 static int open_redir_file(enum type type, char *target)
 {
@@ -86,13 +86,13 @@ static int open_redir_file(enum type type, char *target)
     return -1;
 }
 
-/* Description:
- * 	Handle dup redir
- * Arguments:
- * 	struct redir *redirect -> redir struct
- * 	int target -> target fd
- * Return:
- * 	int ->0 success, 1 failure
+/**
+ * @brief Handle dup redir
+ *
+ * @param struct redir *redirect -> redir struct
+ * @param int target -> target fd
+ *
+ * @return int ->0 success, 1 failure
  */
 static int handle_dup_redir(struct redir *redirect, int target)
 {
@@ -104,13 +104,13 @@ static int handle_dup_redir(struct redir *redirect, int target)
     return 0;
 }
 
-/* Description:
- * 	Apply redirs
- * Arguments:
- * 	struct redir **redirs -> redir to apply
- * 	struct redir_saved *redir_saved -> struct save fd
- * Return:
- * 	int -> 0 success, 1 failure
+/**
+ * @brief Apply redirs
+ *
+ * @param struct redir **redirs -> redir to apply
+ * @param struct redir_saved *redir_saved -> struct save fd
+ *
+ * @return int -> 0 success, 1 failure
  */
 int redir_apply(struct redir **redirs, struct redir_saved *redir_saved)
 {
@@ -152,10 +152,10 @@ int redir_apply(struct redir **redirs, struct redir_saved *redir_saved)
     return 0;
 }
 
-/* Description:
- * 	Restore saved fds
- * Arguments:
- * 	struct redir_saved *redir_saved -> struct with saved fds
+/**
+ * @brief Restore saved fds
+ *
+ * @param struct redir_saved *redir_saved -> struct with saved fds
  */
 void restore_redirs(struct redir_saved *redir_saved)
 {

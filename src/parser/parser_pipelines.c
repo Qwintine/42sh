@@ -3,12 +3,11 @@
 #include "../ast/ast_aux.h"
 #include "parser_aux.h"
 
-/*
- * Description:
- * 	Parse and_or blocks separated by '|' (pipes)
- * Return:
- * 	*ast -> ast containing pipeline blocks
- * Verbose:
+/**
+ * @brief Parse and_or blocks separated by '|' (pipes)
+ * 
+ * @return *ast -> ast containing pipeline blocks
+ * @note
  * 	Grammar:
  * 		pipeline = [ '!' ] command { '|' {'\n'} command } ;
  */
@@ -66,12 +65,11 @@ struct ast *parser_pipeline(struct lex *lex, struct dictionnary *dict)
     return (struct ast *)ast_pipe;
 }
 
-/*
- * Description:
- * 	Parse and_or blocks separated by '&&' or '||'
- * Return:
- * 	*ast -> ast containing and_or blocks
- * Verbose:
+/**
+ * @brief Parse and_or blocks separated by '&&' or '||'
+ * 
+ * @return *ast -> ast containing and_or blocks
+ * @note
  * 	Grammar:
  * 		and_or = pipeline { ( '&&' | '||' ) {'\n'} pipeline } ;
  */

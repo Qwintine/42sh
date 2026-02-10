@@ -1,0 +1,9 @@
+<map id="add_var_arg" name="add_var_arg">
+<area shape="rect" id="Node000001" title="Add a variable with multiple arguments to the dictionnary." alt="" coords="5,55,108,80"/>
+<area shape="rect" id="Node000002" href="$hashmap_8c.html#ae5069e0cc454eb644b895a3d32f3802b" title=" " alt="" coords="156,5,273,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="97,52,159,32,161,37,99,57"/>
+<area shape="rect" id="Node000003" href="$hashmap_8c.html#a9c916e726c920c9129bbd014333bd932" title=" " alt="" coords="177,55,253,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="108,65,163,65,163,70,108,70"/>
+<area shape="rect" id="Node000004" href="$hash_8c.html#ac74a7e29e54c223be6213463974d6154" title=" " alt="" coords="188,104,241,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="99,77,175,102,174,107,97,83"/>
+</map>

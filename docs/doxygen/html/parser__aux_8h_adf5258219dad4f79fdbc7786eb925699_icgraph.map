@@ -1,0 +1,86 @@
+<map id="parser_else_clause" name="parser_else_clause">
+<area shape="rect" id="Node000001" title="Define which parser to use depending on the context." alt="" coords="2751,37,2897,63"/>
+<area shape="rect" id="Node000002" href="$parser__rules_8c.html#a799f84e24df3eff653f7c0696e348572" title="Parse an elif block when called." alt="" coords="1305,5,1395,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="2737,50,2606,39,2459,33,1751,33,1552,32,1396,28,1396,23,1552,27,1751,27,2459,27,2606,34,2738,45"/>
+<area shape="rect" id="Node000003" href="$parser__rules_8c.html#abf9e27d14e7a1c314285114bead78817" title="Handle a &#39;if&#39; block by calling corresponding parser at each step." alt="" coords="2592,119,2703,144"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="2784,71,2677,121,2675,116,2782,66"/>
+<area shape="poly" id="edge2_Node000002_Node000001" title=" " alt="" coords="1409,7,1564,4,1751,3,2459,3,2551,6,2642,14,2785,35,2785,40,2642,19,2551,12,2459,9,1751,9,1564,9,1409,13"/>
+<area shape="rect" id="Node000004" href="$parser__commands_8c.html#ad98fbb958a265134e775b69579e28835" title="Handle a shell command block by calling corresponding parser at each step." alt="" coords="2371,271,2544,296"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="2621,155,2476,272,2473,268,2618,151"/>
+<area shape="rect" id="Node000005" href="$parser__commands_8c.html#aa7191f56bd8e70874c5c381e52186807" title="Parse a command which can be either a simple command or a shell command." alt="" coords="2028,283,2163,308"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="2389,301,2323,311,2267,314,2210,311,2163,307,2163,302,2211,306,2267,309,2322,306,2388,296"/>
+<area shape="rect" id="Node000032" href="$parser__commands_8c.html#a14408e6904da17fc6899bba03f7a5f5a" title="Handle a function definition and add it to the dictionnary." alt="" coords="2211,271,2323,296"/>
+<area shape="poly" id="edge51_Node000004_Node000032" title=" " alt="" coords="2357,286,2323,286,2323,281,2357,281"/>
+<area shape="rect" id="Node000006" href="$parser__pipelines_8c.html#a06068cdf8924fb28f414f419d84a5eae" title="Parse and_or blocks separated by &#39;|&#39; (pipes)" alt="" coords="1857,283,1980,308"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="2014,298,1980,298,1980,293,2014,293"/>
+<area shape="rect" id="Node000007" href="$parser__pipelines_8c.html#a85ca4872d7efdb8b0cd643037ccd5763" title="Parse and_or blocks separated by &#39;&amp;&amp;&#39; or &#39;||&#39;." alt="" coords="1695,283,1809,308"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="1843,298,1810,298,1810,293,1843,293"/>
+<area shape="rect" id="Node000008" href="$parser__lists_8c.html#aae7a5d6760b83c1a37b0369f82a20500" title="Absorb a chain of and_or separeted by &#39;;&#39; or &#39; &#39;." alt="" coords="1481,169,1647,195"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="1717,278,1585,197,1588,193,1720,273"/>
+<area shape="rect" id="Node000013" href="$parser__lists_8c.html#a7b9812922acfb4eba24e65d40bd99001" title="Parse list block into sub and_or block(s) separated by semi&#45;colons." alt="" coords="1519,296,1609,321"/>
+<area shape="poly" id="edge20_Node000007_Node000013" title=" " alt="" coords="1681,303,1610,308,1609,303,1681,298"/>
+<area shape="poly" id="edge10_Node000008_Node000001" title=" " alt="" coords="1602,161,1661,136,1739,109,1827,87,1872,80,1917,78,2459,78,2615,71,2750,57,2751,62,2615,76,2459,83,1917,83,1873,86,1828,92,1740,114,1663,141,1604,166"/>
+<area shape="poly" id="edge9_Node000008_Node000002" title=" " alt="" coords="1534,163,1366,33,1369,29,1537,159"/>
+<area shape="poly" id="edge15_Node000008_Node000003" title=" " alt="" coords="1632,164,1764,141,1841,132,1917,129,2268,129,2592,129,2592,134,2268,134,1917,134,1841,137,1765,146,1633,169"/>
+<area shape="rect" id="Node000009" href="$parser__rules_8c.html#afb9701776de31af668314b48a0b54636" title="Handle a command block enclosed in brackets." alt="" coords="1267,169,1433,209"/>
+<area shape="poly" id="edge11_Node000008_Node000009" title=" " alt="" coords="1467,188,1434,189,1433,183,1467,182"/>
+<area shape="rect" id="Node000010" href="$parser__rules_8c.html#a55dc38591d3749d39ca3f38f8a2a26dd" title="Handle a for block by calling corresponding parser at each step." alt="" coords="1290,233,1410,259"/>
+<area shape="poly" id="edge13_Node000008_Node000010" title=" " alt="" coords="1508,201,1394,236,1393,231,1507,196"/>
+<area shape="rect" id="Node000011" href="$parser__rules_8c.html#abf1c3edda1bb73d8c86028687922ce95" title="Handle a &#39;until&#39; block by calling corresponding parser at each step." alt="" coords="1285,119,1415,144"/>
+<area shape="poly" id="edge16_Node000008_Node000011" title=" " alt="" coords="1495,169,1404,147,1405,141,1497,163"/>
+<area shape="rect" id="Node000012" href="$parser__rules_8c.html#aa6719ad356821f03ad45b1ac0a57d3bd" title="Handle a &#39;while&#39; block by calling corresponding parser at each step." alt="" coords="1281,283,1419,308"/>
+<area shape="poly" id="edge18_Node000008_Node000012" title=" " alt="" coords="1539,205,1492,240,1434,274,1405,285,1403,280,1432,269,1489,236,1536,201"/>
+<area shape="poly" id="edge12_Node000009_Node000004" title=" " alt="" coords="1448,203,1590,221,1671,227,1751,230,2097,230,2180,234,2263,243,2401,268,2400,273,2262,249,2180,239,2097,235,1751,235,1671,233,1590,226,1447,208"/>
+<area shape="poly" id="edge14_Node000010_Node000004" title=" " alt="" coords="1423,262,1435,269,1451,285,1459,302,1467,318,1483,332,1551,366,1610,381,1672,383,1751,382,2097,382,2145,379,2194,372,2289,348,2370,319,2429,294,2431,299,2372,324,2290,353,2195,377,2146,385,2097,387,1751,387,1672,388,1609,386,1549,371,1480,336,1463,321,1455,305,1447,289,1432,273,1420,266"/>
+<area shape="poly" id="edge17_Node000011_Node000004" title=" " alt="" coords="1430,136,1917,179,2097,179,2146,182,2195,189,2290,213,2372,243,2431,268,2429,273,2370,248,2289,219,2194,195,2145,187,2097,185,1917,185,1429,141"/>
+<area shape="poly" id="edge19_Node000012_Node000004" title=" " alt="" coords="1425,312,1435,319,1452,340,1459,362,1466,383,1483,401,1518,421,1550,434,1579,440,1609,441,1672,437,1751,433,2097,433,2213,433,2262,424,2321,401,2361,377,2396,348,2444,294,2448,298,2399,352,2364,381,2324,406,2264,429,2213,438,2097,438,1751,438,1672,442,1609,447,1579,445,1548,439,1516,426,1480,405,1461,386,1454,364,1448,343,1432,323,1422,316"/>
+<area shape="rect" id="Node000014" href="$parser_8c.html#a620dffcc9a167cdee6e67de1191e5277" title="Parse the input of our shell into list." alt="" coords="1319,332,1381,357"/>
+<area shape="poly" id="edge21_Node000013_Node000014" title=" " alt="" coords="1505,321,1382,342,1381,337,1504,316"/>
+<area shape="rect" id="Node000015" href="$42sh_8c.html#a3c04138a5bfe5d72780bb7e82a18e627" title=" " alt="" coords="204,149,259,175"/>
+<area shape="poly" id="edge22_Node000014_Node000015" title=" " alt="" coords="1305,338,1191,320,1122,313,1052,310,522,310,485,307,454,297,430,284,408,266,363,227,336,208,303,190,258,173,260,168,305,185,339,203,367,223,411,262,432,279,457,293,486,301,522,305,1052,305,1122,308,1191,315,1306,333"/>
+<area shape="rect" id="Node000016" href="$dot_8c.html#a17477ee2b0f1b8b9306566c990d15b35" title="Main loop of dot builtin." alt="" coords="1128,357,1219,383"/>
+<area shape="poly" id="edge23_Node000014_Node000016" title=" " alt="" coords="1305,354,1219,366,1219,361,1305,348"/>
+<area shape="rect" id="Node000017" href="$dot_8c.html#a713938d3c6ee343132c429642048bcf6" title="Execute the dot builtin cmd." alt="" coords="1021,408,1080,433"/>
+<area shape="poly" id="edge24_Node000016_Node000017" title=" " alt="" coords="1130,391,1081,411,1079,406,1128,386"/>
+<area shape="rect" id="Node000018" href="$exec_8c.html#abaeb177587c7eec6a064b35bb8399cae" title="Execute builtin cmd with given args." alt="" coords="873,408,973,433"/>
+<area shape="poly" id="edge25_Node000017_Node000018" title=" " alt="" coords="1007,423,973,423,973,418,1007,418"/>
+<area shape="rect" id="Node000019" href="$exec_8c.html#a287d81b4658832f192750310e2925917" title="Execute the builtin command with given args." alt="" coords="759,408,825,433"/>
+<area shape="poly" id="edge26_Node000018_Node000019" title=" " alt="" coords="859,423,825,423,825,418,859,418"/>
+<area shape="rect" id="Node000020" href="$exec_8c.html#ae65edaa99b26b49d60c451157d38b34a" title="Execute les commandes avec les args donnes." alt="" coords="624,408,711,433"/>
+<area shape="poly" id="edge27_Node000019_Node000020" title=" " alt="" coords="745,423,711,423,711,418,745,418"/>
+<area shape="rect" id="Node000021" href="$ast__run_8c.html#aeb6878a59c6907e5669fc3cc428913d9" title=" " alt="" coords="471,408,576,433"/>
+<area shape="poly" id="edge28_Node000020_Node000021" title=" " alt="" coords="611,423,576,423,576,418,611,418"/>
+<area shape="rect" id="Node000022" href="$ast_8c.html#a572345b2707780bbbc5bbaacdca9c372" title=" " alt="" coords="352,371,423,396"/>
+<area shape="poly" id="edge29_Node000021_Node000022" title=" " alt="" coords="463,407,422,396,424,390,464,402"/>
+<area shape="poly" id="edge49_Node000022_Node000015" title=" " alt="" coords="368,360,350,327,337,286,332,252,325,221,316,206,302,189,281,176,258,168,260,163,284,171,306,185,320,203,329,219,338,251,342,285,354,325,372,358"/>
+<area shape="poly" id="edge50_Node000022_Node000016" title=" " alt="" coords="436,377,541,371,666,367,925,367,1128,367,1128,373,925,373,666,373,542,376,436,382"/>
+<area shape="rect" id="Node000023" href="$ast__run_8c.html#a8a01fec616135007fc5b3968a101901b" title=" " alt="" coords="171,545,292,571"/>
+<area shape="poly" id="edge30_Node000022_Node000023" title=" " alt="" coords="382,410,355,474,333,509,306,540,294,549,291,545,302,536,329,506,350,472,377,408"/>
+<area shape="rect" id="Node000024" href="$ast__run_8c.html#a9d83d4834a61ffe21eb77838d70ae173" title=" " alt="" coords="184,595,279,620"/>
+<area shape="poly" id="edge32_Node000022_Node000024" title=" " alt="" coords="386,410,379,451,364,501,340,553,325,576,306,597,280,612,278,608,302,593,320,573,336,550,359,500,373,450,381,409"/>
+<area shape="rect" id="Node000025" href="$ast__run_8c.html#a0a7138b1f2608ea36211c9b78988c248" title=" " alt="" coords="188,199,275,224"/>
+<area shape="poly" id="edge34_Node000022_Node000025" title=" " alt="" coords="362,360,350,339,337,313,330,291,321,271,302,251,278,236,252,227,254,222,280,231,306,247,325,268,335,289,342,311,354,337,367,358"/>
+<area shape="rect" id="Node000026" href="$ast__run_8c.html#ae25cd3ced8abafd76110dba8852a6b87" title=" " alt="" coords="183,272,280,297"/>
+<area shape="poly" id="edge36_Node000022_Node000026" title=" " alt="" coords="353,363,303,324,247,300,249,295,305,320,356,359"/>
+<area shape="rect" id="Node000027" href="$ast__run_8c.html#a536f37ba9bffcd2099fef668656181e0" title=" " alt="" coords="179,321,284,347"/>
+<area shape="poly" id="edge39_Node000022_Node000027" title=" " alt="" coords="338,379,252,349,253,344,340,374"/>
+<area shape="rect" id="Node000028" href="$ast__run_8c.html#aa3e6a973e744d748ee415840596beb53" title=" " alt="" coords="159,371,304,396"/>
+<area shape="poly" id="edge41_Node000022_Node000028" title=" " alt="" coords="338,394,304,395,304,390,338,389"/>
+<area shape="rect" id="Node000029" href="$exec_8c.html#a23babf893bbcd2f6126698a1a19b169f" title="Execute funct with given arguments." alt="" coords="188,644,275,669"/>
+<area shape="poly" id="edge43_Node000022_Node000029" title=" " alt="" coords="383,410,352,531,330,593,318,618,306,635,292,645,276,652,274,647,289,640,302,631,314,615,325,591,347,530,378,409"/>
+<area shape="rect" id="Node000030" href="$exec_8c.html#ab743cb88e12e9b922050925fd2075e36" title="Execute a pipeline of commands." alt="" coords="188,444,275,469"/>
+<area shape="poly" id="edge45_Node000022_Node000030" title=" " alt="" coords="348,404,261,446,258,441,346,400"/>
+<area shape="poly" id="edge31_Node000023_Node000022" title=" " alt="" coords="259,537,281,526,302,512,328,483,349,451,376,395,381,397,354,453,332,486,306,516,284,531,261,542"/>
+<area shape="poly" id="edge33_Node000024_Node000022" title=" " alt="" coords="268,588,286,580,302,569,320,549,336,526,359,477,373,430,381,396,386,397,379,432,364,479,340,529,325,552,306,573,289,585,270,593"/>
+<area shape="poly" id="edge35_Node000025_Node000022" title=" " alt="" coords="289,212,306,223,325,244,335,265,342,287,354,313,385,369,380,372,350,315,337,289,330,267,321,247,302,227,286,216"/>
+<area shape="poly" id="edge38_Node000026_Node000022" title=" " alt="" coords="294,290,305,296,352,332,382,369,378,372,348,336,303,300,292,294"/>
+<area shape="poly" id="edge37_Node000026_Node000026" title=" " alt="" coords="258,261,250,254,231,251,215,253,207,257,205,263,210,271,205,273,200,264,203,254,214,248,231,245,253,249,262,257"/>
+<area shape="poly" id="edge40_Node000027_Node000022" title=" " alt="" coords="298,343,367,368,365,373,297,348"/>
+<area shape="poly" id="edge42_Node000028_Node000022" title=" " alt="" coords="318,372,352,373,352,378,318,377"/>
+<area shape="poly" id="edge44_Node000029_Node000020" title=" " alt="" coords="287,637,303,630,407,578,507,520,646,431,649,436,509,525,410,582,305,635,289,642"/>
+<area shape="poly" id="edge48_Node000030_Node000030" title=" " alt="" coords="258,433,250,426,231,423,215,425,207,429,205,435,210,443,205,445,200,436,203,426,214,420,231,417,253,421,262,429"/>
+<area shape="rect" id="Node000031" href="$ast__run_8c.html#a24d0223822f7b635628199085c3283be" title=" " alt="" coords="5,469,111,495"/>
+<area shape="poly" id="edge46_Node000030_Node000031" title=" " alt="" coords="175,468,111,477,110,472,174,462"/>
+<area shape="poly" id="edge47_Node000031_Node000022" title=" " alt="" coords="124,494,166,499,212,500,259,494,303,480,329,462,350,439,378,395,382,397,354,442,332,466,305,484,260,499,212,505,166,504,124,499"/>
+<area shape="poly" id="edge52_Node000032_Node000005" title=" " alt="" coords="2197,291,2163,293,2163,288,2197,286"/>
+</map>

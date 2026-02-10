@@ -4,7 +4,7 @@
 
 #include "lexer_aux.h"
 
-// gère le comportement des commentaires
+/** gère le comportement des commentaires*/
 int handle_com(int in_quotes, struct lex *lex, struct token *tok, char *buf)
 {
     if (!in_quotes)
@@ -31,7 +31,7 @@ int handle_com(int in_quotes, struct lex *lex, struct token *tok, char *buf)
     return 0;
 }
 
-// gère les différents comportements de backslash
+/** gère les différents comportements de backslash*/
 int handle_backslash(char **value, FILE *entry)
 {
     char buf[1];
@@ -66,7 +66,7 @@ int handle_backslash(char **value, FILE *entry)
     return 0;
 }
 
-// active/désactive les quotes et ajoute le char à la valeur
+/** active/désactive les quotes et ajoute le char à la valeur*/
 int handle_quote(int *quote, int other_quote, struct token *tok, char val)
 {
     tok->value = concat(tok->value, val);
@@ -137,7 +137,7 @@ int handle_blank(struct token *tok, char c, int quote)
     return 0;
 }
 
-// gère le comportement des délimiteurs
+/** gère le comportement des délimiteurs*/
 int handle_delimiter(struct token *tok, char c,
                      struct quote_status *quote_status, FILE *entry)
 {
@@ -149,15 +149,15 @@ int handle_delimiter(struct token *tok, char c,
     return handle_blank(tok, c, quote);
 }
 
-/* Description:
- *  crée un token IO_NUMBER si possible sinon ajoute le char à la valeur
- * Arguments:
- *  struct token *tok -> token en cours de création
- *  int quote -> status des quotes en cours
- *  FILE *entry -> le FILE d'entrée
- *  char val -> char actuel
- * Retour:
- *  int -> code de retour (0 = succès, 1 = erreur, -1 = continuer)
+/**
+ * @bief Crée un token IO_NUMBER si possible sinon ajoute le char à la valeur
+ * 
+ * @param struct token *tok -> token en cours de création
+ * @param int quote -> status des quotes en cours
+ * @param FILE *entry -> le FILE d'entrée
+ * @param char val -> char actuel
+ * 
+ * @return int -> code de retour (0 = succès, 1 = erreur, -1 = continuer)
  */
 int new_op(struct token *tok, int quote, FILE *entry, char val)
 {
@@ -274,15 +274,15 @@ static int handle_closing_bracket(struct lex *lex, struct token *tok,
     return -1;
 }
 
-/* Description:
- *  crée un token de type OPENING_BRACKET ou CLOSING_BRACKET si possible
- * Arguments:
- *  struct lex *lex -> struct du lexeur
- *  struct token *tok -> token en cours de création
- *  struct quote_status *quote_status -> status des quotes en cours
- *  char val -> char actuel
- * Retour:
- *  int -> code de retour (0 = succès, 1 = erreur, -1 = continuer)
+/**
+ * @brief Crée un token de type OPENING_BRACKET ou CLOSING_BRACKET si possible
+ * 
+ * @param struct lex *lex -> struct du lexeur
+ * @param struct token *tok -> token en cours de création
+ * @param struct quote_status *quote_status -> status des quotes en cours
+ * @param char val -> char actuel
+ * 
+ * @return int -> code de retour (0 = succès, 1 = erreur, -1 = continuer)
  */
 int handle_bracket(struct lex *lex, struct token *tok,
                    struct quote_status *quote_status, char val)
@@ -292,15 +292,15 @@ int handle_bracket(struct lex *lex, struct token *tok,
     return handle_closing_bracket(lex, tok, quote_status);
 }
 
-/* Description:
- *  crée un token de type FUNCTION si possible
- * Arguments:
- *  struct lex *lex -> struct du lexeur
- *  struct token *tok -> token en cours de création
- *  struct quote_status *quote_status -> status des quotes en cours
- *  char val -> char actuel
- * Retour:
- *  int -> code de retour (0 = succès, 1 = erreur, -1 = continuer)
+/**
+ * @brief Crée un token de type FUNCTION si possible
+ * 
+ * @param struct lex *lex -> struct du lexeur
+ * @param struct token *tok -> token en cours de création
+ * @param struct quote_status *quote_status -> status des quotes en cours
+ * @param char val -> char actuel
+ * 
+ * @return int -> code de retour (0 = succès, 1 = erreur, -1 = continuer)
  */
 int handle_parenthesis(struct lex *lex, struct token *tok,
                        struct quote_status *quote_status, char val)

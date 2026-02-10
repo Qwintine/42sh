@@ -1,11 +1,11 @@
 #include "itoa.h"
 
-/* Description:
- * 	Convert int to string
- * Arguments:
- * 	int num ->num to convert
- * Return:
- * 	char * -> num in string
+/**
+ * @brief Convert int to string
+ * 
+ * @param int num ->num to convert
+ * 
+ * @return char * -> num in string
  */
 char *itoa(int num)
 {

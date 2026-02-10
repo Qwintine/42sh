@@ -1,0 +1,17 @@
+<map id="src/lexer/lexer_tokens.c" name="src/lexer/lexer_tokens.c">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,180,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="101,299,167,324"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="81,33,62,53,47,80,45,91,47,103,62,156,82,207,122,285,118,288,77,209,57,158,42,105,40,91,42,78,58,50,77,29"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="57,79,128,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="95,31,95,65,90,65,90,31"/>
+<area shape="rect" id="Node000004" href="$lexer__aux_8h.html" title=" " alt="" coords="152,79,249,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="111,28,173,69,170,73,109,33"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="192,106,151,155,131,189,115,226,113,241,114,257,124,285,119,287,109,258,108,241,110,225,126,187,147,152,187,103"/>
+<area shape="rect" id="Node000005" href="$token_8h.html" title=" " alt="" coords="125,225,239,251"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="202,105,188,212,183,211,196,104"/>
+<area shape="rect" id="Node000006" href="$lexer_8h.html" title=" " alt="" coords="220,152,285,177"/>
+<area shape="poly" id="edge7_Node000004_Node000006" title=" " alt="" coords="211,103,238,139,234,142,207,106"/>
+<area shape="poly" id="edge6_Node000005_Node000002" title=" " alt="" coords="176,253,152,289,147,286,172,250"/>
+<area shape="poly" id="edge8_Node000006_Node000002" title=" " alt="" coords="259,177,263,212,261,233,254,252,239,269,221,283,182,301,180,297,218,279,235,266,249,249,256,231,258,212,253,178"/>
+<area shape="poly" id="edge9_Node000006_Node000005" title=" " alt="" coords="243,180,205,218,201,214,239,176"/>
+</map>

@@ -5,12 +5,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/* Description:
- * 	Check if str valid number
- * Arguments:
- * 	char *str -> string to check
- * Return:
- * 	int -> 1 valid number, 0 otherwise
+/**
+ * @brief Check if str valid number
+ *
+ * @param char *str -> string to check
+ * 
+ * @return int -> 1 valid number, 0 otherwise
  */
 int is_valid_nb(char *str)
 {
@@ -27,13 +27,13 @@ int is_valid_nb(char *str)
     return 1;
 }
 
-/* Description:
- * 	Execute exit builtin cmd
- * Arguments:
- * 	char **codes -> args passed to exit
- * 	int *exit -> pointer to exit status
- * Return:
- * 	int -> Exit status of exit cmd
+/**
+ * @brief Execute exit builtin cmd
+ *
+ * @param char **codes -> args passed to exit
+ * @pram int *exit -> pointer to exit status
+ *
+ * @return int -> Exit status of exit cmd
  */
 int exit_b(char **codes, int *exit)
 {

@@ -3,12 +3,12 @@
 
 #include <ctype.h>
 
-/* Description:
- * 	Check if valid var name
- * Arguments:
- * 	char *name -> variable name
- * Return:
- * 	int -> 1 if valid, 0 otherwise
+/**
+ * @brief Check if valid var name
+ *
+ * @param char *name -> variable name
+ *
+ * @return int -> 1 if valid, 0 otherwise
  */
 static int is_valid_name(char *name)
 {
@@ -22,13 +22,13 @@ static int is_valid_name(char *name)
     return 1;
 }
 
-/* Description:
- * 	Execute export builtin cmd
- * Arguments:
- * 	char **args -> args passed to export
- * 	struct dictionnary *dict -> dictionnary of vars
- * Return:
- * 	int -> Exit status of export cmd
+/**
+ * @brief Execute export builtin cmd
+ *
+ * @param char **args -> args passed to export
+ * @param struct dictionnary *dict -> dictionnary of vars
+ *
+ * @return int -> Exit status of export cmd
  */
 int export_b(char **args, struct dictionnary *dict)
 {

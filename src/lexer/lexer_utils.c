@@ -6,14 +6,13 @@
 
 #include "lexer_aux.h"
 
-/*
- * Description:
- *	Helper; Concat char to token value
- * Arguments:
- *	char *val -> current token value
+/**
+ * @brief Helper; Concat char to token value
+ *
+ * @param char *val -> current token value
  *	char c -> char to concat
- * Return:
- *	New token value
+ * 
+ * @return New token value
  */
 char *concat(char *val, char c)
 {
@@ -26,7 +25,7 @@ char *concat(char *val, char c)
     return new_val;
 }
 
-// Vérifie si str est composée uniquement de chiffres
+/**  Vérifie si str est composée uniquement de chiffres*/
 int all_digit(char *str)
 {
     for (size_t i = 0; i < strlen(str); i++)
@@ -37,7 +36,7 @@ int all_digit(char *str)
     return 1;
 }
 
-// Vérifie si il s'agit d'un io valide
+/** Vérifie si il s'agit d'un io valide*/
 int valid_io(char *str)
 {
     if (!all_digit(str))

@@ -1,12 +1,11 @@
 #include "parser_aux.h"
 
-/*
- * Description:
- * 	Peek on the lexer to see the current token
- * Arguments:
- * 	lex -> struct lexer being used
- * Return:
- * 	Current_token if success, NULL otherwise
+/**
+ * @brief Peek on the lexer to see the current token
+ * 
+ * @param lex -> struct lexer being used
+ * 
+ * @return Current_token if success, NULL otherwise
  */
 struct token *peek(struct lex *lex)
 {
@@ -28,13 +27,12 @@ struct token *peek(struct lex *lex)
     return NULL;
 }
 
-/*
- * Description:
- * 	Pop the current token from lex
- * Arguments:
- * 	lex -> struct lexer being used
- * Return:
- * 	Copy of current_token if success, NULL otherwise
+/**
+ * @brief Pop the current token from lex
+ * 
+ * @param lex -> struct lexer being used
+ * 
+ * @return Copy of current_token if success, NULL otherwise
  */
 struct token *pop(struct lex *lex)
 {
@@ -52,13 +50,12 @@ struct token *pop(struct lex *lex)
     return NULL;
 }
 
-/*
- * Description:
- * 		Free a discarded token
- * Arguments:
- * 		Token to free
- * Return:
- * 		1 Succes / 0 Error
+/**
+ * @brief Free a discarded token
+ *
+ * @param Token to free
+ * 
+ * @return 1 Succes / 0 Error
  */
 int discard_token(struct token *tok)
 {
@@ -70,7 +67,7 @@ int discard_token(struct token *tok)
     return 1;
 }
 
-/* Helper pour savoir si token de type Redir */
+/**Helper pour savoir si token de type Redir */
 int is_redir(enum type type)
 {
     return type == REDIR_OUT || type == REDIR_IN || type == REDIR_APPEND

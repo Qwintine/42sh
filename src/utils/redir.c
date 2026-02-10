@@ -2,10 +2,10 @@
 
 #include <stdlib.h>
 
-/* Description:
- * 	Init redir struct
- * Return:
- * 	struct redir * -> inited struct
+/**
+ * @brief Init redir struct
+ * 
+ * @return struct redir * -> inited struct
  */
 struct redir *init_redir(void)
 {
@@ -20,10 +20,10 @@ struct redir *init_redir(void)
     return redir;
 }
 
-/* Description:
- * 	Free redir struct
- * Arguments:
- * 	struct redir *redir -> redir to free
+/**
+ * @brief Free redir struct
+ * 
+ * @param struct redir *redir -> redir to free
  */
 void free_redir(struct redir *redir)
 {

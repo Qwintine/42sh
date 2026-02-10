@@ -4,10 +4,9 @@
 #include "../ast/ast_aux.h"
 #include "parser_aux.h"
 
-/*
- * Description:
- * 	Parse an elif block when called
- * Verbose:
+/**
+ * @brief Parse an elif block when called
+ * @note
  * 	Grammar:
  * 		elif' compound_list 'then' compound_list [else_clause]
  */
@@ -49,10 +48,9 @@ ERROR:
     return NULL;
 }
 
-/*
- * Description:
- * 	Define which parser to use depending on the context
- * Verbose:
+/**
+ * @brief Define which parser to use depending on the context
+ * @note
  * 	Grammar:
  * 		else_clause =
  * 			'else' compound_list
@@ -78,15 +76,14 @@ struct ast *parser_else_clause(struct lex *lex, struct dictionnary *dict)
     return NULL;
 }
 
-/*
- * Description:
- * 	Handle a 'if' block by calling corresponding parser at each step
- * Arguments:
- * 	struct lex *lex -> lexer
- * struct dictionnary *dict -> dictionnary of var + func
- * Return:
- * struct ast * -> AST if
- * Verbose:
+/**
+ * @brief Handle a 'if' block by calling corresponding parser at each step
+ * 
+ * @param struct lex *lex -> lexer
+ * @param struct dictionnary *dict -> dictionnary of var + func
+ * 
+ * @return  struct ast * -> AST if
+ * @note 
  * 	Grammar:
  * 		'if' compound_list 'then' compound_list [else_clause] 'fi' ;
  */
@@ -139,10 +136,9 @@ ERROR:
     return NULL;
 }
 
-/*
- * Description:
- * 	Handle a 'while' block by calling corresponding parser at each step
- * Verbose:
+/**
+ * @brief Handle a 'while' block by calling corresponding parser at each step
+ * @note
  * 	Grammar:
  * 		'while' compound_list 'do' compound_list 'done' ;
  */
@@ -185,10 +181,9 @@ ERROR:
     return NULL;
 }
 
-/*
- * Description:
- * 	Handle a 'until' block by calling corresponding parser at each step
- * Verbose:
+/**
+ * @brief Handle a 'until' block by calling corresponding parser at each step
+ * @note 
  * 	Grammar:
  * 		'until' compound_list 'do' compound_list 'done' ;
  */
@@ -234,7 +229,7 @@ ERROR:
     return NULL;
 }
 
-// Helper for parser_rule_for
+/** Helper for parser_rule_for*/
 static int parser_rule_for_aux(struct lex *lex, struct ast_for *ast_for)
 {
     if (peek(lex)
@@ -270,10 +265,10 @@ static int parser_rule_for_aux(struct lex *lex, struct ast_for *ast_for)
     return 0;
 }
 
-/*
- * Description:
- * 	Handle a for block by calling corresponding parser at each step
- * Verbose:
+/**
+ * @brief Handle a for block by calling corresponding parser at each step
+ * 
+ * @note
  * 	Grammar:
  * 		'for' WORD ( [';'] | [ {'\n'} 'in' { WORD } ( ';' | '\n' ) ] ) {'\n'}
  *  'do' compound_list 'done' ;
@@ -322,10 +317,9 @@ ERROR:
     return NULL;
 }
 
-/*
- * Description:
- * 	Handle a command block enclosed in brackets
- * Verbose:
+/**
+ * @brief Handle a command block enclosed in brackets
+ * @note
  * 	Grammar:
  * 		'{' compound_list '}';
  */

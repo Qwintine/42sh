@@ -3,15 +3,14 @@
 
 #include "lexer_aux.h"
 
-/*
- * Description:
- * 	Handle a possible operator
- * Argument:
- * 	lex -> struct lexer
- * 	tok -> token being created
- * 	buf[] -> current character
- * Return:
- * 	0 Token created / 1 Error
+/** 
+ * @brief Handle a possible operator
+ *
+ * @param lex -> struct lexer
+ * @param tok -> token being created
+ * @param buf[] -> current character
+ * 
+ * @return  Token created / 1 Error
  */
 int manage_op(struct lex *lex, struct token *tok, char buf[])
 {
@@ -54,15 +53,14 @@ int manage_op(struct lex *lex, struct token *tok, char buf[])
     return 0;
 }
 
-/*
- * Description:
- * 	Handle different redirections
- * Arguments:
- * 	lex-> struct lexer
- * 	tok -> token being created
- *      buf[] -> currrent character
- * Return:
- * 	0 Redir token created / 1 Error
+/**
+ * @brief Handle different redirections
+ * 
+ * @param ex-> struct lexer
+ * @param tok -> token being created
+ * @param buf[] -> currrent character
+ * 
+ * @return 0 Redir token created / 1 Error
  */
 int manage_redir(struct lex *lex, struct token *tok, char buf[])
 {

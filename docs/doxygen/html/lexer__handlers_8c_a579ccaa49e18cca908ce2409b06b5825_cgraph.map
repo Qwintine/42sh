@@ -1,0 +1,13 @@
+<map id="handle_delimiter" name="handle_delimiter">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,137,80"/>
+<area shape="rect" id="Node000002" href="$lexer__handlers_8c.html#a2ed09a62089d61b6a2928dcbcc623e7f" title=" " alt="" coords="201,5,310,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="119,52,193,32,194,37,120,57"/>
+<area shape="rect" id="Node000004" href="$lexer__handlers_8c.html#aa69ff9b0e657615d22e4220657378e92" title=" " alt="" coords="193,55,317,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="138,65,179,65,179,70,138,70"/>
+<area shape="rect" id="Node000005" href="$lexer__handlers_8c.html#afa8aa1a23dd8c155bcfb4145f2099aaf" title=" " alt="" coords="185,104,325,129"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="120,77,194,98,193,103,119,83"/>
+<area shape="rect" id="Node000003" href="$dot_8c.html#a36f9e0f75603ec6472a90c595e3bba79" title="Concat path and string with &#39;/&#39; between." alt="" coords="373,55,439,80"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="296,28,361,50,359,55,294,33"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="318,65,360,65,360,70,318,70"/>
+<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="294,101,359,80,361,85,296,106"/>
+</map>

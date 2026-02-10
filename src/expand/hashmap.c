@@ -28,10 +28,10 @@ static void add_special(struct dictionnary *dict, char *key, char *val)
     free(val);
 }
 
-/*Description:
- *	Initialise the dictionnary and adds special variables from the get go
- *Argument:
- *	The hashing function used by the dictionnary to hash the key
+/**
+ * @brief Initialise the dictionnary and adds special variables from the get go
+ *
+ * @param The hashing function used by the dictionnary to hash the key
  */
 struct dictionnary *init_dict(void)
 {
@@ -90,7 +90,7 @@ struct dictionnary *init_dict(void)
     return dict;
 }
 
-// special variables handling
+/**  special variables handling*/
 char *special(char *key)
 {
     if (!strcmp(key, "RANDOM"))
@@ -110,7 +110,7 @@ char *special(char *key)
     return 0;
 }
 
-// helper function to update or append a variable in the dictionnary
+/** helper function to update or append a variable in the dictionnary*/
 static int update_or_append_var(struct variables *bucket, struct variables *new,
                                 char *key, char *val)
 {
@@ -152,10 +152,10 @@ static char *expand_value(struct dictionnary *dict, char *val)
     return val;
 }
 
-/*Description:
- *  Add a variable to the dictionnary
- *Arguments:
- *  varas: the variable as a string "KEY=VALUE"
+/**
+ * @brief Add a variable to the dictionnary
+ *
+ * @param varas: the variable as a string "KEY=VALUE"
  */
 int add_var(struct dictionnary *dict, char *varas)
 {
@@ -210,7 +210,7 @@ ERROR:
     return 1;
 }
 
-// helper function to duplicate values into the variable element
+/** helper function to duplicate values into the variable element*/
 static int dup_val_to_elt(struct variables *new, char **val, size_t i)
 {
     for (size_t j = 0; j < i; j++)
@@ -229,13 +229,13 @@ static int dup_val_to_elt(struct variables *new, char **val, size_t i)
     return 0;
 }
 
-/*Description:
- *  Add a variable with multiple arguments to the dictionnary
- *Arguments:
- *  key: the variable name
- *  val: the variable value as a list of strings
- *Extra:
- *  Especially useful for handling the $@ variable
+/**
+ * @brief Add a variable with multiple arguments to the dictionnary
+ *
+ * @param key: the variable name
+ * @param val: the variable value as a list of strings
+ *
+ * @note Especially useful for handling the $@ variable
  */
 int add_var_arg(struct dictionnary *dict, char *key, char **val)
 {
@@ -299,11 +299,11 @@ ERROR:
     return 1;
 }
 
-/*Description:
- *  Add a function to the dictionnary
- *Arguments:
- *  key: the function name
- *  cmd_block: the function body as an AST
+/**
+ * @brief Add a function to the dictionnary
+ *
+ * @param key: the function name
+ * @param cmd_block: the function body as an AST
  */
 int add_func(struct dictionnary *dict, char *key, struct ast *cmd_block)
 {
@@ -343,10 +343,10 @@ int add_func(struct dictionnary *dict, char *key, struct ast *cmd_block)
     return 1;
 }
 
-/*Description:
- *  Get the variable from the dictionnary
- *Arguments:
- *  key: the variable name
+/**
+ * @brief Get the variable from the dictionnary
+ *
+ * @param key: the variable name
  */
 char **get_var(struct dictionnary *dict, char *key)
 {
@@ -409,10 +409,10 @@ char **get_var(struct dictionnary *dict, char *key)
     return res;
 }
 
-/*Description:
- *  Get the function from the dictionnary
- *Arguments:
- *  key: the function name
+/** 
+ * @brief Get the function from the dictionnary
+ *
+ * @param key: the function name
  */
 struct ast *get_func(struct dictionnary *dict, char *key)
 {

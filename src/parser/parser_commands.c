@@ -7,10 +7,9 @@
 #include "../expand/hashmap.h"
 #include "parser_aux.h"
 
-/*
- * Description:
- * 	Handle a shell command block by calling corresponding parser at each step
- * Verbose:
+/**
+ * @brief Handle a shell command block by calling corresponding parser at each step
+ * @note 
  * 	Grammar:
  * 		either an if, while or until block
  */
@@ -56,17 +55,15 @@ struct ast *parser_shell_command(struct lex *lex, struct dictionnary *dict)
     return ast;
 }
 
-/*
- * Description:
- * 	Group words in a command in order to form a list of commands
- * Return:
- * 	*ast -> ast containing a command to execute
- * Verbose:
+/**
+ * @brief Group words in a command in order to form a list of commands
+ *
+ * @return *ast -> ast containing a command to execute
+ * @note
  * 	Grammar:
  * 		{prefix} WORD {element}
  * 		| prefix {prefix}
  */
-// prochaine step -> ajouter gestion des préfixes ( cf. Trove Shell Syntax )
 struct ast *parser_simple_command(struct lex *lex)
 {
     struct ast_cmd *ast_cmd = (struct ast_cmd *)init_ast_cmd();
@@ -124,12 +121,11 @@ ERROR:
     return NULL;
 }
 
-/*
- * Description:
- * 	Handle a function definition and add it to the dictionnary
- * Return:
- * 	*ast -> ast containing an empty list
- * Grammar:
+/**
+ * @brief Handle a function definition and add it to the dictionnary
+ * 
+ * @return *ast -> ast containing an empty list
+ * @note 
  * 	   WORD '(' ')' {'\n'} shell_command
  */
 struct ast *parser_fundef(struct lex *lex, struct dictionnary *dict)
@@ -149,12 +145,12 @@ struct ast *parser_fundef(struct lex *lex, struct dictionnary *dict)
     return (struct ast *)empty;
 }
 
-/*
- * Description:
- * 	Parse a command which can be either a simple command or a shell command
- * Return:
- * 	*ast -> ast containing simple command or shell command
- * Verbose:
+/**
+ * @brief Parse a command which can be either a simple command or a shell command
+ * 
+ * @return *ast -> ast containing simple command or shell command
+ * 
+ * @note
  * 	Grammar:
  * 	   simple_command
  * 	   | shell_command
