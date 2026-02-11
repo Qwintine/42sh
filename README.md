@@ -145,6 +145,6 @@ Some advanced features such as job control or full quoting rules may be incomple
 ## Authors
 
 Quentin Pouyadoux - quentin.pouyadoux@epita.fr <br>
-Victor Gardère - victor.gardère@epita.fr <br> 
+Victor Gardère - victor.gardere@epita.fr <br> 
 Victor Happe - victor.happe@epita.fr <br>
 
